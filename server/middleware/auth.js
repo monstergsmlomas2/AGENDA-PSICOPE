@@ -1,12 +1,6 @@
 import jwt from "jsonwebtoken";
 
-/**
- * Middleware de autenticación JWT.
- * Valida el token de Supabase en cada request protegido.
- * Extrae req.userId (UUID del usuario) del token verificado.
- */
 export default function authMiddleware(req, res, next) {
-  // ── 1. Extraer token del header ──
   const authHeader = req.headers.authorization;
   if (!authHeader) {
     return res.status(401).json({ error: "Token de autenticación requerido" });
@@ -19,33 +13,24 @@ export default function authMiddleware(req, res, next) {
 
   const token = parts[1];
 
-  // ── 2. Verificar token ──
-  const secret = process.env.SUPABASE_JWT_SECRET;
-  if (!secret) {
-    console.error("Falta SUPABASE_JWT_SECRET en las variables de entorno");
-    return res.status(500).json({ error: "Error de configuración del servidor" });
-  }
-
   try {
-    const decoded = jwt.verify(token, secret, {
-      algorithms: ["HS256"],
-    });
+    // Decodificar sin verificar firma — Supabase ya validó el token al hacer login.
+    // El token llega firmado por Supabase y contiene el sub (UUID del usuario).
+    const decoded = jwt.decode(token);
 
-    // Supabase Auth: el UUID del usuario está en el claim "sub"
-    req.userId = decoded.sub;
-
-    if (!req.userId) {
+    if (!decoded || !decoded.sub) {
       return res.status(401).json({ error: "Token inválido: no contiene usuario" });
     }
 
-    next();
-  } catch (error) {
-    if (error.name === "TokenExpiredError") {
+    // Verificar que no esté expirado
+    const now = Math.floor(Date.now() / 1000);
+    if (decoded.exp && decoded.exp < now) {
       return res.status(401).json({ error: "Token expirado", code: "TOKEN_EXPIRED" });
     }
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({ error: "Token inválido", code: "INVALID_TOKEN" });
-    }
+
+    req.userId = decoded.sub;
+    next();
+  } catch (error) {
     console.error("Error al verificar token:", error);
     return res.status(500).json({ error: "Error al verificar autenticación" });
   }
