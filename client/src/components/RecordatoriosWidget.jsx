@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect } from 'react';
 import { Bell, AlertTriangle, Clock, User, FileText, ClipboardList, ChevronRight, MessageCircle } from 'lucide-react';
 import { getPacientesSinSesion, enviarRecordatorioSeguimiento } from '../services/pacientesService';
+import { apiGet } from '../services/api';
 import { Link } from 'react-router-dom';
 
 export default function RecordatoriosWidget() {
@@ -16,8 +17,8 @@ export default function RecordatoriosWidget() {
       try {
         const [pacientes, informes, evaluaciones] = await Promise.all([
           getPacientesSinSesion(),
-          fetch('/informes/proximos-vencer').then(r => r.ok ? r.json() : []),
-          fetch('/evaluaciones/proximos-vencer').then(r => r.ok ? r.json() : []),
+          apiGet('/informes/proximos-vencer').catch(() => []),
+          apiGet('/evaluaciones/proximos-vencer').catch(() => []),
         ]);
         setPacientesSinSesion(Array.isArray(pacientes) ? pacientes : []);
         setInformesPorVencer(Array.isArray(informes) ? informes : []);

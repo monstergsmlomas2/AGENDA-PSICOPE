@@ -12,13 +12,15 @@ router.get("/", async (req, res) => {
       FROM evaluaciones e
       JOIN pacientes p ON e.paciente_id = p.id
     `;
-    const params = [];
+    const conditions = ['p.usuario_id = $1'];
+    const params = [req.userId];
 
     if (paciente_id) {
-      query += " WHERE e.paciente_id = $1";
+      conditions.push(`e.paciente_id = $${params.length + 1}`);
       params.push(paciente_id);
     }
 
+    query += ` WHERE ${conditions.join(' AND ')}`;
     query += " ORDER BY e.fecha_administracion DESC, e.created_at DESC";
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -28,7 +30,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 1b. EVALUACIONES PRÓXIMAS A VENCER — columna no disponible, devuelve vacío
+// 1b. EVALUACIONES PRÓXIMAS A VENCER
 router.get("/proximos-vencer", async (req, res) => {
   res.json([]);
 });
@@ -43,9 +45,9 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO evaluaciones (paciente_id, tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [paciente_id, tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones]
+      `INSERT INTO evaluaciones (paciente_id, tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [paciente_id, tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -61,9 +63,11 @@ router.put("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE evaluaciones SET tipo_test = $1, fecha_administracion = $2, resultados = $3, puntaje_obtenido = $4, observaciones = $5
-       WHERE id = $6 RETURNING *`,
-      [tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones, id]
+      `UPDATE evaluaciones e SET tipo_test = $1, fecha_administracion = $2, resultados = $3, puntaje_obtenido = $4, observaciones = $5
+       FROM pacientes p
+       WHERE e.id = $6 AND e.paciente_id = p.id AND p.usuario_id = $7
+       RETURNING e.*`,
+      [tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Evaluación no encontrada" });
@@ -79,7 +83,12 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("DELETE FROM evaluaciones WHERE id = $1 RETURNING id", [id]);
+    const result = await pool.query(
+      `DELETE FROM evaluaciones e USING pacientes p
+       WHERE e.id = $1 AND e.paciente_id = p.id AND p.usuario_id = $2
+       RETURNING e.id`,
+      [id, req.userId]
+    );
     if (result.rowCount === 0) return res.status(404).json({ error: "Evaluación no encontrada" });
     res.json({ message: "Evaluación eliminada" });
   } catch (error) {

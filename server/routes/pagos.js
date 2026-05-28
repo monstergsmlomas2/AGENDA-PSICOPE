@@ -12,8 +12,8 @@ router.get("/", async (req, res) => {
       FROM pagos p
       JOIN pacientes pa ON p.paciente_id = pa.id
     `;
-    const params = [];
-    const conditions = [];
+    const conditions = ['pa.usuario_id = $1'];
+    const params = [req.userId];
 
     if (paciente_id) {
       conditions.push(`p.paciente_id = $${params.length + 1}`);
@@ -28,10 +28,7 @@ router.get("/", async (req, res) => {
       params.push(estado);
     }
 
-    if (conditions.length > 0) {
-      query += " WHERE " + conditions.join(" AND ");
-    }
-
+    query += " WHERE " + conditions.join(" AND ");
     query += " ORDER BY p.fecha DESC, p.created_at DESC";
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -53,9 +50,10 @@ router.get("/resumen-mes", async (req, res) => {
         COALESCE(SUM(CASE WHEN estado = 'pagado' THEN monto ELSE 0 END), 0) AS total_cobrado,
         COALESCE(SUM(CASE WHEN estado = 'pendiente' THEN monto ELSE 0 END), 0) AS total_pendiente,
         COALESCE(SUM(monto), 0) AS total_facturado
-       FROM pagos
-       WHERE to_char(fecha, 'YYYY-MM') = $1`,
-      [mesFiltro]
+       FROM pagos p
+       JOIN pacientes pa ON p.paciente_id = pa.id
+       WHERE to_char(p.fecha, 'YYYY-MM') = $1 AND pa.usuario_id = $2`,
+      [mesFiltro, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -74,9 +72,9 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [paciente_id, fecha, concepto, monto, tipo_pago, estado || 'pendiente', observaciones, nro_sesion_facturada]
+      `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
+      [paciente_id, fecha, concepto, monto, tipo_pago, estado || 'pendiente', observaciones, nro_sesion_facturada, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -92,9 +90,11 @@ router.put("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE pagos SET fecha = $1, concepto = $2, monto = $3, tipo_pago = $4, estado = $5, observaciones = $6, nro_sesion_facturada = $7
-       WHERE id = $8 RETURNING *`,
-      [fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, id]
+      `UPDATE pagos p SET fecha = $1, concepto = $2, monto = $3, tipo_pago = $4, estado = $5, observaciones = $6, nro_sesion_facturada = $7
+       FROM pacientes pa
+       WHERE p.id = $8 AND p.paciente_id = pa.id AND pa.usuario_id = $9
+       RETURNING p.*`,
+      [fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Pago no encontrado" });
@@ -110,7 +110,12 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("DELETE FROM pagos WHERE id = $1 RETURNING id", [id]);
+    const result = await pool.query(
+      `DELETE FROM pagos p USING pacientes pa
+       WHERE p.id = $1 AND p.paciente_id = pa.id AND pa.usuario_id = $2
+       RETURNING p.id`,
+      [id, req.userId]
+    );
     if (result.rowCount === 0) return res.status(404).json({ error: "Pago no encontrado" });
     res.json({ message: "Pago eliminado" });
   } catch (error) {

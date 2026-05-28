@@ -1,17 +1,8 @@
-import API_URL from '../config/api.js';
-
-const handleResponse = async (res) => {
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorText}`);
-  }
-  return res.json();
-};
+import { apiGet, apiPut } from './api.js';
 
 export const getConfiguracionNotificaciones = async () => {
   try {
-    const res = await fetch(`${API_URL}/configuracion/notificaciones`);
-    return await handleResponse(res);
+    return await apiGet('/configuracion/notificaciones');
   } catch (error) {
     console.error("Error al obtener configuración de notificaciones:", error);
     return null;
@@ -20,12 +11,7 @@ export const getConfiguracionNotificaciones = async () => {
 
 export const updateConfiguracionNotificaciones = async (data) => {
   try {
-    const res = await fetch(`${API_URL}/configuracion/notificaciones`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return await handleResponse(res);
+    return await apiPut('/configuracion/notificaciones', data);
   } catch (error) {
     console.error("Error al actualizar configuración de notificaciones:", error);
     return null;

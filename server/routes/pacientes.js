@@ -13,8 +13,8 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO pacientes (nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) RETURNING *`,
-      [nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null]
+      `INSERT INTO pacientes (nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones, usuario_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
+      [nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -33,8 +33,9 @@ router.get("/", async (req, res) => {
         fecha_nacimiento, motivo, derivada_por, diagnostico, cud, contacto_emergencia,
         (entrevista IS NOT NULL) AS entrevista
       FROM pacientes
+      WHERE usuario_id = $1
       ORDER BY id DESC
-    `);
+    `, [req.userId]);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener pacientes" });
@@ -42,7 +43,6 @@ router.get("/", async (req, res) => {
 });
 
 // 3. PACIENTES SIN SESIÓN RECIENTE (+15 días o nunca)
-// IMPORTANTE: debe ir ANTES de /:id para que Express no interprete "sin-sesion-reciente" como un ID
 router.get("/sin-sesion-reciente", async (req, res) => {
   try {
     const result = await pool.query(`
@@ -59,6 +59,7 @@ router.get("/sin-sesion-reciente", async (req, res) => {
         END AS dias_desde_ultima_sesion
       FROM pacientes p
       LEFT JOIN sesiones s ON s.paciente_id = p.id
+      WHERE p.usuario_id = $1
       GROUP BY p.id
       HAVING
         COUNT(s.id) = 0
@@ -66,7 +67,7 @@ router.get("/sin-sesion-reciente", async (req, res) => {
       ORDER BY
         CASE WHEN COUNT(s.id) = 0 THEN 0 ELSE 1 END,
         MAX(s.fecha) ASC NULLS FIRST
-    `);
+    `, [req.userId]);
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener pacientes sin sesión reciente:", error);
@@ -78,7 +79,7 @@ router.get("/sin-sesion-reciente", async (req, res) => {
 router.get("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM pacientes WHERE id = $1", [id]);
+    const result = await pool.query("SELECT * FROM pacientes WHERE id = $1 AND usuario_id = $2", [id, req.userId]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Paciente no encontrado" });
     }
@@ -94,10 +95,14 @@ router.delete("/:id", async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query("DELETE FROM turnos WHERE paciente_id = $1", [id]);
-    await client.query("DELETE FROM sesiones WHERE paciente_id = $1", [id]);
-    await client.query("DELETE FROM evaluaciones WHERE paciente_id = $1", [id]);
-    await client.query("DELETE FROM pacientes WHERE id = $1", [id]);
+    await client.query("DELETE FROM turnos WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
+    await client.query("DELETE FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
+    await client.query("DELETE FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
+    const result = await client.query("DELETE FROM pacientes WHERE id = $1 AND usuario_id = $2 RETURNING id", [id, req.userId]);
+    if (result.rowCount === 0) {
+      await client.query("ROLLBACK");
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     await client.query("COMMIT");
     res.json({ message: "Paciente eliminado" });
   } catch (error) {
@@ -115,9 +120,12 @@ router.put("/:id", async (req, res) => {
   const { nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE pacientes SET nombre=$1, apellido=$2, dni=$3, fecha_nacimiento=$4, sexo=$5, domicilio=$6, telefono=$7, email=$8, obra_social=$9, nro_afiliado=$10, motivo=$11, derivada_por=$12, diagnostico=$13, cud=$14, contacto_emergencia=$15, inicio_sesiones=$16 WHERE id=$17 RETURNING *`,
-      [nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null, id]
+      `UPDATE pacientes SET nombre=$1, apellido=$2, dni=$3, fecha_nacimiento=$4, sexo=$5, domicilio=$6, telefono=$7, email=$8, obra_social=$9, nro_afiliado=$10, motivo=$11, derivada_por=$12, diagnostico=$13, cud=$14, contacto_emergencia=$15, inicio_sesiones=$16 WHERE id=$17 AND usuario_id=$18 RETURNING *`,
+      [nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null, id, req.userId]
     );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     res.json(result.rows[0]);
   } catch (error) {
     console.error("Error al actualizar paciente:", error);
@@ -130,7 +138,13 @@ router.put("/:id/entrevista", async (req, res) => {
   const { id } = req.params;
   const { entrevista } = req.body;
   try {
-    const result = await pool.query("UPDATE pacientes SET entrevista = $1 WHERE id = $2 RETURNING *", [entrevista, id]);
+    const result = await pool.query(
+      "UPDATE pacientes SET entrevista = $1 WHERE id = $2 AND usuario_id = $3 RETURNING *",
+      [entrevista, id, req.userId]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     res.json(result.rows[0]);
   } catch (error) {
     res.status(500).json({ error: "Error al guardar la entrevista" });
@@ -145,7 +159,10 @@ router.put("/:id/entrevista", async (req, res) => {
 router.get("/:id/sesiones", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("SELECT * FROM sesiones WHERE paciente_id = $1 ORDER BY fecha ASC", [id]);
+    const result = await pool.query(
+      "SELECT s.* FROM sesiones s JOIN pacientes p ON s.paciente_id = p.id WHERE s.paciente_id = $1 AND p.usuario_id = $2 ORDER BY s.fecha ASC",
+      [id, req.userId]
+    );
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener sesiones" });
@@ -158,8 +175,8 @@ router.post("/:id/sesiones", async (req, res) => {
   const { fecha, observaciones, actividades_realizadas } = req.body;
   try {
     const result = await pool.query(
-      "INSERT INTO sesiones (paciente_id, fecha, observaciones, actividades_realizadas) VALUES ($1, $2, $3, $4) RETURNING *",
-      [id, fecha, observaciones, actividades_realizadas]
+      "INSERT INTO sesiones (paciente_id, fecha, observaciones, actividades_realizadas, usuario_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [id, fecha, observaciones, actividades_realizadas, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -173,8 +190,11 @@ router.put("/:id/sesiones/:sesionId", async (req, res) => {
   const { fecha, actividades_realizadas, observaciones } = req.body;
   try {
     const result = await pool.query(
-      "UPDATE sesiones SET fecha = $1, actividades_realizadas = $2, observaciones = $3 WHERE id = $4 AND paciente_id = $5 RETURNING *",
-      [fecha, actividades_realizadas, observaciones, sesionId, id]
+      `UPDATE sesiones s SET fecha = $1, actividades_realizadas = $2, observaciones = $3
+       FROM pacientes p
+       WHERE s.id = $4 AND s.paciente_id = $5 AND s.paciente_id = p.id AND p.usuario_id = $6
+       RETURNING s.*`,
+      [fecha, actividades_realizadas, observaciones, sesionId, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Sesión no encontrada" });
@@ -191,8 +211,10 @@ router.delete("/:id/sesiones/:sesionId", async (req, res) => {
   const { id, sesionId } = req.params;
   try {
     const result = await pool.query(
-      "DELETE FROM sesiones WHERE id = $1 AND paciente_id = $2 RETURNING *",
-      [sesionId, id]
+      `DELETE FROM sesiones s USING pacientes p
+       WHERE s.id = $1 AND s.paciente_id = $2 AND s.paciente_id = p.id AND p.usuario_id = $3
+       RETURNING s.id`,
+      [sesionId, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Sesión no encontrada" });
@@ -214,8 +236,8 @@ router.post("/:id/recordatorio-seguimiento", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "SELECT id, nombre, apellido, telefono FROM pacientes WHERE id = $1",
-      [id]
+      "SELECT id, nombre, apellido, telefono FROM pacientes WHERE id = $1 AND usuario_id = $2",
+      [id, req.userId]
     );
 
     if (result.rows.length === 0) {

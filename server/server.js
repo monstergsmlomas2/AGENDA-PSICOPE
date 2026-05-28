@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 import pacientesRoutes from "./routes/pacientes.js";
 import turnosRoutes from "./routes/turnos.js";
 import consultoriosRoutes from "./routes/consultorios.js";
@@ -11,6 +12,9 @@ import analyticsRoutes from "./routes/analytics.js";
 import configuracionRouter from "./routes/configuracion.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
+import authMiddleware from "./middleware/auth.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -24,17 +28,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Rutas
-app.use("/turnos", turnosRoutes);
-app.use("/pacientes", pacientesRoutes);
-app.use("/consultorios", consultoriosRoutes);
-app.use("/obras-sociales", obrasSocialesRoutes);
-app.use("/informes", informesRoutes);
-app.use("/evaluaciones", evaluacionesRoutes);
-app.use("/pagos", pagosRoutes);
-app.use("/analytics", analyticsRoutes);
-app.use("/configuracion", configuracionRouter);
-
+// Ruta pública — health check
 app.get("/", (req, res) => {
   res.send("Agenda Psicope API funcionando");
 });
@@ -50,6 +44,17 @@ if (process.env.NODE_ENV !== "production") {
     }
   });
 }
+
+// ── Middleware de autenticación en todas las rutas de API ──
+app.use("/pacientes", authMiddleware, pacientesRoutes);
+app.use("/turnos", authMiddleware, turnosRoutes);
+app.use("/consultorios", authMiddleware, consultoriosRoutes);
+app.use("/obras-sociales", authMiddleware, obrasSocialesRoutes);
+app.use("/informes", authMiddleware, informesRoutes);
+app.use("/evaluaciones", authMiddleware, evaluacionesRoutes);
+app.use("/pagos", authMiddleware, pagosRoutes);
+app.use("/analytics", authMiddleware, analyticsRoutes);
+app.use("/configuracion", authMiddleware, configuracionRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

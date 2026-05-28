@@ -1,20 +1,11 @@
-import API_URL from '../config/api.js';
+import { apiGet, apiPost, apiPut, apiDelete } from './api.js';
 
 let _obrasSocialesCache = null;
-
-const handleResponse = async (res) => {
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorText}`);
-  }
-  return res.json();
-};
 
 export const getObrasSociales = async () => {
   if (_obrasSocialesCache) return _obrasSocialesCache;
   try {
-    const res = await fetch(`${API_URL}/obras-sociales`);
-    const data = await handleResponse(res);
+    const data = await apiGet('/obras-sociales');
     _obrasSocialesCache = data;
     return data;
   } catch (error) {
@@ -25,8 +16,7 @@ export const getObrasSociales = async () => {
 
 export const getObraSocial = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/obras-sociales/${id}`);
-    return await handleResponse(res);
+    return await apiGet(`/obras-sociales/${id}`);
   } catch (error) {
     console.error("Error al obtener obra social:", error);
     return null;
@@ -35,12 +25,7 @@ export const getObraSocial = async (id) => {
 
 export const crearObraSocial = async (data) => {
   try {
-    const res = await fetch(`${API_URL}/obras-sociales`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const result = await handleResponse(res);
+    const result = await apiPost('/obras-sociales', data);
     _obrasSocialesCache = null;
     return result;
   } catch (error) {
@@ -51,12 +36,7 @@ export const crearObraSocial = async (data) => {
 
 export const actualizarObraSocial = async (id, data) => {
   try {
-    const res = await fetch(`${API_URL}/obras-sociales/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    const result = await handleResponse(res);
+    const result = await apiPut(`/obras-sociales/${id}`, data);
     _obrasSocialesCache = null;
     return result;
   } catch (error) {
@@ -67,8 +47,7 @@ export const actualizarObraSocial = async (id, data) => {
 
 export const eliminarObraSocial = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/obras-sociales/${id}`, { method: 'DELETE' });
-    const result = await handleResponse(res);
+    const result = await apiDelete(`/obras-sociales/${id}`);
     _obrasSocialesCache = null;
     return result;
   } catch (error) {

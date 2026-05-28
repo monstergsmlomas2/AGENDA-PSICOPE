@@ -9,23 +9,24 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   const { desde, hasta, paciente_id } = req.query;
   try {
-    const conditions = [];
-    const params = [];
+    const conditions = ['t.usuario_id = $1'];
+    const params = [req.userId];
+    let paramIndex = 1;
 
     if (paciente_id) {
       params.push(paciente_id);
-      conditions.push(`t.paciente_id = $${params.length}`);
+      conditions.push(`t.paciente_id = $${++paramIndex}`);
     }
     if (desde) {
       params.push(desde);
-      conditions.push(`t.fecha >= $${params.length}`);
+      conditions.push(`t.fecha >= $${++paramIndex}`);
     }
     if (hasta) {
       params.push(hasta);
-      conditions.push(`t.fecha <= $${params.length}`);
+      conditions.push(`t.fecha <= $${++paramIndex}`);
     }
 
-    const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const where = `WHERE ${conditions.join(' AND ')}`;
 
     const result = await pool.query(`
       SELECT
@@ -64,9 +65,9 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura)
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-      [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular']
+      `INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular', req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -86,8 +87,8 @@ router.patch("/:id/estado", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "UPDATE turnos SET estado = $1 WHERE id = $2 RETURNING *",
-      [estado, id]
+      "UPDATE turnos SET estado = $1 WHERE id = $2 AND usuario_id = $3 RETURNING *",
+      [estado, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
@@ -111,8 +112,8 @@ router.put("/:id", async (req, res) => {
   try {
     const result = await pool.query(
       `UPDATE turnos SET fecha = $1, hora = $2, consultorio = $3, observaciones = $4, estado = $5, tipo_cobertura = $6
-       WHERE id = $7 RETURNING *`,
-      [fecha, hora, consultorio, observaciones, estado, tipo_cobertura, id]
+       WHERE id = $7 AND usuario_id = $8 RETURNING *`,
+      [fecha, hora, consultorio, observaciones, estado, tipo_cobertura, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
@@ -133,8 +134,8 @@ router.post("/:id/recordatorio", async (req, res) => {
       SELECT t.*, p.nombre, p.apellido, p.telefono
       FROM turnos t
       JOIN pacientes p ON t.paciente_id = p.id
-      WHERE t.id = $1
-    `, [id]);
+      WHERE t.id = $1 AND t.usuario_id = $2
+    `, [id, req.userId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
@@ -183,7 +184,7 @@ router.post("/:id/recordatorio", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("DELETE FROM turnos WHERE id = $1 RETURNING id", [id]);
+    const result = await pool.query("DELETE FROM turnos WHERE id = $1 AND usuario_id = $2 RETURNING id", [id, req.userId]);
     if (result.rowCount === 0) return res.status(404).json({ error: "Turno no encontrado" });
     res.json({ message: "Turno eliminado" });
   } catch (error) {

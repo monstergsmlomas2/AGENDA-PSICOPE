@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route } from 'react-router-dom';
+﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Turnos from './pages/Turnos';
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
@@ -15,9 +15,35 @@ import EntrevistaPage from './pages/EntrevistaPage';
 import EvaluacionDetalle from './pages/EvaluacionDetalle';
 import EvaluacionForm from './pages/EvaluacionForm';
 import Configuracion from './pages/Configuracion';
+import Login from './pages/Login';
 import { ToastProvider } from './components/ui';
+import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { Loader2 } from 'lucide-react';
 
-function App() {
+// ─── Componente que protege rutas ───
+function ProtectedRoute({ children }) {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-purple-200 dark:bg-[var(--bg-base)]">
+        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+          <Loader2 size={24} className="animate-spin" />
+          <span className="text-sm font-medium">Cargando…</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+// ─── Layout protegido con Sidebar ───
+function ProtectedLayout({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved === null ? true : saved === 'true';
@@ -45,39 +71,61 @@ function App() {
   }, []);
 
   return (
-    <ToastProvider>
-      <BrowserRouter>
-        <div className="flex h-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
+    <div className="flex h-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
+      <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+      <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in">
+        {children}
+      </main>
+    </div>
+  );
+}
 
-          <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+// ─── Componente raíz con rutas ───
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route
+        path="/*"
+        element={
+          <ProtectedRoute>
+            <ProtectedLayout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/pacientes" element={<Pacientes />} />
+                <Route path="/pacientes/:id" element={<PacienteDetalle />} />
+                <Route path="/pacientes/:id/sesiones/nueva" element={<SesionForm />} />
+                <Route path="/pacientes/:id/sesiones/:sesionId" element={<SesionDetalle />} />
+                <Route path="/pacientes/:id/sesiones/:sesionId/editar" element={<SesionForm />} />
+                <Route path="/pacientes/:id/entrevista" element={<EntrevistaPage />} />
+                <Route path="/pacientes/:id/evaluaciones/nueva" element={<EvaluacionForm />} />
+                <Route path="/pacientes/:id/evaluaciones/:evalId" element={<EvaluacionDetalle />} />
+                <Route path="/pacientes/:id/evaluaciones/:evalId/editar" element={<EvaluacionForm />} />
+                <Route path="/consultorios" element={<Consultorios />} />
+                <Route path="/turnos" element={<Turnos />} />
+                <Route path="/obras-sociales" element={<ObrasSociales />} />
+                <Route path="/informes" element={<Informes />} />
+                <Route path="/pagos" element={<Pagos />} />
+                <Route path="/configuracion" element={<Configuracion />} />
+              </Routes>
+            </ProtectedLayout>
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
+  );
+}
 
-          <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/pacientes" element={<Pacientes />} />
-              <Route path="/pacientes/:id" element={<PacienteDetalle />} />
-              <Route path="/pacientes/:id/sesiones/nueva" element={<SesionForm />} />
-              <Route path="/pacientes/:id/sesiones/:sesionId" element={<SesionDetalle />} />
-              <Route path="/pacientes/:id/sesiones/:sesionId/editar" element={<SesionForm />} />
-              <Route path="/pacientes/:id/entrevista" element={<EntrevistaPage />} />
-              <Route path="/pacientes/:id/evaluaciones/nueva" element={<EvaluacionForm />} />
-              <Route path="/pacientes/:id/evaluaciones/:evalId" element={<EvaluacionDetalle />} />
-              <Route path="/pacientes/:id/evaluaciones/:evalId/editar" element={<EvaluacionForm />} />
-              <Route path="/consultorios" element={<Consultorios />} />
-              <Route path="/turnos" element={<Turnos />} />
-              <Route path="/obras-sociales" element={<ObrasSociales />} />
-              <Route path="/informes" element={<Informes />} />
-              <Route path="/pagos" element={<Pagos />} />
-              <Route path="/configuracion" element={<Configuracion />} />
-            </Routes>
-          </main>
-        </div>
-      </BrowserRouter>
-    </ToastProvider>
+function App() {
+  return (
+    <AuthProvider>
+      <ToastProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ToastProvider>
+    </AuthProvider>
   );
 }
 
 export default App;
-
-
-

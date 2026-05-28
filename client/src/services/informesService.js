@@ -1,19 +1,10 @@
-import API_URL from '../config/api.js';
-
-const handleResponse = async (res) => {
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorText}`);
-  }
-  return res.json();
-};
+import { apiGet, apiPost, apiPut, apiDelete } from './api.js';
 
 export const getInformes = async (pacienteId = null) => {
   try {
-    let url = `${API_URL}/informes`;
+    let url = '/informes';
     if (pacienteId) url += `?paciente_id=${pacienteId}`;
-    const res = await fetch(url);
-    return await handleResponse(res);
+    return await apiGet(url);
   } catch (error) {
     console.error("Error al obtener informes:", error);
     return [];
@@ -22,8 +13,7 @@ export const getInformes = async (pacienteId = null) => {
 
 export const getInformesProximosVencer = async () => {
   try {
-    const res = await fetch(`${API_URL}/informes/proximos-vencer`);
-    return await handleResponse(res);
+    return await apiGet('/informes/proximos-vencer');
   } catch (error) {
     console.error("Error al obtener informes próximos a vencer:", error);
     return [];
@@ -32,8 +22,7 @@ export const getInformesProximosVencer = async () => {
 
 export const getInforme = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/informes/${id}`);
-    return await handleResponse(res);
+    return await apiGet(`/informes/${id}`);
   } catch (error) {
     console.error("Error al obtener informe:", error);
     return null;
@@ -42,12 +31,7 @@ export const getInforme = async (id) => {
 
 export const crearInforme = async (data) => {
   try {
-    const res = await fetch(`${API_URL}/informes`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return await handleResponse(res);
+    return await apiPost('/informes', data);
   } catch (error) {
     console.error("Error al crear informe:", error);
     return null;
@@ -56,12 +40,7 @@ export const crearInforme = async (data) => {
 
 export const actualizarInforme = async (id, data) => {
   try {
-    const res = await fetch(`${API_URL}/informes/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return await handleResponse(res);
+    return await apiPut(`/informes/${id}`, data);
   } catch (error) {
     console.error("Error al actualizar informe:", error);
     return null;
@@ -70,8 +49,7 @@ export const actualizarInforme = async (id, data) => {
 
 export const eliminarInforme = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/informes/${id}`, { method: 'DELETE' });
-    return await handleResponse(res);
+    return await apiDelete(`/informes/${id}`);
   } catch (error) {
     console.error("Error al eliminar informe:", error);
     return null;

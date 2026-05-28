@@ -1,8 +1,9 @@
-﻿import { NavLink } from 'react-router-dom';
+﻿import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon,
+  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut,
 } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
 
 const navItems = [
   {
@@ -84,6 +85,14 @@ function NavItem({ item }) {
 }
 
 export default function Sidebar({ darkMode, toggleDarkMode }) {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login', { replace: true });
+  };
+
   return (
     <aside className="w-52 flex flex-col h-screen shrink-0 bg-purple-100 dark:bg-slate-950 border-r border-pink-200 dark:border-slate-800 transition-colors duration-300">
       {/* ─── Logo ─── */}
@@ -143,6 +152,16 @@ export default function Sidebar({ darkMode, toggleDarkMode }) {
           </p>
           <div className="space-y-0.5">
             <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} />
+            {/* Cerrar sesión */}
+            <button
+              onClick={handleLogout}
+              className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
+            >
+              <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
+                <LogOut size={17} />
+              </span>
+              <span className="truncate">Cerrar sesión</span>
+            </button>
           </div>
         </div>
       </nav>

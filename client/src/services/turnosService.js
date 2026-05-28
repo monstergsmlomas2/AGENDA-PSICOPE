@@ -1,12 +1,4 @@
-import API_URL from '../config/api.js';
-
-const handleResponse = async (res) => {
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorText}`);
-  }
-  return res.json();
-};
+import { apiGet, apiPost, apiPut, apiPatch, apiDelete } from './api.js';
 
 export const getTurnos = async (filtros = {}) => {
   try {
@@ -15,8 +7,7 @@ export const getTurnos = async (filtros = {}) => {
     if (filtros.hasta) params.append('hasta', filtros.hasta);
     if (filtros.paciente_id) params.append('paciente_id', filtros.paciente_id);
     const query = params.toString() ? `?${params.toString()}` : '';
-    const res = await fetch(`${API_URL}/turnos${query}`);
-    return await handleResponse(res);
+    return await apiGet(`/turnos${query}`);
   } catch (error) {
     console.error("Error al obtener turnos:", error);
     return [];
@@ -25,12 +16,7 @@ export const getTurnos = async (filtros = {}) => {
 
 export const crearTurno = async (data) => {
   try {
-    const res = await fetch(`${API_URL}/turnos`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return await handleResponse(res);
+    return await apiPost('/turnos', data);
   } catch (error) {
     console.error("Error al crear turno:", error);
     return null;
@@ -39,10 +25,7 @@ export const crearTurno = async (data) => {
 
 export const eliminarTurno = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/turnos/${id}`, {
-      method: 'DELETE',
-    });
-    return await handleResponse(res);
+    return await apiDelete(`/turnos/${id}`);
   } catch (error) {
     console.error("Error al eliminar turno:", error);
     return null;
@@ -51,12 +34,7 @@ export const eliminarTurno = async (id) => {
 
 export const actualizarEstadoTurno = async (id, estado) => {
   try {
-    const res = await fetch(`${API_URL}/turnos/${id}/estado`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ estado }),
-    });
-    return await handleResponse(res);
+    return await apiPatch(`/turnos/${id}/estado`, { estado });
   } catch (error) {
     console.error("Error al actualizar estado del turno:", error);
     return null;
@@ -65,12 +43,7 @@ export const actualizarEstadoTurno = async (id, estado) => {
 
 export const actualizarTurno = async (id, data) => {
   try {
-    const res = await fetch(`${API_URL}/turnos/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return await handleResponse(res);
+    return await apiPut(`/turnos/${id}`, data);
   } catch (error) {
     console.error("Error al actualizar turno:", error);
     return null;
@@ -79,10 +52,7 @@ export const actualizarTurno = async (id, data) => {
 
 export const enviarRecordatorio = async (turnoId) => {
   try {
-    const res = await fetch(`${API_URL}/turnos/${turnoId}/recordatorio`, {
-      method: 'POST',
-    });
-    return await handleResponse(res);
+    return await apiPost(`/turnos/${turnoId}/recordatorio`);
   } catch (error) {
     console.error("Error al enviar recordatorio:", error);
     throw error;

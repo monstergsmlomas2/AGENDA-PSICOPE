@@ -12,13 +12,15 @@ router.get("/", async (req, res) => {
       FROM informes i
       JOIN pacientes p ON i.paciente_id = p.id
     `;
-    const params = [];
+    const conditions = ['p.usuario_id = $1'];
+    const params = [req.userId];
 
     if (paciente_id) {
-      query += " WHERE i.paciente_id = $1";
+      conditions.push(`i.paciente_id = $${params.length + 1}`);
       params.push(paciente_id);
     }
 
+    query += ` WHERE ${conditions.join(' AND ')}`;
     query += " ORDER BY i.fecha DESC, i.created_at DESC";
     const result = await pool.query(query, params);
     res.json(result.rows);
@@ -35,10 +37,11 @@ router.get("/proximos-vencer", async (req, res) => {
       SELECT i.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
       FROM informes i
       JOIN pacientes p ON i.paciente_id = p.id
-      WHERE i.fecha_vencimiento IS NOT NULL
+      WHERE p.usuario_id = $1
+        AND i.fecha_vencimiento IS NOT NULL
         AND i.fecha_vencimiento BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
       ORDER BY i.fecha_vencimiento ASC
-    `);
+    `, [req.userId]);
     res.json(result.rows);
   } catch (error) {
     console.error("Error al obtener informes próximos a vencer:", error);
@@ -54,8 +57,8 @@ router.get("/:id", async (req, res) => {
       `SELECT i.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
        FROM informes i
        JOIN pacientes p ON i.paciente_id = p.id
-       WHERE i.id = $1`,
-      [id]
+       WHERE i.id = $1 AND p.usuario_id = $2`,
+      [id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Informe no encontrado" });
@@ -77,9 +80,9 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO informes (paciente_id, tipo, fecha, contenido, estado, fecha_vencimiento)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
-      [paciente_id, tipo, fecha, JSON.stringify(contenido || {}), estado || 'borrador', fecha_vencimiento || null]
+      `INSERT INTO informes (paciente_id, tipo, fecha, contenido, estado, fecha_vencimiento, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+      [paciente_id, tipo, fecha, JSON.stringify(contenido || {}), estado || 'borrador', fecha_vencimiento || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -95,9 +98,11 @@ router.put("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE informes SET tipo = $1, fecha = $2, contenido = $3, estado = $4, fecha_vencimiento = $5
-       WHERE id = $6 RETURNING *`,
-      [tipo, fecha, JSON.stringify(contenido || {}), estado, fecha_vencimiento || null, id]
+      `UPDATE informes i SET tipo = $1, fecha = $2, contenido = $3, estado = $4, fecha_vencimiento = $5
+       FROM pacientes p
+       WHERE i.id = $6 AND i.paciente_id = p.id AND p.usuario_id = $7
+       RETURNING i.*`,
+      [tipo, fecha, JSON.stringify(contenido || {}), estado, fecha_vencimiento || null, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Informe no encontrado" });
@@ -113,7 +118,12 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("DELETE FROM informes WHERE id = $1 RETURNING id", [id]);
+    const result = await pool.query(
+      `DELETE FROM informes i USING pacientes p
+       WHERE i.id = $1 AND i.paciente_id = p.id AND p.usuario_id = $2
+       RETURNING i.id`,
+      [id, req.userId]
+    );
     if (result.rowCount === 0) return res.status(404).json({ error: "Informe no encontrado" });
     res.json({ message: "Informe eliminado" });
   } catch (error) {

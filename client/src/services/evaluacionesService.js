@@ -1,19 +1,10 @@
-import API_URL from '../config/api.js';
-
-const handleResponse = async (res) => {
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`HTTP ${res.status}: ${errorText}`);
-  }
-  return res.json();
-};
+import { apiGet, apiPost, apiPut, apiDelete } from './api.js';
 
 export const getEvaluaciones = async (pacienteId = null) => {
   try {
-    let url = `${API_URL}/evaluaciones`;
+    let url = '/evaluaciones';
     if (pacienteId) url += `?paciente_id=${pacienteId}`;
-    const res = await fetch(url);
-    return await handleResponse(res);
+    return await apiGet(url);
   } catch (error) {
     console.error("Error al obtener evaluaciones:", error);
     return [];
@@ -22,8 +13,7 @@ export const getEvaluaciones = async (pacienteId = null) => {
 
 export const getEvaluacionesProximasVencer = async () => {
   try {
-    const res = await fetch(`${API_URL}/evaluaciones/proximos-vencer`);
-    return await handleResponse(res);
+    return await apiGet('/evaluaciones/proximos-vencer');
   } catch (error) {
     console.error("Error al obtener evaluaciones próximas a vencer:", error);
     return [];
@@ -31,27 +21,16 @@ export const getEvaluacionesProximasVencer = async () => {
 };
 
 export const crearEvaluacion = async (data) => {
-  const res = await fetch(`${API_URL}/evaluaciones`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return await handleResponse(res);
+  return apiPost('/evaluaciones', data);
 };
 
 export const actualizarEvaluacion = async (id, data) => {
-  const res = await fetch(`${API_URL}/evaluaciones/${id}`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  return await handleResponse(res);
+  return apiPut(`/evaluaciones/${id}`, data);
 };
 
 export const eliminarEvaluacion = async (id) => {
   try {
-    const res = await fetch(`${API_URL}/evaluaciones/${id}`, { method: 'DELETE' });
-    return await handleResponse(res);
+    return await apiDelete(`/evaluaciones/${id}`);
   } catch (error) {
     console.error("Error al eliminar evaluación:", error);
     return null;

@@ -1,44 +1,29 @@
-import API_URL from '../config/api.js';
+import { apiGet } from './api.js';
 
-const safeJson = async (res, fallback) => {
-  if (!res.ok) return fallback;
-  try { return await res.json(); } catch { return fallback; }
+const safeData = async (promise, fallback) => {
+  try {
+    return await promise;
+  } catch {
+    return fallback;
+  }
 };
 
 export const getIngresosMensuales = async () => {
-  try {
-    const res = await fetch(`${API_URL}/analytics/ingresos-mensuales`);
-    return safeJson(res, []);
-  } catch { return []; }
+  return safeData(apiGet('/analytics/ingresos-mensuales'), []);
 };
 
 export const getSesionesSemanales = async () => {
-  try {
-    const res = await fetch(`${API_URL}/analytics/sesiones-semanales`);
-    return safeJson(res, []);
-  } catch { return []; }
+  return safeData(apiGet('/analytics/sesiones-semanales'), []);
 };
 
 export const getPacientesPorObraSocial = async () => {
-  try {
-    const res = await fetch(`${API_URL}/analytics/pacientes-por-obra-social`);
-    return safeJson(res, []);
-  } catch { return []; }
+  return safeData(apiGet('/analytics/pacientes-por-obra-social'), []);
 };
 
 export const getResumenMesActual = async () => {
-  try {
-    const res = await fetch(`${API_URL}/analytics/resumen-mes-actual`);
-    return safeJson(res, {
-      sesiones_este_mes: 0, sesiones_mes_anterior: 0,
-      ingresos_este_mes: 0, ingresos_mes_anterior: 0,
-      pacientes_activos: 0, turnos_pendientes: 0,
-    });
-  } catch {
-    return {
-      sesiones_este_mes: 0, sesiones_mes_anterior: 0,
-      ingresos_este_mes: 0, ingresos_mes_anterior: 0,
-      pacientes_activos: 0, turnos_pendientes: 0,
-    };
-  }
+  return safeData(apiGet('/analytics/resumen-mes-actual'), {
+    sesiones_este_mes: 0, sesiones_mes_anterior: 0,
+    ingresos_este_mes: 0, ingresos_mes_anterior: 0,
+    pacientes_activos: 0, turnos_pendientes: 0,
+  });
 };
