@@ -1,4 +1,5 @@
-// Caché simple en módulo — evita refetch innecesario de la lista de obras sociales
+import API_URL from '../config/api.js';
+
 let _obrasSocialesCache = null;
 
 const handleResponse = async (res) => {
@@ -12,7 +13,7 @@ const handleResponse = async (res) => {
 export const getObrasSociales = async () => {
   if (_obrasSocialesCache) return _obrasSocialesCache;
   try {
-    const res = await fetch('/obras-sociales');
+    const res = await fetch(`${API_URL}/obras-sociales`);
     const data = await handleResponse(res);
     _obrasSocialesCache = data;
     return data;
@@ -24,7 +25,7 @@ export const getObrasSociales = async () => {
 
 export const getObraSocial = async (id) => {
   try {
-    const res = await fetch(`/obras-sociales/${id}`);
+    const res = await fetch(`${API_URL}/obras-sociales/${id}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener obra social:", error);
@@ -34,13 +35,12 @@ export const getObraSocial = async (id) => {
 
 export const crearObraSocial = async (data) => {
   try {
-    const res = await fetch('/obras-sociales', {
+    const res = await fetch(`${API_URL}/obras-sociales`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     const result = await handleResponse(res);
-    // Invalidar caché al crear una nueva obra social
     _obrasSocialesCache = null;
     return result;
   } catch (error) {
@@ -51,13 +51,12 @@ export const crearObraSocial = async (data) => {
 
 export const actualizarObraSocial = async (id, data) => {
   try {
-    const res = await fetch(`/obras-sociales/${id}`, {
+    const res = await fetch(`${API_URL}/obras-sociales/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
     const result = await handleResponse(res);
-    // Invalidar caché al actualizar
     _obrasSocialesCache = null;
     return result;
   } catch (error) {
@@ -68,9 +67,8 @@ export const actualizarObraSocial = async (id, data) => {
 
 export const eliminarObraSocial = async (id) => {
   try {
-    const res = await fetch(`/obras-sociales/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/obras-sociales/${id}`, { method: 'DELETE' });
     const result = await handleResponse(res);
-    // Invalidar caché al eliminar
     _obrasSocialesCache = null;
     return result;
   } catch (error) {

@@ -14,7 +14,14 @@ import { iniciarJob } from "./jobs/recordatorios.js";
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    /\.vercel\.app$/,
+    process.env.CLIENT_URL,
+  ].filter(Boolean),
+  credentials: true,
+}));
 app.use(express.json());
 
 // Rutas

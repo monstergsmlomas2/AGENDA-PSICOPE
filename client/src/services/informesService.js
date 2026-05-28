@@ -1,3 +1,5 @@
+import API_URL from '../config/api.js';
+
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorText = await res.text();
@@ -8,7 +10,7 @@ const handleResponse = async (res) => {
 
 export const getInformes = async (pacienteId = null) => {
   try {
-    let url = '/informes';
+    let url = `${API_URL}/informes`;
     if (pacienteId) url += `?paciente_id=${pacienteId}`;
     const res = await fetch(url);
     return await handleResponse(res);
@@ -20,7 +22,7 @@ export const getInformes = async (pacienteId = null) => {
 
 export const getInformesProximosVencer = async () => {
   try {
-    const res = await fetch('/informes/proximos-vencer');
+    const res = await fetch(`${API_URL}/informes/proximos-vencer`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener informes próximos a vencer:", error);
@@ -30,7 +32,7 @@ export const getInformesProximosVencer = async () => {
 
 export const getInforme = async (id) => {
   try {
-    const res = await fetch(`/informes/${id}`);
+    const res = await fetch(`${API_URL}/informes/${id}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener informe:", error);
@@ -40,7 +42,7 @@ export const getInforme = async (id) => {
 
 export const crearInforme = async (data) => {
   try {
-    const res = await fetch('/informes', {
+    const res = await fetch(`${API_URL}/informes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -54,7 +56,7 @@ export const crearInforme = async (data) => {
 
 export const actualizarInforme = async (id, data) => {
   try {
-    const res = await fetch(`/informes/${id}`, {
+    const res = await fetch(`${API_URL}/informes/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -68,7 +70,7 @@ export const actualizarInforme = async (id, data) => {
 
 export const eliminarInforme = async (id) => {
   try {
-    const res = await fetch(`/informes/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/informes/${id}`, { method: 'DELETE' });
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al eliminar informe:", error);

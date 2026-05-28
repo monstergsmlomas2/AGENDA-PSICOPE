@@ -1,3 +1,5 @@
+import API_URL from '../config/api.js';
+
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorText = await res.text();
@@ -8,7 +10,7 @@ const handleResponse = async (res) => {
 
 export const getConsultorios = async () => {
   try {
-    const res = await fetch('/consultorios');
+    const res = await fetch(`${API_URL}/consultorios`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener consultorios:", error);
@@ -18,7 +20,7 @@ export const getConsultorios = async () => {
 
 export const crearConsultorio = async (data) => {
   try {
-    const res = await fetch('/consultorios', {
+    const res = await fetch(`${API_URL}/consultorios`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -32,7 +34,7 @@ export const crearConsultorio = async (data) => {
 
 export const eliminarConsultorio = async (id) => {
   try {
-    const res = await fetch(`/consultorios/${id}`, {
+    const res = await fetch(`${API_URL}/consultorios/${id}`, {
       method: 'DELETE',
     });
     return await handleResponse(res);

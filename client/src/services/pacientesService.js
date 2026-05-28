@@ -1,3 +1,5 @@
+import API_URL from '../config/api.js';
+
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorText = await res.text();
@@ -8,7 +10,7 @@ const handleResponse = async (res) => {
 
 export const getPacientes = async () => {
   try {
-    const res = await fetch('/pacientes');
+    const res = await fetch(`${API_URL}/pacientes`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener pacientes:", error);
@@ -18,7 +20,7 @@ export const getPacientes = async () => {
 
 export const getPacienteById = async (id) => {
   try {
-    const res = await fetch(`/pacientes/${id}`);
+    const res = await fetch(`${API_URL}/pacientes/${id}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener paciente:", error);
@@ -27,7 +29,7 @@ export const getPacienteById = async (id) => {
 };
 
 export const crearPaciente = async (data) => {
-  const res = await fetch('/pacientes', {
+  const res = await fetch(`${API_URL}/pacientes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -36,7 +38,7 @@ export const crearPaciente = async (data) => {
 };
 
 export const actualizarPaciente = async (id, data) => {
-  const res = await fetch(`/pacientes/${id}`, {
+  const res = await fetch(`${API_URL}/pacientes/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -46,7 +48,7 @@ export const actualizarPaciente = async (id, data) => {
 
 export const eliminarPaciente = async (id) => {
   try {
-    const res = await fetch(`/pacientes/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/pacientes/${id}`, { method: 'DELETE' });
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al eliminar paciente:", error);
@@ -56,7 +58,7 @@ export const eliminarPaciente = async (id) => {
 
 export const guardarEntrevista = async (id, entrevistaData) => {
   try {
-    const res = await fetch(`/pacientes/${id}/entrevista`, {
+    const res = await fetch(`${API_URL}/pacientes/${id}/entrevista`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ entrevista: entrevistaData }),
@@ -68,13 +70,9 @@ export const guardarEntrevista = async (id, entrevistaData) => {
   }
 };
 
-// ==========================================
-// FUNCIONES: SESIONES
-// ==========================================
-
 export const getSesiones = async (pacienteId) => {
   try {
-    const res = await fetch(`/pacientes/${pacienteId}/sesiones`);
+    const res = await fetch(`${API_URL}/pacientes/${pacienteId}/sesiones`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener sesiones:", error);
@@ -83,7 +81,7 @@ export const getSesiones = async (pacienteId) => {
 };
 
 export const crearSesion = async (pacienteId, data) => {
-  const res = await fetch(`/pacientes/${pacienteId}/sesiones`, {
+  const res = await fetch(`${API_URL}/pacientes/${pacienteId}/sesiones`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -92,7 +90,7 @@ export const crearSesion = async (pacienteId, data) => {
 };
 
 export const actualizarSesion = async (pacienteId, sesionId, data) => {
-  const res = await fetch(`/pacientes/${pacienteId}/sesiones/${sesionId}`, {
+  const res = await fetch(`${API_URL}/pacientes/${pacienteId}/sesiones/${sesionId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
@@ -102,7 +100,7 @@ export const actualizarSesion = async (pacienteId, sesionId, data) => {
 
 export const eliminarSesion = async (pacienteId, sesionId) => {
   try {
-    const res = await fetch(`/pacientes/${pacienteId}/sesiones/${sesionId}`, {
+    const res = await fetch(`${API_URL}/pacientes/${pacienteId}/sesiones/${sesionId}`, {
       method: 'DELETE',
     });
     return await handleResponse(res);
@@ -114,7 +112,7 @@ export const eliminarSesion = async (pacienteId, sesionId) => {
 
 export const getPacientesSinSesion = async () => {
   try {
-    const res = await fetch('/pacientes/sin-sesion-reciente');
+    const res = await fetch(`${API_URL}/pacientes/sin-sesion-reciente`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener pacientes sin sesión reciente:", error);
@@ -124,7 +122,7 @@ export const getPacientesSinSesion = async () => {
 
 export const enviarRecordatorioSeguimiento = async (pacienteId) => {
   try {
-    const res = await fetch(`/pacientes/${pacienteId}/recordatorio-seguimiento`, {
+    const res = await fetch(`${API_URL}/pacientes/${pacienteId}/recordatorio-seguimiento`, {
       method: 'POST',
     });
     return await handleResponse(res);

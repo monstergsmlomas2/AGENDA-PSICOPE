@@ -1,3 +1,5 @@
+import API_URL from '../config/api.js';
+
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorText = await res.text();
@@ -13,7 +15,7 @@ export const getPagos = async (filtros = {}) => {
     if (filtros.mes) params.append('mes', filtros.mes);
     if (filtros.estado) params.append('estado', filtros.estado);
     const query = params.toString();
-    const res = await fetch(`/pagos${query ? '?' + query : ''}`);
+    const res = await fetch(`${API_URL}/pagos${query ? '?' + query : ''}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener pagos:", error);
@@ -24,7 +26,7 @@ export const getPagos = async (filtros = {}) => {
 export const getResumenMes = async (mes = null) => {
   try {
     const params = mes ? `?mes=${mes}` : '';
-    const res = await fetch(`/pagos/resumen-mes${params}`);
+    const res = await fetch(`${API_URL}/pagos/resumen-mes${params}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener resumen mensual:", error);
@@ -34,7 +36,7 @@ export const getResumenMes = async (mes = null) => {
 
 export const crearPago = async (data) => {
   try {
-    const res = await fetch('/pagos', {
+    const res = await fetch(`${API_URL}/pagos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -48,7 +50,7 @@ export const crearPago = async (data) => {
 
 export const actualizarPago = async (id, data) => {
   try {
-    const res = await fetch(`/pagos/${id}`, {
+    const res = await fetch(`${API_URL}/pagos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -62,7 +64,7 @@ export const actualizarPago = async (id, data) => {
 
 export const eliminarPago = async (id) => {
   try {
-    const res = await fetch(`/pagos/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_URL}/pagos/${id}`, { method: 'DELETE' });
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al eliminar pago:", error);

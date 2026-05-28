@@ -1,3 +1,5 @@
+import API_URL from '../config/api.js';
+
 const handleResponse = async (res) => {
   if (!res.ok) {
     const errorText = await res.text();
@@ -13,7 +15,7 @@ export const getTurnos = async (filtros = {}) => {
     if (filtros.hasta) params.append('hasta', filtros.hasta);
     if (filtros.paciente_id) params.append('paciente_id', filtros.paciente_id);
     const query = params.toString() ? `?${params.toString()}` : '';
-    const res = await fetch(`/turnos${query}`);
+    const res = await fetch(`${API_URL}/turnos${query}`);
     return await handleResponse(res);
   } catch (error) {
     console.error("Error al obtener turnos:", error);
@@ -23,7 +25,7 @@ export const getTurnos = async (filtros = {}) => {
 
 export const crearTurno = async (data) => {
   try {
-    const res = await fetch('/turnos', {
+    const res = await fetch(`${API_URL}/turnos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -37,7 +39,7 @@ export const crearTurno = async (data) => {
 
 export const eliminarTurno = async (id) => {
   try {
-    const res = await fetch(`/turnos/${id}`, {
+    const res = await fetch(`${API_URL}/turnos/${id}`, {
       method: 'DELETE',
     });
     return await handleResponse(res);
@@ -49,7 +51,7 @@ export const eliminarTurno = async (id) => {
 
 export const actualizarEstadoTurno = async (id, estado) => {
   try {
-    const res = await fetch(`/turnos/${id}/estado`, {
+    const res = await fetch(`${API_URL}/turnos/${id}/estado`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado }),
@@ -63,7 +65,7 @@ export const actualizarEstadoTurno = async (id, estado) => {
 
 export const actualizarTurno = async (id, data) => {
   try {
-    const res = await fetch(`/turnos/${id}`, {
+    const res = await fetch(`${API_URL}/turnos/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -77,7 +79,7 @@ export const actualizarTurno = async (id, data) => {
 
 export const enviarRecordatorio = async (turnoId) => {
   try {
-    const res = await fetch(`/turnos/${turnoId}/recordatorio`, {
+    const res = await fetch(`${API_URL}/turnos/${turnoId}/recordatorio`, {
       method: 'POST',
     });
     return await handleResponse(res);
