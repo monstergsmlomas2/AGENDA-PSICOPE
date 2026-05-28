@@ -46,7 +46,7 @@ function ProtectedRoute({ children }) {
 function ProtectedLayout({ children }) {
   const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved === null ? true : saved === 'true';
+    return saved === null ? false : saved === 'true';
   });
 
   const toggleDarkMode = () => {
