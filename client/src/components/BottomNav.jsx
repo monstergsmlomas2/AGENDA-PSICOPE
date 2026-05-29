@@ -20,22 +20,22 @@ export default function BottomNav() {
           to={to}
           end={end}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center flex-1 gap-0.5 transition-colors duration-200 ${
+            `flex flex-col items-center justify-center flex-1 min-w-0 gap-0.5 transition-colors duration-200 ${
               isActive
                 ? 'text-pink-600 dark:text-teal-400'
-                : 'text-slate-400 dark:text-slate-500'
+                : 'text-slate-900 dark:text-slate-300'
             }`
           }
         >
           {({ isActive }) => (
             <>
               <span className="relative">
-                <Icon size={22} />
+                <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8} />
                 {isActive && (
                   <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-pink-500 dark:bg-teal-400" />
                 )}
               </span>
-              <span className="text-[10px] font-medium">{label}</span>
+              <span className="text-[9px] font-medium truncate w-full text-center px-0.5">{label}</span>
             </>
           )}
         </NavLink>
