@@ -96,6 +96,14 @@ select::placeholder {
   scrollbar-color: #475569 transparent;
 }
 
+/* Ocultar scrollbar en bottom nav */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
 /* ============================================================
    ANIMACIONES DE ENTRADA
    ============================================================ */
