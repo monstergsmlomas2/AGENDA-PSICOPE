@@ -1,7 +1,7 @@
-﻿import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut,
+  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -46,12 +46,13 @@ const gestionItems = [
   },
 ];
 
-function NavItem({ item }) {
+function NavItem({ item, onClick }) {
   const Icono = item.icon;
   return (
     <NavLink
       to={item.to}
       end={item.to === '/'}
+      onClick={onClick}
       className={({ isActive }) =>
         `group relative flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
           isActive
@@ -84,7 +85,7 @@ function NavItem({ item }) {
   );
 }
 
-export default function Sidebar({ darkMode, toggleDarkMode }) {
+export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -93,104 +94,130 @@ export default function Sidebar({ darkMode, toggleDarkMode }) {
     navigate('/login', { replace: true });
   };
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <aside className="w-52 flex flex-col h-screen shrink-0 bg-purple-100 dark:bg-slate-950 border-r border-pink-200 dark:border-slate-800 transition-colors duration-300">
-      {/* ─── Logo ─── */}
-      <div className="p-4 border-b border-pink-200 dark:border-slate-800">
-        <div className="flex items-center gap-2.5">
-          <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1.5 rounded-xl shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
-            <Brain size={22} className="text-pink-600 dark:text-teal-400" />
+    <>
+      {/* Overlay oscuro semitransparente — solo visible en móvil cuando está abierto */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside
+        className={`
+          /* Mobile: fixed drawer con transición */
+          fixed md:static inset-y-0 left-0 z-50
+          w-52 flex flex-col h-screen shrink-0
+          bg-purple-100 dark:bg-slate-950
+          border-r border-pink-200 dark:border-slate-800
+          transition-all duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
+        `}
+      >
+        {/* ─── Header con botón cerrar en móvil ─── */}
+        <div className="p-4 border-b border-pink-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1.5 rounded-xl shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
+              <Brain size={22} className="text-pink-600 dark:text-teal-400" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold tracking-tight leading-tight">
+                <span className="text-black dark:text-white">Agenda</span>
+                <span className="text-pink-600 dark:text-teal-400">Psicope</span>
+              </h1>
+              <p className="text-[9px] font-medium text-slate-900 uppercase tracking-widest mt-0.5">
+                Sistema de Gestión
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-base font-bold tracking-tight leading-tight">
-              <span className="text-black dark:text-white">Agenda</span>
-              <span className="text-pink-600 dark:text-teal-400">Psicope</span>
-            </h1>
-            <p className="text-[9px] font-medium text-slate-900 uppercase tracking-widest mt-0.5">
-              Sistema de Gestión
+          {/* Botón cerrar — solo en móvil */}
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-pink-200 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors md:hidden"
+          >
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* ─── Navegación ─── */}
+        <nav className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+          {/* Menú Principal */}
+          <div className="mb-1">
+            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
+              Menú Principal
             </p>
+            <div className="space-y-0.5">
+              {navItems.map((item) => (
+                <NavItem key={item.to} item={item} onClick={handleNavClick} />
+              ))}
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* ─── Navegación ─── */}
-      <nav className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
-        {/* Menú Principal */}
-        <div className="mb-1">
-          <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-            Menú Principal
+          {/* Divisor */}
+          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+
+          {/* Gestión */}
+          <div>
+            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
+              Gestión
+            </p>
+            <div className="space-y-0.5">
+              {gestionItems.map((item) => (
+                <NavItem key={item.to} item={item} onClick={handleNavClick} />
+              ))}
+            </div>
+          </div>
+
+          {/* Separador antes de Configuración */}
+          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+
+          {/* Configuración */}
+          <div>
+            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
+              Sistema
+            </p>
+            <div className="space-y-0.5">
+              <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} onClick={handleNavClick} />
+              {/* Cerrar sesión */}
+              <button
+                onClick={handleLogout}
+                className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
+              >
+                <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
+                  <LogOut size={17} />
+                </span>
+                <span className="truncate">Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </nav>
+
+        {/* ─── Toggle Theme ─── */}
+        <div className="px-3 py-2 border-t border-purple-300 dark:border-slate-800">
+          <button
+            onClick={toggleDarkMode}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
+          >
+            <span className="shrink-0">
+              {darkMode ? <Sun size={17} /> : <Moon size={17} />}
+            </span>
+            <span>{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
+          </button>
+        </div>
+
+        {/* ─── Footer ─── */}
+        <div className="p-3 border-t border-purple-300 dark:border-slate-800">
+          <p className="text-[11px] text-slate-900 dark:text-slate-600 text-center font-medium">
+            v1.0 &copy; {new Date().getFullYear()}
           </p>
-          <div className="space-y-0.5">
-            {navItems.map((item) => (
-              <NavItem key={item.to} item={item} />
-            ))}
-          </div>
         </div>
-
-        {/* Divisor */}
-        <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
-
-        {/* Gestión */}
-        <div>
-          <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-            Gestión
-          </p>
-          <div className="space-y-0.5">
-            {gestionItems.map((item) => (
-              <NavItem key={item.to} item={item} />
-            ))}
-          </div>
-        </div>
-
-        {/* Separador antes de Configuración */}
-        <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
-
-        {/* Configuración */}
-        <div>
-          <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-            Sistema
-          </p>
-          <div className="space-y-0.5">
-            <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} />
-            {/* Cerrar sesión */}
-            <button
-              onClick={handleLogout}
-              className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-            >
-              <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-                <LogOut size={17} />
-              </span>
-              <span className="truncate">Cerrar sesión</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* ─── Toggle Theme ─── */}
-      <div className="px-3 py-2 border-t border-purple-300 dark:border-slate-800">
-        <button
-          onClick={toggleDarkMode}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-        >
-          <span className="shrink-0">
-            {darkMode ? <Sun size={17} /> : <Moon size={17} />}
-          </span>
-          <span>{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
-        </button>
-      </div>
-
-      {/* ─── Footer ─── */}
-      <div className="p-3 border-t border-purple-300 dark:border-slate-800">
-        <p className="text-[11px] text-slate-900 dark:text-slate-600 text-center font-medium">
-          v1.0 &copy; {new Date().getFullYear()}
-        </p>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }
-
-
-
-
-
-

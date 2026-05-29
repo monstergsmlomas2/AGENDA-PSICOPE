@@ -1,7 +1,8 @@
-﻿import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Turnos from './pages/Turnos';
 import { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
+import BottomNav from './components/BottomNav';
 import Pacientes from './pages/Pacientes';
 import Dashboard from './pages/Dashboard';
 import Consultorios from './pages/Consultorios';
@@ -72,10 +73,20 @@ function ProtectedLayout({ children }) {
 
   return (
     <div className="flex h-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
-      <Sidebar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-      <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in">
+      {/* Sidebar — oculto en móvil, visible en desktop */}
+      <div className="hidden md:flex">
+        <Sidebar
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          isOpen={false}
+          onClose={() => {}}
+        />
+      </div>
+      <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in pb-20 md:pb-6">
         {children}
       </main>
+      {/* Bottom navigation — solo en móvil */}
+      <BottomNav />
     </div>
   );
 }

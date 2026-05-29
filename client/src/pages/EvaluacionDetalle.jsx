@@ -12,8 +12,8 @@ const tiposTest = [
   { value: 'htp', label: 'HTP / Figura Humana (proyectivos)' },
   { value: 'ple', label: 'Prueba de Lectura y Escritura (PLE)' },
   { value: 'raven', label: 'Test de Raven (matrices progresivas)' },
-  { value: 'dictado', label: 'Dictado / Copia / Escritura espontÃ¡nea' },
-  { value: 'ludica', label: 'Entrevista lÃºdica diagnÃ³stica' },
+  { value: 'dictado', label: 'Dictado / Copia / Escritura espontánea' },
+  { value: 'ludica', label: 'Entrevista lúdica diagnóstica' },
   { value: 'otro', label: 'Otro' },
 ];
 
@@ -35,7 +35,7 @@ export default function EvaluacionDetalle() {
         setEvaluacion(ev ?? null);
         setPaciente(pac);
       } catch {
-        toast.error('Error', 'No se pudo cargar la evaluaciÃ³n.');
+        toast.error('Error', 'No se pudo cargar la evaluación.');
       } finally {
         setLoading(false);
       }
@@ -45,18 +45,18 @@ export default function EvaluacionDetalle() {
 
   const handleEliminar = async () => {
     const ok = await confirm({
-      title: 'Eliminar evaluaciÃ³n',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s eliminar esta evaluaciÃ³n?',
+      title: 'Eliminar evaluación',
+      message: '¿Estás seguro de que querés eliminar esta evaluación?',
       confirmLabel: 'Eliminar',
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await eliminarEvaluacion(evalId);
-      toast.success('EvaluaciÃ³n eliminada', 'La evaluaciÃ³n fue eliminada correctamente.');
+      toast.success('Evaluación eliminada', 'La evaluación fue eliminada correctamente.');
       navigate(`/pacientes/${id}`);
     } catch {
-      toast.error('Error', 'No se pudo eliminar la evaluaciÃ³n.');
+      toast.error('Error', 'No se pudo eliminar la evaluación.');
     }
   };
 
@@ -72,7 +72,7 @@ export default function EvaluacionDetalle() {
   if (!evaluacion) {
     return (
       <div className="text-center py-20 text-slate-900 dark:text-slate-400">
-        <p className="text-lg font-bold">EvaluaciÃ³n no encontrada</p>
+        <p className="text-lg font-bold">Evaluación no encontrada</p>
         <button onClick={() => navigate(`/pacientes/${id}`)} className="mt-4 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:underline font-medium">Volver al paciente</button>
       </div>
     );
@@ -92,7 +92,7 @@ export default function EvaluacionDetalle() {
           <div>
             <div className="flex items-center gap-2 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mb-1">
               <ClipboardCheck size={18} />
-              <span className="text-xs font-bold uppercase tracking-wider">EvaluaciÃ³n</span>
+              <span className="text-xs font-bold uppercase tracking-wider">Evaluación</span>
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
               {tiposTest.find(t => t.value === evaluacion.tipo_test)?.label || evaluacion.tipo_test}

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { DollarSign, Plus, Search, Edit, Trash2, X, Calendar, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown, Wallet, ShieldCheck, AlertCircle } from 'lucide-react';
 import { getPagos, crearPago, actualizarPago, eliminarPago, getResumenMes } from '../services/pagosService';
 import { getPacientes } from '../services/pacientesService';
@@ -54,7 +54,7 @@ export default function Pagos() {
       setPacientes(Array.isArray(dataPacientes) ? dataPacientes : []);
       setResumen(dataResumen || { total_pagos: 0, total_cobrado: 0, total_pendiente: 0, total_facturado: 0 });
     } catch {
-      setError('No se pudieron cargar los pagos. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar los pagos. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -84,9 +84,9 @@ export default function Pagos() {
 
   const validatePagoForm = () => {
     const errors = {};
-    if (!pacienteId) errors.pacienteId = 'DebÃ©s seleccionar un paciente.';
+    if (!pacienteId) errors.pacienteId = 'Debés seleccionar un paciente.';
     if (!fecha) errors.fecha = 'La fecha es obligatoria.';
-    if (!monto || Number(monto) <= 0) errors.monto = 'El monto debe ser un nÃºmero positivo.';
+    if (!monto || Number(monto) <= 0) errors.monto = 'El monto debe ser un número positivo.';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -136,7 +136,7 @@ export default function Pagos() {
   const handleDelete = async (id) => {
     const ok = await confirm({
       title: 'Eliminar pago',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s eliminar este pago? Esta acciÃ³n no se puede deshacer.',
+      message: '¿Estás seguro de que querés eliminar este pago? Esta acción no se puede deshacer.',
       confirmLabel: 'Eliminar',
       variant: 'danger'
     });
@@ -185,7 +185,7 @@ export default function Pagos() {
           <div className="h-12 w-40 bg-pink-200 dark:bg-[#262626] rounded-xl animate-pulse" />
         </div>
 
-        {/* MÃ©tricas esqueleto */}
+        {/* Métricas esqueleto */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl p-5">
@@ -232,9 +232,9 @@ export default function Pagos() {
             <span className="bg-pink-100 text-slate-900 font-bold dark:text-pink-600 dark:bg-teal-500/10 dark:text-teal-400 p-2.5 rounded-xl border border-teal-500/20 shadow-inner">
               <DollarSign size={24} />
             </span>
-            Pagos y FacturaciÃ³n
+            Pagos y Facturación
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">GestiÃ³n de cobros, facturaciÃ³n y resÃºmenes mensuales.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Gestión de cobros, facturación y resúmenes mensuales.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nuevo Pago
@@ -313,7 +313,7 @@ export default function Pagos() {
           <EmptyState
             icon={DollarSign}
             title={searchTerm || mesFiltro || filtroEstado ? 'Sin resultados' : 'No hay pagos registrados'}
-            description={searchTerm || mesFiltro || filtroEstado ? 'No hay pagos que coincidan con los filtros seleccionados.' : 'RegistrÃ¡ el primer pago para empezar a gestionar la facturaciÃ³n.'}
+            description={searchTerm || mesFiltro || filtroEstado ? 'No hay pagos que coincidan con los filtros seleccionados.' : 'Registrá el primer pago para empezar a gestionar la facturación.'}
             action={!searchTerm && !mesFiltro && !filtroEstado ? { label: 'Nuevo Pago', onClick: () => { resetForm(); setShowModal(true); } } : undefined}
           />
         </div>
@@ -352,14 +352,14 @@ export default function Pagos() {
                     {new Date(p.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
                   </td>
                   <td className="px-6 py-5 text-slate-900 dark:text-slate-400 max-w-[200px] truncate">
-                    {p.concepto || 'â€”'}
+                    {p.concepto || '—'}
                   </td>
                   <td className="px-6 py-5 text-right">
                     <span className="font-bold text-slate-900 dark:text-white">
                       ${Number(p.monto).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
                     </span>
                     {p.nro_sesion_facturada && (
-                      <span className="ml-2 text-[10px] text-slate-900">(SesiÃ³n #{p.nro_sesion_facturada})</span>
+                      <span className="ml-2 text-[10px] text-slate-900">(Sesión #{p.nro_sesion_facturada})</span>
                     )}
                   </td>
                   <td className="px-6 py-5 text-center">
@@ -398,14 +398,14 @@ export default function Pagos() {
 
       {/* MODAL: NUEVO / EDITAR PAGO */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#141414] w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
-            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-[#141414] w-full max-w-lg mx-auto max-h-screen sm:max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
+            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Pago' : 'Nuevo Pago'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">RegistrÃ¡ un cobro o facturaciÃ³n.</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Registrá un cobro o facturación.</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
@@ -416,7 +416,7 @@ export default function Pagos() {
                     value={pacienteId}
                     onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
                     onBlur={() => {
-                      if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'DebÃ©s seleccionar un paciente.' }));
+                      if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'Debés seleccionar un paciente.' }));
                       else setFormErrors(prev => ({ ...prev, pacienteId: '' }));
                     }}
                     className={inputClass('pacienteId')}
@@ -433,7 +433,7 @@ export default function Pagos() {
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
                     <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} required className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert shadow-sm font-medium" />
@@ -446,7 +446,7 @@ export default function Pagos() {
                       value={monto}
                       onChange={(e) => { setMonto(e.target.value); setFormErrors(prev => ({ ...prev, monto: '' })); }}
                       onBlur={() => {
-                        if (!monto || Number(monto) <= 0) setFormErrors(prev => ({ ...prev, monto: 'El monto debe ser un nÃºmero positivo.' }));
+                        if (!monto || Number(monto) <= 0) setFormErrors(prev => ({ ...prev, monto: 'El monto debe ser un número positivo.' }));
                         else setFormErrors(prev => ({ ...prev, monto: '' }));
                       }}
                       className={inputClass('monto')}
@@ -462,10 +462,10 @@ export default function Pagos() {
 
                 <div>
                   <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Concepto</label>
-                  <input type="text" value={concepto} onChange={(e)=>setConcepto(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: SesiÃ³n psicopedagÃ³gica, Informe diagnÃ³stico..." />
+                  <input type="text" value={concepto} onChange={(e)=>setConcepto(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: Sesión psicopedagógica, Informe diagnóstico..." />
                 </div>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Pago</label>
                     <select value={tipoPago} onChange={(e)=>setTipoPago(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
@@ -485,9 +485,9 @@ export default function Pagos() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">NÂ° SesiÃ³n Facturada</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">N° Sesión Facturada</label>
                     <input type="number" value={nroSesion} onChange={(e)=>setNroSesion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Opcional" />
                   </div>
                 </div>
@@ -499,7 +499,7 @@ export default function Pagos() {
               </form>
             </div>
 
-            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
+            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
               <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="pagoForm" loading={submitting}>
                 {editing ? 'Guardar Cambios' : 'Registrar Pago'}

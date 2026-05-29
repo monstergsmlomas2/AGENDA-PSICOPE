@@ -1,8 +1,8 @@
 ﻿/**
- * Skeleton â€” placeholder de carga con animate-pulse.
+ * Skeleton — placeholder de carga con animate-pulse.
  *
  * Variants:
- *   - text   : lÃ­nea de texto (ancho por defecto 100%, alto 16px)
+ *   - text   : línea de texto (ancho por defecto 100%, alto 16px)
  *   - card   : bloque rectangular redondeado (por defecto 100% x 120px)
  *   - circle : avatar circular (por defecto 40x40)
  *   - table-row : fila de tabla simulada (por defecto 100% x 48px)
@@ -38,7 +38,7 @@ export default function Skeleton({ variant = 'text', width, height, className = 
 }
 
 /**
- * SkeletonCard â€” simula una tarjeta con tÃ­tulo + N lÃ­neas de texto.
+ * SkeletonCard — simula una tarjeta con título + N líneas de texto.
  *
  * @example
  *   <SkeletonCard />
@@ -47,7 +47,7 @@ export default function Skeleton({ variant = 'text', width, height, className = 
 export function SkeletonCard({ lines = 3, className = '' }) {
   return (
     <div className={`bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#262626] rounded-2xl p-6 shadow-sm ${className}`}>
-      {/* TÃ­tulo simulado */}
+      {/* Título simulado */}
       <div className="flex items-center gap-3 mb-5">
         <Skeleton variant="circle" className="w-10 h-10 shrink-0" />
         <div className="flex-1 space-y-2">
@@ -55,7 +55,7 @@ export function SkeletonCard({ lines = 3, className = '' }) {
           <Skeleton variant="text" className="w-2/5 h-3" />
         </div>
       </div>
-      {/* LÃ­neas de texto */}
+      {/* Líneas de texto */}
       <div className="space-y-2.5">
         {Array.from({ length: lines }).map((_, i) => (
           <Skeleton
@@ -70,7 +70,7 @@ export function SkeletonCard({ lines = 3, className = '' }) {
 }
 
 /**
- * SkeletonTable â€” simula una tabla con N filas y M columnas.
+ * SkeletonTable — simula una tabla con N filas y M columnas.
  *
  * @example
  *   <SkeletonTable rows={5} cols={4} />

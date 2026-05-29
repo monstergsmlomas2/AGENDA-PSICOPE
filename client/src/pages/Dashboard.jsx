@@ -1,4 +1,4 @@
-﻿import { useState } from 'react';
+import { useState } from 'react';
 import { Users, Calendar as CalendarIcon, Clock, Activity, ArrowRight, MapPin, DollarSign, AlertTriangle, TrendingUp, TrendingDown, BarChart3, CreditCard, PieChart as PieChartIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import RecordatoriosWidget from '../components/RecordatoriosWidget';
@@ -347,11 +347,11 @@ export default function Dashboard() {
       {/* ────────── 1. KPI CARDS ────────── */}
       <section>
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             {Array.from({ length: 6 }).map((_, i) => <MetricSkeleton key={i} />)}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
             <KpiCard icon={<Users size={20} />} label="Pacientes" value={stats.totalPacientes}
               bgColor="bg-indigo-50 dark:bg-indigo-500/10" textColor="text-indigo-600 dark:text-indigo-400" />
             <KpiCard icon={<CalendarIcon size={20} />} label="Turnos Totales" value={stats.totalTurnos}

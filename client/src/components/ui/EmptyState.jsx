@@ -1,18 +1,18 @@
 ﻿import Button from './Button';
 
 /**
- * Componente EmptyState para estados vacÃ­os.
+ * Componente EmptyState para estados vacíos.
  *
  * @example
- * // BÃ¡sico
+ * // Básico
  * <EmptyState
  *   icon={Users}
  *   title="No hay pacientes"
- *   description="AgregÃ¡ tu primer paciente para empezar."
+ *   description="Agregá tu primer paciente para empezar."
  * />
  *
  * @example
- * // Con acciÃ³n
+ * // Con acción
  * <EmptyState
  *   icon={Calendar}
  *   title="Sin turnos"

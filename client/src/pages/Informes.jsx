@@ -7,24 +7,24 @@ import { useToast, SkeletonTable, ErrorState, EmptyState, Button } from '../comp
 import { useConfirm } from '../hooks/useConfirm';
 
 const tiposInforme = [
-  { value: 'diagnostico', label: 'Informe DiagnÃ³stico PsicopedagÃ³gico' },
-  { value: 'evolucion', label: 'Informe de EvoluciÃ³n (periÃ³dico)' },
+  { value: 'diagnostico', label: 'Informe Diagnóstico Psicopedagógico' },
+  { value: 'evolucion', label: 'Informe de Evolución (periódico)' },
   { value: 'escolar', label: 'Informe Escolar (para docentes/directivos)' },
   { value: 'obra_social', label: 'Informe para Obra Social' },
-  { value: 'derivacion', label: 'DerivaciÃ³n a otro profesional' },
+  { value: 'derivacion', label: 'Derivación a otro profesional' },
   { value: 'asistencia', label: 'Certificado de Asistencia' },
 ];
 
 const seccionesPorTipo = {
   diagnostico: [
     { key: 'motivo_consulta', label: 'Motivo de Consulta' },
-    { key: 'tecnicas_administradas', label: 'TÃ©cnicas Administradas' },
+    { key: 'tecnicas_administradas', label: 'Técnicas Administradas' },
     { key: 'resultados_obtenidos', label: 'Resultados Obtenidos' },
-    { key: 'diagnostico_presuntivo', label: 'DiagnÃ³stico Presuntivo' },
+    { key: 'diagnostico_presuntivo', label: 'Diagnóstico Presuntivo' },
     { key: 'orientaciones', label: 'Orientaciones y Sugerencias' },
   ],
   evolucion: [
-    { key: 'periodo', label: 'PerÃ­odo' },
+    { key: 'periodo', label: 'Período' },
     { key: 'objetivos_trabajados', label: 'Objetivos Trabajados' },
     { key: 'logros_alcanzados', label: 'Logros Alcanzados' },
     { key: 'aspectos_continuar', label: 'Aspectos a Continuar Trabajando' },
@@ -32,23 +32,23 @@ const seccionesPorTipo = {
   ],
   escolar: [
     { key: 'datos_institucionales', label: 'Datos Institucionales' },
-    { key: 'desempenio_academico', label: 'DesempeÃ±o AcadÃ©mico' },
+    { key: 'desempenio_academico', label: 'Desempeño Académico' },
     { key: 'aspectos_conductuales', label: 'Aspectos Conductuales' },
-    { key: 'recomendaciones', label: 'Recomendaciones PedagÃ³gicas' },
+    { key: 'recomendaciones', label: 'Recomendaciones Pedagógicas' },
   ],
   obra_social: [
-    { key: 'diagnostico', label: 'DiagnÃ³stico / CIE' },
-    { key: 'justificacion', label: 'JustificaciÃ³n de Sesiones' },
-    { key: 'frecuencia', label: 'Frecuencia y DuraciÃ³n' },
-    { key: 'objetivos_terapeuticos', label: 'Objetivos TerapÃ©uticos' },
+    { key: 'diagnostico', label: 'Diagnóstico / CIE' },
+    { key: 'justificacion', label: 'Justificación de Sesiones' },
+    { key: 'frecuencia', label: 'Frecuencia y Duración' },
+    { key: 'objetivos_terapeuticos', label: 'Objetivos Terapéuticos' },
   ],
   derivacion: [
-    { key: 'motivo_derivacion', label: 'Motivo de DerivaciÃ³n' },
+    { key: 'motivo_derivacion', label: 'Motivo de Derivación' },
     { key: 'profesional_sugerido', label: 'Profesional Sugerido' },
     { key: 'antecedentes', label: 'Antecedentes Relevantes' },
   ],
   asistencia: [
-    { key: 'periodo_asistencia', label: 'PerÃ­odo de Asistencia' },
+    { key: 'periodo_asistencia', label: 'Período de Asistencia' },
     { key: 'frecuencia_asistencia', label: 'Frecuencia' },
     { key: 'observaciones_asistencia', label: 'Observaciones' },
   ],
@@ -91,7 +91,7 @@ export default function Informes() {
       setPacientes(Array.isArray(dataPacientes) ? dataPacientes : []);
       setProximosVencer(Array.isArray(dataProximos) ? dataProximos : []);
     } catch {
-      setError('No se pudieron cargar los informes. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar los informes. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -156,7 +156,7 @@ export default function Informes() {
   const handleDelete = async (id) => {
     const ok = await confirm({
       title: 'Eliminar informe',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s eliminar este informe? Esta acciÃ³n no se puede deshacer.',
+      message: '¿Estás seguro de que querés eliminar este informe? Esta acción no se puede deshacer.',
       confirmLabel: 'Eliminar',
       variant: 'danger'
     });
@@ -302,25 +302,25 @@ export default function Informes() {
             </span>
             Informes
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">RedacciÃ³n y gestiÃ³n de informes psicopedagÃ³gicos.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Redacción y gestión de informes psicopedagógicos.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nuevo Informe
         </button>
       </div>
 
-      {/* Banner: PrÃ³ximos a vencer */}
+      {/* Banner: Próximos a vencer */}
       {proximosVencer.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
           <AlertTriangle size={20} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-amber-800 dark:text-amber-300 text-sm">
-              {proximosVencer.length} informe{proximosVencer.length > 1 ? 's' : ''} prÃ³ximo{proximosVencer.length > 1 ? 's' : ''} a vencer (30 dÃ­as)
+              {proximosVencer.length} informe{proximosVencer.length > 1 ? 's' : ''} próximo{proximosVencer.length > 1 ? 's' : ''} a vencer (30 días)
             </p>
             <div className="mt-1.5 flex flex-wrap gap-2">
               {proximosVencer.map(inf => (
                 <span key={inf.id} className="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-lg font-medium border border-amber-200 dark:border-amber-500/30">
-                  {inf.paciente_nombre} {inf.paciente_apellido} â€” vence {new Date(inf.fecha_vencimiento + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
+                  {inf.paciente_nombre} {inf.paciente_apellido} — vence {new Date(inf.fecha_vencimiento + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
                 </span>
               ))}
             </div>
@@ -355,7 +355,7 @@ export default function Informes() {
           <EmptyState
             icon={FileText}
             title={searchTerm || filtroTipo || filtroEstado ? 'Sin resultados' : 'No hay informes registrados'}
-            description={searchTerm || filtroTipo || filtroEstado ? 'No hay informes que coincidan con los filtros seleccionados.' : 'CreÃ¡ el primer informe para empezar a redactar.'}
+            description={searchTerm || filtroTipo || filtroEstado ? 'No hay informes que coincidan con los filtros seleccionados.' : 'Creá el primer informe para empezar a redactar.'}
             action={!searchTerm && !filtroTipo && !filtroEstado ? { label: 'Nuevo Informe', onClick: () => { resetForm(); setShowModal(true); } } : undefined}
           />
         </div>
@@ -427,9 +427,9 @@ export default function Informes() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Informe' : 'Nuevo Informe'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">CompletÃ¡ las secciones segÃºn el tipo de informe.</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Completá las secciones según el tipo de informe.</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 overflow-y-auto custom-scrollbar flex-1 text-sm">
@@ -466,7 +466,7 @@ export default function Informes() {
                   </div>
                 </div>
 
-                {/* Secciones dinÃ¡micas segÃºn tipo */}
+                {/* Secciones dinámicas según tipo */}
                 <div className="border-t border-purple-300 dark:border-[#333] pt-6">
                   <h3 className="text-lg font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mb-4">Contenido del Informe</h3>
                   <div className="space-y-5">
@@ -478,7 +478,7 @@ export default function Informes() {
                           onChange={(e) => handleContenidoChange(sec.key, e.target.value)}
                           rows="4"
                           className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
-                          placeholder={`EscribÃ­ ${sec.label.toLowerCase()}...`}
+                          placeholder={`Escribí ${sec.label.toLowerCase()}...`}
                         ></textarea>
                       </div>
                     ))}
@@ -497,7 +497,7 @@ export default function Informes() {
         </div>
       )}
 
-      {/* Estilos para impresiÃ³n */}
+      {/* Estilos para impresión */}
       <style>{`
         @media print {
           body * { visibility: hidden; }

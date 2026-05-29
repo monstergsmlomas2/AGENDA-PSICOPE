@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ShieldCheck, Plus, Search, Edit, Trash2, X, Calendar, DollarSign, Hash, FileText, Users, AlertCircle } from 'lucide-react';
 import { getObrasSociales, crearObraSocial, actualizarObraSocial, eliminarObraSocial } from '../services/obrasSocialesService';
 import { useToast, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
@@ -31,7 +31,7 @@ export default function ObrasSociales() {
       const data = await getObrasSociales();
       setObrasSociales(Array.isArray(data) ? data : []);
     } catch {
-      setError('No se pudieron cargar las obras sociales. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar las obras sociales. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -99,7 +99,7 @@ export default function ObrasSociales() {
   const handleDelete = async (id, nombreOS) => {
     const ok = await confirm({
       title: 'Eliminar obra social',
-      message: `Â¿EstÃ¡s seguro de que querÃ©s eliminar "${nombreOS}"? Los pacientes asociados a esta obra social podrÃ­an verse afectados.`,
+      message: `¿Estás seguro de que querés eliminar "${nombreOS}"? Los pacientes asociados a esta obra social podrían verse afectados.`,
       confirmLabel: 'Eliminar',
       variant: 'danger'
     });
@@ -164,7 +164,7 @@ export default function ObrasSociales() {
             </span>
             Obras Sociales
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">AdministraciÃ³n de coberturas mÃ©dicas y valores de sesiÃ³n.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Administración de coberturas médicas y valores de sesión.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nueva Obra Social
@@ -175,7 +175,7 @@ export default function ObrasSociales() {
       <div className="mb-6">
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={20} />
-          <input type="text" placeholder="Buscar por nombre o cÃ³digo..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+          <input type="text" placeholder="Buscar por nombre o código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
           />
         </div>
@@ -187,7 +187,7 @@ export default function ObrasSociales() {
           <EmptyState
             icon={ShieldCheck}
             title={searchTerm ? 'Sin resultados' : 'No hay obras sociales registradas'}
-            description={searchTerm ? 'ProbÃ¡ con otro tÃ©rmino de bÃºsqueda.' : 'AgregÃ¡ la primera obra social para empezar a gestionar coberturas.'}
+            description={searchTerm ? 'Probá con otro término de búsqueda.' : 'Agregá la primera obra social para empezar a gestionar coberturas.'}
             action={!searchTerm ? { label: 'Nueva Obra Social', onClick: () => { resetForm(); setShowModal(true); } } : undefined}
           />
         </div>
@@ -198,10 +198,10 @@ export default function ObrasSociales() {
             <thead className="bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
               <tr>
                 <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Nombre</th>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">CÃ³digo</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Código</th>
                 <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Sesiones Autorizadas</th>
-                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Valor por SesiÃ³n</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">RenovaciÃ³n</th>
+                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Valor por Sesión</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Renovación</th>
                 <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Pacientes</th>
                 <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Acciones</th>
               </tr>
@@ -221,7 +221,7 @@ export default function ObrasSociales() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="font-mono text-slate-900 dark:text-slate-400">{os.codigo || 'â€”'}</span>
+                    <span className="font-mono text-slate-900 dark:text-slate-400">{os.codigo || '—'}</span>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg font-bold text-xs">
@@ -230,7 +230,7 @@ export default function ObrasSociales() {
                   </td>
                   <td className="px-6 py-5 text-right">
                     <span className="font-bold text-slate-900 dark:text-white">
-                      {os.valor_sesion ? `$${Number(os.valor_sesion).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : 'â€”'}
+                      {os.valor_sesion ? `$${Number(os.valor_sesion).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '—'}
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
@@ -265,19 +265,19 @@ export default function ObrasSociales() {
 
       {/* MODAL ALTA/EDICIÃ“N */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#141414] w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
-            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-[#141414] w-full max-w-lg mx-auto max-h-screen sm:max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
+            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Obra Social' : 'Nueva Obra Social'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editing ? 'ActualizÃ¡ los datos de la cobertura.' : 'RegistrÃ¡ una nueva obra social.'}</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editing ? 'Actualizá los datos de la cobertura.' : 'Registrá una nueva obra social.'}</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
               <form id="osForm" onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="col-span-2">
                     <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Nombre *</label>
                     <input
@@ -299,7 +299,7 @@ export default function ObrasSociales() {
                   </div>
                   <div>
                     <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
-                      <Hash size={12} className="inline mr-1" /> CÃ³digo
+                      <Hash size={12} className="inline mr-1" /> Código
                     </label>
                     <input type="text" value={codigo} onChange={(e)=>setCodigo(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: OSDE-210" />
                   </div>
@@ -311,12 +311,12 @@ export default function ObrasSociales() {
                   </div>
                   <div>
                     <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
-                      <DollarSign size={12} className="inline mr-1" /> Valor por SesiÃ³n
+                      <DollarSign size={12} className="inline mr-1" /> Valor por Sesión
                     </label>
                     <input type="number" step="0.01" value={valorSesion} onChange={(e)=>setValorSesion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="0.00" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">PerÃ­odo de RenovaciÃ³n</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Período de Renovación</label>
                     <select value={periodoRenovacion} onChange={(e)=>setPeriodoRenovacion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                       <option value="mensual">Mensual</option>
                       <option value="trimestral">Trimestral</option>
@@ -333,7 +333,7 @@ export default function ObrasSociales() {
               </form>
             </div>
 
-            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
+            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
               <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="osForm" loading={submitting}>
                 {editing ? 'Guardar Cambios' : 'Crear Obra Social'}

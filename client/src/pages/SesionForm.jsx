@@ -35,7 +35,7 @@ export default function SesionForm() {
           }
         }
       } catch {
-        toast.error('Error', 'No se pudo cargar la sesiÃ³n.');
+        toast.error('Error', 'No se pudo cargar la sesión.');
       } finally {
         setLoading(false);
       }
@@ -50,22 +50,22 @@ export default function SesionForm() {
       const data = { fecha, actividades_realizadas: actividades, observaciones };
       if (sesionId) {
         await actualizarSesion(id, sesionId, data);
-        toast.success('SesiÃ³n actualizada', 'Los cambios se guardaron correctamente.');
+        toast.success('Sesión actualizada', 'Los cambios se guardaron correctamente.');
         navigate(`/pacientes/${id}/sesiones/${sesionId}`);
       } else {
         await crearSesion(id, data);
-        toast.success('SesiÃ³n guardada', 'La sesiÃ³n fue registrada correctamente.');
+        toast.success('Sesión guardada', 'La sesión fue registrada correctamente.');
         navigate(`/pacientes/${id}`);
       }
     } catch (err) {
-      toast.error('Error', err?.message || 'No se pudo guardar la sesiÃ³n.');
+      toast.error('Error', err?.message || 'No se pudo guardar la sesión.');
     } finally {
       setSubmitting(false);
     }
   };
 
   const volverLabel = sesionId
-    ? 'Volver a la sesiÃ³n'
+    ? 'Volver a la sesión'
     : `Volver a ${paciente ? `${paciente.nombre} ${paciente.apellido}` : 'Paciente'}`;
 
   const volverPath = sesionId
@@ -95,11 +95,11 @@ export default function SesionForm() {
           <div className="flex items-center gap-2 text-blue-400 mb-1">
             <ClipboardList size={18} />
             <span className="text-xs font-bold uppercase tracking-wider">
-              {sesionId ? 'Editar SesiÃ³n' : 'Nueva SesiÃ³n'}
+              {sesionId ? 'Editar Sesión' : 'Nueva Sesión'}
             </span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {sesionId ? 'Editar SesiÃ³n' : 'Registrar nueva sesiÃ³n'}
+            {sesionId ? 'Editar Sesión' : 'Registrar nueva sesión'}
           </h1>
           {paciente && (
             <p className="text-sm text-slate-900 mt-1 capitalize">
@@ -127,13 +127,13 @@ export default function SesionForm() {
               onChange={(e) => setActividades(e.target.value)}
               rows="5"
               required
-              placeholder="Juegos, tests administrados, tÃ©cnicas utilizadas..."
+              placeholder="Juegos, tests administrados, técnicas utilizadas..."
               className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / EvoluciÃ³n</label>
+            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / Evolución</label>
             <textarea
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
@@ -159,7 +159,7 @@ export default function SesionForm() {
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               <Save size={14} />
-              {sesionId ? 'Guardar Cambios' : 'Guardar SesiÃ³n'}
+              {sesionId ? 'Guardar Cambios' : 'Guardar Sesión'}
             </button>
           </div>
         </form>

@@ -53,8 +53,8 @@ export default function RecordatoriosWidget() {
   const formatearDias = (dias) => {
     if (dias === null || dias === undefined) return 'Sin sesiones';
     if (dias === 0) return 'Hoy';
-    if (dias === 1) return '1 dÃ­a';
-    return `${dias} dÃ­as`;
+    if (dias === 1) return '1 día';
+    return `${dias} días`;
   };
 
   const formatearFecha = (fechaStr) => {
@@ -67,7 +67,7 @@ export default function RecordatoriosWidget() {
     e.preventDefault();
     e.stopPropagation();
     if (!paciente.telefono) {
-      alert('El paciente no tiene telÃ©fono registrado');
+      alert('El paciente no tiene teléfono registrado');
       return;
     }
     setEnviandoSeguimiento(paciente.id);
@@ -105,12 +105,12 @@ export default function RecordatoriosWidget() {
       </div>
 
       <div className="space-y-5">
-        {/* SecciÃ³n: Pacientes sin sesiÃ³n reciente */}
+        {/* Sección: Pacientes sin sesión reciente */}
         {pacientesSinSesion.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
               <AlertTriangle size={13} className="text-amber-500" />
-              Pacientes sin sesiÃ³n reciente
+              Pacientes sin sesión reciente
             </h3>
             <div className="space-y-2">
               {pacientesSinSesion.slice(0, 5).map(p => (
@@ -129,8 +129,8 @@ export default function RecordatoriosWidget() {
                       </p>
                       <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium">
                         {p.ultima_sesion
-                          ? `Ãšlt. sesiÃ³n: ${formatearFecha(p.ultima_sesion)}`
-                          : 'Nunca asistiÃ³'}
+                          ? `Ãšlt. sesión: ${formatearFecha(p.ultima_sesion)}`
+                          : 'Nunca asistió'}
                       </p>
                     </div>
                   </div>
@@ -160,14 +160,14 @@ export default function RecordatoriosWidget() {
               ))}
               {pacientesSinSesion.length > 5 && (
                 <p className="text-xs text-center text-pink-500 dark:text-slate-500 font-medium pt-1">
-                  + {pacientesSinSesion.length - 5} pacientes mÃ¡s
+                  + {pacientesSinSesion.length - 5} pacientes más
                 </p>
               )}
             </div>
           </div>
         )}
 
-        {/* SecciÃ³n: Vencimientos prÃ³ximos - Informes */}
+        {/* Sección: Vencimientos próximos - Informes */}
         {informesPorVencer.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
@@ -192,7 +192,7 @@ export default function RecordatoriosWidget() {
                           {i.paciente_apellido}, {i.paciente_nombre}
                         </p>
                         <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium capitalize">
-                          {i.tipo} â€¢ Vence: {formatearFecha(i.fecha_vencimiento)}
+                          {i.tipo} • Vence: {formatearFecha(i.fecha_vencimiento)}
                         </p>
                       </div>
                     </div>
@@ -202,7 +202,7 @@ export default function RecordatoriosWidget() {
                           ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                           : 'bg-blue-100 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                       }`}>
-                        {dias !== null ? `${dias} ${dias === 1 ? 'dÃ­a' : 'dÃ­as'}` : ''}
+                        {dias !== null ? `${dias} ${dias === 1 ? 'día' : 'días'}` : ''}
                       </span>
                       <ChevronRight size={14} className="text-slate-900 group-hover:text-blue-500 transition-colors" />
                     </div>
@@ -213,7 +213,7 @@ export default function RecordatoriosWidget() {
           </div>
         )}
 
-        {/* SecciÃ³n: Vencimientos prÃ³ximos - Evaluaciones */}
+        {/* Sección: Vencimientos próximos - Evaluaciones */}
         {evaluacionesPorVencer.length > 0 && (
           <div>
             <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
@@ -238,7 +238,7 @@ export default function RecordatoriosWidget() {
                           {e.paciente_apellido}, {e.paciente_nombre}
                         </p>
                         <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium">
-                          {e.tipo_test} â€¢ Vence: {formatearFecha(e.fecha_vencimiento)}
+                          {e.tipo_test} • Vence: {formatearFecha(e.fecha_vencimiento)}
                         </p>
                       </div>
                     </div>
@@ -248,7 +248,7 @@ export default function RecordatoriosWidget() {
                           ? 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400'
                           : 'bg-white dark:bg-purple-500/10 text-purple-600 dark:text-purple-400'
                       }`}>
-                        {dias !== null ? `${dias} ${dias === 1 ? 'dÃ­a' : 'dÃ­as'}` : ''}
+                        {dias !== null ? `${dias} ${dias === 1 ? 'día' : 'días'}` : ''}
                       </span>
                       <ChevronRight size={14} className="text-slate-900 group-hover:text-purple-500 transition-colors" />
                     </div>

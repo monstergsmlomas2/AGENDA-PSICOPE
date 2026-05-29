@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
@@ -112,14 +112,14 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-slate-800">
-        <div className="border-b border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-6 py-4 flex items-center justify-between shrink-0">
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-lg mx-auto max-h-screen sm:max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-slate-800">
+            <div className="border-b border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Editar Paciente</h2>
-            <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificaciÃ³n y administrativos.</p>
+            <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificación y administrativos.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">âœ•</button>
+          <button onClick={onClose} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">✕</button>
         </div>
         <div className="p-5 overflow-y-auto custom-scrollbar flex-1 text-sm">
           <form id="editPacienteForm" onSubmit={handleSubmit} className="space-y-8">
@@ -143,7 +143,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                   <input type="text" value={dni} onChange={(e) => setDni(e.target.value)} required
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nacimiento</label>
                     <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)}
@@ -152,7 +152,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                   <div>
                     <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Edad</label>
                     <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-slate-300 min-h-[46px]">
-                      {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} aÃ±os` : <span className="text-slate-900 dark:text-slate-600 text-xs">â€”</span>}
+                      {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-slate-600 text-xs">—</span>}
                     </div>
                   </div>
                   <div>
@@ -176,7 +176,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">TelÃ©fono</label>
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Teléfono</label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
                       <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)}
@@ -193,7 +193,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura MÃ©dica</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
                   <select value={obraSocial} onChange={(e) => setObraSocial(e.target.value)}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500">
                     <option value="">Particular</option>
@@ -203,7 +203,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">NÂº de Afiliado</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
                   <input type="text" value={nroAfiliado} onChange={(e) => setNroAfiliado(e.target.value)} disabled={!obraSocial}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 disabled:opacity-50" />
                 </div>
@@ -223,20 +223,20 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">DiagnÃ³stico</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Diagnóstico</label>
                   <textarea value={diagnostico} onChange={(e) => setDiagnostico(e.target.value)} rows="2"
                     className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div className="md:col-span-2 p-4 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20">
                   <label className="block mb-2 font-semibold text-red-600 dark:text-red-500">Contacto de Emergencia</label>
                   <input type="text" value={contactoEmergencia} onChange={(e) => setContactoEmergencia(e.target.value)}
-                    placeholder="Nombre y telÃ©fono..." className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
+                    placeholder="Nombre y teléfono..." className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
               </div>
             </section>
           </form>
         </div>
-        <div className="border-t border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-6 py-4 flex justify-end gap-3 shrink-0">
+        <div className="border-t border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
           <button type="button" onClick={onClose}
             className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-pink-200 dark:bg-slate-800"
             disabled={submitting}>Cancelar</button>
@@ -383,7 +383,7 @@ export default function PacienteDetalle() {
           cur.setDate(cur.getDate() + 7);
         }
         await Promise.all(fechas.map(f => crearTurno({ ...base, fecha: f })));
-        toast.success('Turno actualizado y repetido', `Se guardÃ³ el turno y se crearon ${fechas.length} turnos adicionales.`);
+        toast.success('Turno actualizado y repetido', `Se guardó el turno y se crearon ${fechas.length} turnos adicionales.`);
       } else {
         toast.success('Turno actualizado', '');
       }
@@ -400,7 +400,7 @@ export default function PacienteDetalle() {
   const handleEliminarTurno = async (turno) => {
     const ok = await confirm({
       title: 'Eliminar turno',
-      message: `Â¿EliminÃ¡s el turno del ${new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-AR')} a las ${turno.hora?.slice(0, 5)}?`,
+      message: `¿Eliminás el turno del ${new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-AR')} a las ${turno.hora?.slice(0, 5)}?`,
       confirmLabel: 'Eliminar',
       variant: 'danger',
     });
@@ -462,7 +462,7 @@ export default function PacienteDetalle() {
       <div className="space-y-6 animate-fade-in">
         <div className="h-10 w-48 bg-pink-200 dark:bg-slate-800 rounded-xl animate-pulse" />
         <div className="h-32 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl animate-pulse" />
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="h-16 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl animate-pulse" />
           <div className="h-16 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl animate-pulse" />
           <div className="h-16 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl animate-pulse" />
@@ -484,7 +484,7 @@ export default function PacienteDetalle() {
     <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in">
       <ConfirmModal />
 
-      {/* BotÃ³n volver */}
+      {/* Botón volver */}
       <button
         onClick={() => navigate('/pacientes')}
         className="inline-flex items-center gap-2 text-sm font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors"
@@ -541,12 +541,12 @@ export default function PacienteDetalle() {
       {/* Datos del paciente en grilla */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {[
-          { icon: Phone, label: 'TelÃ©fono', value: paciente.telefono || 'â€”' },
-          { icon: Mail, label: 'Email', value: paciente.email || 'â€”' },
-          { icon: MapPin, label: 'Domicilio', value: paciente.domicilio || 'â€”' },
-          { icon: Calendar, label: 'Fecha de Nacimiento', value: paciente.fecha_nacimiento ? `${new Date(paciente.fecha_nacimiento.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}${calcularEdad(paciente.fecha_nacimiento) !== null ? ` (${calcularEdad(paciente.fecha_nacimiento)} aÃ±os)` : ''}` : 'â€”' },
-          { icon: User, label: 'Sexo', value: paciente.sexo === 'M' ? 'Masculino' : paciente.sexo === 'F' ? 'Femenino' : paciente.sexo === 'X' ? 'Otro' : 'â€”' },
-          { icon: ShieldCheck, label: 'NÂº de Afiliado', value: paciente.nro_afiliado || 'â€”' },
+          { icon: Phone, label: 'Teléfono', value: paciente.telefono || '—' },
+          { icon: Mail, label: 'Email', value: paciente.email || '—' },
+          { icon: MapPin, label: 'Domicilio', value: paciente.domicilio || '—' },
+          { icon: Calendar, label: 'Fecha de Nacimiento', value: paciente.fecha_nacimiento ? `${new Date(paciente.fecha_nacimiento.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}${calcularEdad(paciente.fecha_nacimiento) !== null ? ` (${calcularEdad(paciente.fecha_nacimiento)} años)` : ''}` : '—' },
+          { icon: User, label: 'Sexo', value: paciente.sexo === 'M' ? 'Masculino' : paciente.sexo === 'F' ? 'Femenino' : paciente.sexo === 'X' ? 'Otro' : '—' },
+          { icon: ShieldCheck, label: 'Nº de Afiliado', value: paciente.nro_afiliado || '—' },
         ].map((item, i) => {
           const Icon = item.icon;
           return (
@@ -577,13 +577,13 @@ export default function PacienteDetalle() {
         )}
       </div>
 
-      {/* Botones de acciÃ³n */}
+      {/* Botones de acción */}
       <div className="flex flex-wrap gap-3 justify-center">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
           className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors shadow-lg shadow-amber-500/5"
         >
-          <FileText size={18} /> Entrevista de AdmisiÃ³n
+          <FileText size={18} /> Entrevista de Admisión
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
@@ -662,13 +662,13 @@ export default function PacienteDetalle() {
               </div>
               <div className="border border-teal-500/30 bg-teal-500/5 rounded-xl p-3 space-y-1.5">
                 <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
-                <p className="text-xs text-slate-900">Se crearÃ¡ un turno por semana, el mismo dÃ­a y horario, durante el perÃ­odo elegido.</p>
+                <p className="text-xs text-slate-900">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                 <select
                   value={recurrenciaTurno}
                   onChange={e => setRecurrenciaTurno(e.target.value)}
                   className="w-full rounded-lg p-2.5 text-sm outline-none border border-pink-300 dark:border-slate-700 bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-teal-500"
                 >
-                  <option value="">Sin repeticiÃ³n (turno Ãºnico)</option>
+                  <option value="">Sin repetición (turno único)</option>
                   <option value="1">Durante 1 mes</option>
                   <option value="2">Durante 2 meses</option>
                   <option value="3">Durante 3 meses</option>
@@ -729,13 +729,13 @@ export default function PacienteDetalle() {
                       </div>
                       <div className="border border-teal-500/30 bg-teal-500/5 rounded-xl p-3 space-y-1.5">
                         <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
-                        <p className="text-xs text-slate-900">Se crearÃ¡ un turno por semana, el mismo dÃ­a y horario, durante el perÃ­odo elegido.</p>
+                        <p className="text-xs text-slate-900">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                         <select
                           value={recurrenciaTurno}
                           onChange={e => setRecurrenciaTurno(e.target.value)}
                           className="w-full rounded-lg p-2.5 text-sm outline-none border border-pink-300 dark:border-slate-700 bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-teal-500"
                         >
-                          <option value="">Sin repeticiÃ³n (turno Ãºnico)</option>
+                          <option value="">Sin repetición (turno único)</option>
                           <option value="1">Durante 1 mes</option>
                           <option value="2">Durante 2 meses</option>
                           <option value="3">Durante 3 meses</option>
@@ -794,7 +794,7 @@ export default function PacienteDetalle() {
               onClick={() => navigate(`/pacientes/${id}/sesiones/nueva`)}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 transition-colors"
             >
-              <Plus size={16} /> Nueva SesiÃ³n
+              <Plus size={16} /> Nueva Sesión
             </button>
           </div>
           {loadingSesiones ? (
@@ -806,7 +806,7 @@ export default function PacienteDetalle() {
           ) : sesiones.length === 0 ? (
             <div className="text-center py-12 rounded-xl border-2 border-dashed border-pink-300 dark:border-slate-800 bg-white dark:bg-slate-950">
               <ClipboardList size={40} className="mx-auto text-slate-900 mb-2" />
-              <p className="text-slate-900 font-medium">No hay sesiones registradas aÃºn.</p>
+              <p className="text-slate-900 font-medium">No hay sesiones registradas aún.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -817,7 +817,7 @@ export default function PacienteDetalle() {
                   className="p-4 rounded-xl border border-purple-300 dark:border-slate-800 bg-white dark:bg-slate-950/50 hover:border-blue-500/50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-bold text-blue-400">SesiÃ³n #{idx + 1}</span>
+                    <span className="font-bold text-blue-400">Sesión #{idx + 1}</span>
                     <span className="text-xs text-slate-900 font-medium">
                       {new Date((s.fecha || '').split('T')[0] + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
                     </span>
@@ -845,7 +845,7 @@ export default function PacienteDetalle() {
               onClick={() => navigate(`/pacientes/${id}/evaluaciones/nueva`)}
               className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500/20 transition-colors"
             >
-              <Plus size={16} /> Nueva EvaluaciÃ³n
+              <Plus size={16} /> Nueva Evaluación
             </button>
           </div>
 

@@ -11,8 +11,8 @@ const tiposTest = [
   { value: 'htp', label: 'HTP / Figura Humana (proyectivos)' },
   { value: 'ple', label: 'Prueba de Lectura y Escritura (PLE)' },
   { value: 'raven', label: 'Test de Raven (matrices progresivas)' },
-  { value: 'dictado', label: 'Dictado / Copia / Escritura espontÃ¡nea' },
-  { value: 'ludica', label: 'Entrevista lÃºdica diagnÃ³stica' },
+  { value: 'dictado', label: 'Dictado / Copia / Escritura espontánea' },
+  { value: 'ludica', label: 'Entrevista lúdica diagnóstica' },
   { value: 'otro', label: 'Otro' },
 ];
 
@@ -47,7 +47,7 @@ export default function EvaluacionForm() {
           }
         }
       } catch {
-        toast.error('Error', 'No se pudo cargar la evaluaciÃ³n.');
+        toast.error('Error', 'No se pudo cargar la evaluación.');
       } finally {
         setLoading(false);
       }
@@ -69,15 +69,15 @@ export default function EvaluacionForm() {
       };
       if (evalId) {
         await actualizarEvaluacion(evalId, data);
-        toast.success('EvaluaciÃ³n actualizada', 'Los cambios se guardaron correctamente.');
+        toast.success('Evaluación actualizada', 'Los cambios se guardaron correctamente.');
         navigate(`/pacientes/${id}/evaluaciones/${evalId}`);
       } else {
         await crearEvaluacion(data);
-        toast.success('EvaluaciÃ³n creada', 'La evaluaciÃ³n fue registrada correctamente.');
+        toast.success('Evaluación creada', 'La evaluación fue registrada correctamente.');
         navigate(`/pacientes/${id}`);
       }
     } catch (err) {
-      toast.error('Error', err?.message || 'No se pudo guardar la evaluaciÃ³n.');
+      toast.error('Error', err?.message || 'No se pudo guardar la evaluación.');
     } finally {
       setSubmitting(false);
     }
@@ -100,7 +100,7 @@ export default function EvaluacionForm() {
         onClick={() => navigate(volverPath)}
         className="inline-flex items-center gap-2 text-sm font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors"
       >
-        <ArrowLeft size={18} /> {evalId ? 'Volver a la evaluaciÃ³n' : `Volver a ${paciente ? `${paciente.nombre} ${paciente.apellido}` : 'Paciente'}`}
+        <ArrowLeft size={18} /> {evalId ? 'Volver a la evaluación' : `Volver a ${paciente ? `${paciente.nombre} ${paciente.apellido}` : 'Paciente'}`}
       </button>
 
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg">
@@ -108,11 +108,11 @@ export default function EvaluacionForm() {
           <div className="flex items-center gap-2 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mb-1">
             <ClipboardCheck size={18} />
             <span className="text-xs font-bold uppercase tracking-wider">
-              {evalId ? 'Editar EvaluaciÃ³n' : 'Nueva EvaluaciÃ³n'}
+              {evalId ? 'Editar Evaluación' : 'Nueva Evaluación'}
             </span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {evalId ? 'Editar EvaluaciÃ³n' : 'Registrar nueva evaluaciÃ³n'}
+            {evalId ? 'Editar Evaluación' : 'Registrar nueva evaluación'}
           </h1>
           {paciente && (
             <p className="text-sm text-slate-900 mt-1 capitalize">
@@ -131,15 +131,15 @@ export default function EvaluacionForm() {
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Fecha de AdministraciÃ³n</label>
+            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Fecha de Administración</label>
             <input type="date" value={fechaAdmin} onChange={(e) => setFechaAdmin(e.target.value)}
               className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Resultados (descripciÃ³n cualitativa)</label>
+            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Resultados (descripción cualitativa)</label>
             <textarea value={resultados} onChange={(e) => setResultados(e.target.value)} rows="5"
-              placeholder="DescribÃ­ los resultados obtenidos..."
+              placeholder="Describí los resultados obtenidos..."
               className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500" />
           </div>
 
@@ -166,7 +166,7 @@ export default function EvaluacionForm() {
               className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl bg-pink-500 dark:bg-teal-600 hover:bg-pink-400 dark:hover:bg-teal-500 text-slate-900 dark:text-white transition-colors disabled:opacity-50 shadow-lg shadow-pink-500/20 dark:shadow-teal-500/20">
               {submitting && <Loader2 size={14} className="animate-spin" />}
               <Save size={14} />
-              {evalId ? 'Guardar Cambios' : 'Crear EvaluaciÃ³n'}
+              {evalId ? 'Guardar Cambios' : 'Crear Evaluación'}
             </button>
           </div>
         </form>

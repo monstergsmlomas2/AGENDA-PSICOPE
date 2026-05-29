@@ -8,8 +8,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The project is split into two independent packages:
 
-- `client/` — React 19 + Vite 8 + Tailwind CSS 4 SPA
+- `client/` — React 19 + Vite + Tailwind CSS 4 SPA
 - `server/` — Node.js + Express 5 REST API connected to a Supabase PostgreSQL database
+
+**Deploy targets**: Server → Fly.io (`agenda-psicope`, region `gru`). Client → Vercel.
 
 ---
 
@@ -33,7 +35,37 @@ npm run lint      # ESLint
 npm run preview   # Preview production build
 ```
 
-Test DB connection (dev only): `GET http://localhost:3000/test-db`
+Test DB connection (dev only): `GET http://localhost:3000/test-db` (disabled in production)
+
+---
+
+## Authentication
+
+The app uses **Supabase Auth** with a JWT-based flow.
+
+### Client side
+- `client/src/services/authService.js` — wraps `@supabase/supabase-js`. On login, stores the Supabase `access_token` in `localStorage` under the key `psicope_token`.
+- `client/src/context/AuthContext.jsx` — React context that exposes `{ user, loading, login, logout, isAuthenticated }`. Reads the token from localStorage on mount and checks expiry.
+- `client/src/pages/Login.jsx` — login form, calls `AuthContext.login()`.
+- Every protected page is wrapped in `<ProtectedRoute>` (defined in `App.jsx`). If not authenticated, redirects to `/login`.
+- Every API `fetch()` call must include the header `Authorization: Bearer <token>` (retrieved via `authService.getToken()`).
+
+**Env vars required** in `client/.env` (or Vercel dashboard):
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+```
+
+### Server side
+- `server/middleware/auth.js` — Bearer token middleware applied to **all** API routes. Uses `jwt.decode()` (not `verify`) because Supabase tokens use ES256, which would require the public key. Validates that `decoded.sub` exists and that `exp` has not passed. Sets `req.userId = decoded.sub` for downstream use.
+- The middleware is mounted in `server.js` before every route: `app.use("/pacientes", authMiddleware, pacientesRoutes)`.
+
+**Env vars required** in `server/.env`:
+```
+DATABASE_URL=...
+CLIENT_URL=https://your-vercel-app.vercel.app   # optional, for CORS
+NODE_ENV=production                              # set automatically on Fly.io
+```
 
 ---
 
@@ -42,11 +74,14 @@ Test DB connection (dev only): `GET http://localhost:3000/test-db`
 ### Client (`client/src/`)
 
 ```
-App.jsx                                    # Root: router + dark/light mode toggle (state-based)
-components/Sidebar.jsx                     # Navigation sidebar
+App.jsx                                    # Root: AuthProvider + router + ProtectedRoute + ProtectedLayout
+components/Sidebar.jsx                     # Navigation sidebar with dark/light toggle
 components/ui/                             # Shared UI components (Button, Toast, ConfirmDialog, etc.)
 components/pacientes/EntrevistaModal.jsx   # Admission interview modal (used in PacienteDetalle)
+context/AuthContext.jsx                    # Auth state & helpers
 pages/                                     # One file per route/feature
+pages/Login.jsx                            # Login form
+services/authService.js                    # Supabase auth + token helpers
 services/                                  # Fetch wrappers — one file per resource
 hooks/                                     # useToast, useConfirm
 ```
@@ -54,23 +89,32 @@ hooks/                                     # useToast, useConfirm
 **Routing** (React Router v7, defined in `App.jsx`):
 | Path | Page |
 |------|------|
+| `/login` | Login |
 | `/` | Dashboard |
 | `/pacientes` | Pacientes — patient card grid |
 | `/pacientes/:id` | PacienteDetalle — full patient detail view |
+| `/pacientes/:id/sesiones/nueva` | SesionForm (create) |
+| `/pacientes/:id/sesiones/:sesionId` | SesionDetalle |
+| `/pacientes/:id/sesiones/:sesionId/editar` | SesionForm (edit) |
+| `/pacientes/:id/entrevista` | EntrevistaPage |
+| `/pacientes/:id/evaluaciones/nueva` | EvaluacionForm (create) |
+| `/pacientes/:id/evaluaciones/:evalId` | EvaluacionDetalle |
+| `/pacientes/:id/evaluaciones/:evalId/editar` | EvaluacionForm (edit) |
 | `/turnos` | Turnos |
 | `/obras-sociales` | ObrasSociales |
 | `/informes` | Informes |
 | `/pagos` | Pagos |
 | `/consultorios` | Consultorios |
+| `/configuracion` | Configuracion |
 
-> `/evaluaciones` was removed as a standalone route. Evaluations now live inside `/pacientes/:id`.
+> `/evaluaciones` is not a standalone route. Evaluations live inside `/pacientes/:id`.
 
-**Services pattern** (`src/services/*.js`): Each service file exports plain async functions that call `fetch()` against relative URLs (e.g. `/pacientes`). Vite's dev proxy (`vite.config.js`) forwards those to `http://localhost:3000`. All service functions return the parsed JSON or a safe fallback (`[]` / `null`) on error — never throw.
+**Services pattern** (`src/services/*.js`): Each service file exports plain async functions that call `fetch()` with `Authorization: Bearer <token>` against relative URLs (e.g. `/pacientes`). Vite's dev proxy (`vite.config.js`) forwards those to `http://localhost:3000`. All service functions return the parsed JSON or a safe fallback (`[]` / `null`) on error — never throw.
 
-**Theme (Dark/Light Mode)**: The app defaults to dark mode but includes a toggle in the sidebar to switch to light mode. `App.jsx` manages a `darkMode` state (`useState(true)`) that adds/removes the `dark` class on `<html>`. All components use Tailwind's `dark:` variant classes.
+**Theme (Dark/Light Mode)**: The app defaults to **light mode**. `ProtectedLayout` in `App.jsx` manages a `darkMode` state, initialised from `localStorage` (`false` when key is absent). Toggle persists to `localStorage('darkMode')`. All components use Tailwind's `dark:` variant classes.
 
 **Light mode palette (rosa/lila)**:
-- Page background: `bg-pink-50`
+- Page background: `bg-purple-200`
 - Sidebar: `bg-purple-100`, borders `border-pink-200`
 - Cards: `bg-white`, borders `border-pink-200`
 - Primary buttons / accents: `bg-pink-500`, `text-pink-600`
@@ -110,13 +154,19 @@ Clicking a patient card in `/pacientes` navigates to `/pacientes/:id` (no modal)
 ### Server (`server/`)
 
 ```
-server.js           # Express app entry — mounts all routers
-config/db.js        # pg Pool instance using DATABASE_URL env var
-routes/             # One router file per resource (pacientes, turnos, etc.)
-.env                # DATABASE_URL for Supabase connection (not committed ideally)
+server.js              # Express app entry — mounts all routers behind authMiddleware
+middleware/auth.js     # JWT decode middleware — extracts req.userId from Bearer token
+config/db.js           # pg Pool instance using DATABASE_URL env var
+routes/                # One router file per resource (pacientes, turnos, etc.)
+jobs/recordatorios.js  # Cron job started on server boot via iniciarJob()
+services/whatsapp.js   # WhatsApp notification helper
+migrations/            # SQL migration files (run manually in Supabase)
+fly.toml               # Fly.io deploy config (region: gru, 256 MB RAM)
 ```
 
 **Database**: Supabase PostgreSQL, accessed via the `pg` npm package. The connection string is in `server/.env` as `DATABASE_URL`. The pool is a singleton exported from `config/db.js`.
+
+**CORS**: Allowed origins are `http://localhost:5173`, any `*.vercel.app`, and the optional `CLIENT_URL` env var.
 
 **API routes — pacientes** (`server/routes/pacientes.js`):
 - `GET /pacientes` — list all patients
@@ -131,7 +181,7 @@ routes/             # One router file per resource (pacientes, turnos, etc.)
 - `PUT /pacientes/:id/sesiones/:sesionId` — update session
 - `DELETE /pacientes/:id/sesiones/:sesionId` — delete session (verifies ownership via `paciente_id`)
 
-**Other routes**: `/turnos`, `/consultorios`, `/obras-sociales`, `/informes`, `/evaluaciones`, `/pagos` — standard CRUD per router file.
+**Other routes**: `/turnos`, `/consultorios`, `/obras-sociales`, `/informes`, `/evaluaciones`, `/pagos`, `/analytics`, `/configuracion` — standard CRUD per router file.
 
 **Critical route order**: In `pacientes.js`, `GET /sin-sesion-reciente` must be declared before `GET /:id`. If `:id` comes first, Express interprets the literal string "sin-sesion-reciente" as a patient ID and returns 404.
 
@@ -140,8 +190,9 @@ routes/             # One router file per resource (pacientes, turnos, etc.)
 ## Key Conventions
 
 - All server route files follow the same pattern: import `express` + `pool`, define a router, export it.
+- All routes are protected by `authMiddleware` — never mount a route without it (except `/` health check and `/test-db` dev endpoint).
 - Page components are self-contained — state, fetch calls (via services), and UI all in one file.
 - `PacienteDetalle.jsx` is the most complex page: patient data, edit modal, sessions panel (inline form + detail modal), and evaluations panel (card grid + form modal + detail modal).
 - The DB column for consultation reason is `motivo` (not `motivo_consulta`). Services send and receive it as `motivo`.
 - No test suite exists. Manual testing via the browser and `/test-db` endpoint.
-- All proxy entries are present in `client/vite.config.js`: `/pacientes`, `/turnos`, `/consultorios`, `/obras-sociales`, `/informes`, `/evaluaciones`, `/pagos`, `/analytics`.
+- All proxy entries are present in `client/vite.config.js`: `/pacientes`, `/turnos`, `/consultorios`, `/obras-sociales`, `/informes`, `/evaluaciones`, `/pagos`, `/analytics`, `/configuracion`.

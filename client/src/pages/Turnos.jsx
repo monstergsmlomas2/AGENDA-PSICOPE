@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Calendar as CalendarIcon, List, Plus, Clock, MapPin, Trash2, ChevronLeft, ChevronRight, User, ShieldCheck, Check, X, AlertTriangle, Bell, AlertCircle, Pencil, MessageCircle } from 'lucide-react';
 import { getTurnos, crearTurno, eliminarTurno, actualizarEstadoTurno, actualizarTurno, enviarRecordatorio } from '../services/turnosService';
@@ -49,7 +49,7 @@ export default function Turnos() {
   const [popoverTurno, setPopoverTurno] = useState(null);
   const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
 
-  // Panel lateral de turnos del dÃ­a
+  // Panel lateral de turnos del día
   const [diaPanel, setDiaPanel] = useState(null); // { fecha, turnos }
 
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
@@ -83,7 +83,7 @@ export default function Turnos() {
       setPacientes(Array.isArray(dataPacientes) ? dataPacientes : []);
       setConsultorios(Array.isArray(dataConsultorios) ? dataConsultorios : []);
     } catch {
-      setError('No se pudieron cargar los turnos. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar los turnos. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function Turnos() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [popoverTurno]);
 
-  // Cerrar panel de dÃ­a con Escape
+  // Cerrar panel de día con Escape
   useEffect(() => {
     const handleKey = (e) => { if (e.key === 'Escape') { setDiaPanel(null); setPopoverTurno(null); } };
     document.addEventListener('keydown', handleKey);
@@ -124,7 +124,7 @@ export default function Turnos() {
 
   const validateTurnoForm = () => {
     const errors = {};
-    if (!pacienteId) errors.pacienteId = 'DebÃ©s seleccionar un paciente.';
+    if (!pacienteId) errors.pacienteId = 'Debés seleccionar un paciente.';
     if (!fecha) errors.fecha = 'La fecha es obligatoria.';
     else {
       const today = new Date();
@@ -133,7 +133,7 @@ export default function Turnos() {
       if (selectedDate < today) errors.fecha = 'La fecha no puede ser anterior a hoy.';
     }
     if (!hora) errors.hora = 'La hora es obligatoria.';
-    if (!consultorio) errors.consultorio = 'DebÃ©s seleccionar un consultorio.';
+    if (!consultorio) errors.consultorio = 'Debés seleccionar un consultorio.';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -207,7 +207,7 @@ export default function Turnos() {
     if (e) e.stopPropagation();
     const ok = await confirm({
       title: 'Cancelar turno',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s cancelar este turno?',
+      message: '¿Estás seguro de que querés cancelar este turno?',
       confirmLabel: 'Cancelar Turno',
       variant: 'danger'
     });
@@ -226,7 +226,7 @@ export default function Turnos() {
     const estadoLabel = estadoConfig[nuevoEstado]?.label || nuevoEstado;
     const ok = await confirm({
       title: 'Cambiar estado del turno',
-      message: `Â¿EstÃ¡s seguro de que querÃ©s cambiar el estado a "${estadoLabel}"?`,
+      message: `¿Estás seguro de que querés cambiar el estado a "${estadoLabel}"?`,
       confirmLabel: `Marcar como ${estadoLabel}`,
       variant: 'warning'
     });
@@ -532,7 +532,7 @@ export default function Turnos() {
             </span>
             Agenda de Turnos
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">GestionÃ¡ tus horarios y citas de manera visual.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Gestioná tus horarios y citas de manera visual.</p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -558,11 +558,11 @@ export default function Turnos() {
         <div className={`bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl shadow-xl flex flex-col ${isDark ? 'rbc-wrapper-dark' : 'rbc-wrapper-light'}`}>
 
           {/* Header del Calendario */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-purple-300 dark:border-[#333] bg-slate-50/50 dark:bg-[#0f1115] rounded-t-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-6 py-4 border-b border-purple-300 dark:border-[#333] bg-slate-50/50 dark:bg-[#0f1115] rounded-t-2xl">
             <h2 className="text-lg md:text-2xl font-black text-slate-900 dark:text-white capitalize tracking-tight">
               {headerTitle()}
             </h2>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <div className="flex bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-[#262626] rounded-lg p-0.5 gap-0.5">
                 {[['month','Mensual'],['week','Semanal'],['day','Diaria']].map(([v, label]) => (
                   <button
@@ -633,7 +633,7 @@ export default function Turnos() {
       )}
 
       {/* ============================== */}
-      {/* PANEL LATERAL: DÃA COMPLETO   */}
+      {/* PANEL LATERAL: DÍA COMPLETO   */}
       {/* ============================== */}
       {diaPanel && (
         <>
@@ -641,12 +641,12 @@ export default function Turnos() {
           <div className="fixed right-0 top-0 h-full w-80 z-50 bg-white dark:bg-[#141414] border-l border-purple-300 dark:border-[#333] shadow-2xl flex flex-col">
             <div className="px-5 py-4 border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] flex items-center justify-between shrink-0">
               <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-0.5">Turnos del dÃ­a</p>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-0.5">Turnos del día</p>
                 <h3 className="font-black text-slate-900 dark:text-white text-base">
                   {new Date(diaPanel.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </h3>
               </div>
-              <button onClick={() => setDiaPanel(null)} className="p-2 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 transition-colors text-sm font-bold">âœ•</button>
+              <button onClick={() => setDiaPanel(null)} className="p-2 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 transition-colors text-sm font-bold">✕</button>
             </div>
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
               {diaPanel.turnos.map(turno => {
@@ -673,7 +673,7 @@ export default function Turnos() {
                 onClick={() => { setDiaPanel(null); handleDayClick(Number(diaPanel.fecha.slice(8, 10))); }}
                 className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
               >
-                <Plus size={16} /> Nuevo turno este dÃ­a
+                <Plus size={16} /> Nuevo turno este día
               </button>
             </div>
           </div>
@@ -681,7 +681,7 @@ export default function Turnos() {
       )}
 
       {/* ============================== */}
-      {/* POPOVER DE ACCIÃ“N RÃPIDA      */}
+      {/* POPOVER DE ACCIÃ“N RÁPIDA      */}
       {/* ============================== */}
       {popoverTurno && (
         <>
@@ -785,7 +785,7 @@ export default function Turnos() {
               <EmptyState
                 icon={CalendarIcon}
                 title={filtroMes || filtroEstado ? 'Sin resultados' : 'No hay turnos agendados'}
-                description={filtroMes || filtroEstado ? 'No hay turnos que coincidan con los filtros seleccionados.' : 'HacÃ© clic en "Nuevo Turno" para empezar.'}
+                description={filtroMes || filtroEstado ? 'No hay turnos que coincidan con los filtros seleccionados.' : 'Hacé clic en "Nuevo Turno" para empezar.'}
                 action={!filtroMes && !filtroEstado ? { label: 'Nuevo Turno', onClick: () => { setFecha(""); setFormErrors({}); setShowModal(true); } } : undefined}
               />
             </div>
@@ -870,15 +870,15 @@ export default function Turnos() {
       {/* MODAL: NUEVO TURNO PREMIUM    */}
       {/* ============================== */}
       {showModal && (
-        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-[#141414] w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-[#141414] w-full max-w-lg mx-auto max-h-screen sm:max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
 
-            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
+            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editingTurno ? 'Editar Turno' : 'Nuevo Turno'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editingTurno ? 'ModificÃ¡ los datos del turno.' : 'AsignÃ¡ fecha, hora y consultorio al paciente.'}</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editingTurno ? 'Modificá los datos del turno.' : 'Asigná fecha, hora y consultorio al paciente.'}</p>
               </div>
-              <button onClick={() => { setShowModal(false); setEditingTurno(null); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => { setShowModal(false); setEditingTurno(null); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
@@ -889,7 +889,7 @@ export default function Turnos() {
                     value={pacienteId}
                     onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
                     onBlur={() => {
-                      if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'DebÃ©s seleccionar un paciente.' }));
+                      if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'Debés seleccionar un paciente.' }));
                       else setFormErrors(prev => ({ ...prev, pacienteId: '' }));
                     }}
                     className={inputClass('pacienteId')}
@@ -967,7 +967,7 @@ export default function Turnos() {
                     value={consultorio}
                     onChange={(e) => { setConsultorio(e.target.value); setFormErrors(prev => ({ ...prev, consultorio: '' })); }}
                     onBlur={() => {
-                      if (!consultorio) setFormErrors(prev => ({ ...prev, consultorio: 'DebÃ©s seleccionar un consultorio.' }));
+                      if (!consultorio) setFormErrors(prev => ({ ...prev, consultorio: 'Debés seleccionar un consultorio.' }));
                       else setFormErrors(prev => ({ ...prev, consultorio: '' }));
                     }}
                     className={inputClass('consultorio')}
@@ -1002,13 +1002,13 @@ export default function Turnos() {
                 {!editingTurno && (
                   <div className="border border-teal-500/30 dark:border-teal-500/20 bg-teal-50/50 dark:bg-teal-500/5 rounded-xl p-4 space-y-2">
                     <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
-                    <p className="text-xs text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Se crearÃ¡ un turno por semana, el mismo dÃ­a y horario, durante el perÃ­odo elegido.</p>
+                    <p className="text-xs text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                     <select
                       value={recurrencia}
                       onChange={(e) => setRecurrencia(e.target.value)}
                       className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
                     >
-                      <option value="">Sin repeticiÃ³n (turno Ãºnico)</option>
+                      <option value="">Sin repetición (turno único)</option>
                       <option value="1">Durante 1 mes</option>
                       <option value="2">Durante 2 meses</option>
                       <option value="3">Durante 3 meses</option>
@@ -1019,7 +1019,7 @@ export default function Turnos() {
               </form>
             </div>
 
-            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
+            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
               <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="turnoForm" loading={submitting}>
                 {editingTurno ? 'Guardar Cambios' : 'Agendar Turno'}

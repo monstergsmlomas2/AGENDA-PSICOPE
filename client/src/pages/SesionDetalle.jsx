@@ -30,7 +30,7 @@ export default function SesionDetalle() {
         setSesionIdx(idx);
         setPaciente(pac);
       } catch {
-        toast.error('Error', 'No se pudo cargar la sesiÃ³n.');
+        toast.error('Error', 'No se pudo cargar la sesión.');
       } finally {
         setLoading(false);
       }
@@ -40,18 +40,18 @@ export default function SesionDetalle() {
 
   const handleEliminar = async () => {
     const ok = await confirm({
-      title: 'Eliminar sesiÃ³n',
-      message: `Â¿EstÃ¡s seguro de que querÃ©s eliminar esta sesiÃ³n?`,
+      title: 'Eliminar sesión',
+      message: `¿Estás seguro de que querés eliminar esta sesión?`,
       confirmLabel: 'Eliminar',
       variant: 'danger',
     });
     if (!ok) return;
     try {
       await eliminarSesion(id, sesionId);
-      toast.success('SesiÃ³n eliminada', 'La sesiÃ³n fue eliminada correctamente.');
+      toast.success('Sesión eliminada', 'La sesión fue eliminada correctamente.');
       navigate(`/pacientes/${id}`);
     } catch {
-      toast.error('Error', 'No se pudo eliminar la sesiÃ³n.');
+      toast.error('Error', 'No se pudo eliminar la sesión.');
     }
   };
 
@@ -67,7 +67,7 @@ export default function SesionDetalle() {
   if (!sesion) {
     return (
       <div className="text-center py-20 text-slate-900 dark:text-slate-400">
-        <p className="text-lg font-bold">SesiÃ³n no encontrada</p>
+        <p className="text-lg font-bold">Sesión no encontrada</p>
         <button onClick={() => navigate(`/pacientes/${id}`)} className="mt-4 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:underline font-medium">
           Volver al paciente
         </button>
@@ -93,7 +93,7 @@ export default function SesionDetalle() {
             <div className="flex items-center gap-2 text-blue-400 mb-1">
               <ClipboardList size={18} />
               <span className="text-xs font-bold uppercase tracking-wider">
-                {sesionIdx !== null && sesionIdx >= 0 ? `SesiÃ³n #${sesionIdx + 1}` : 'SesiÃ³n'}
+                {sesionIdx !== null && sesionIdx >= 0 ? `Sesión #${sesionIdx + 1}` : 'Sesión'}
               </span>
             </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
@@ -131,7 +131,7 @@ export default function SesionDetalle() {
 
           {sesion.observaciones && (
             <div className="border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-xl p-5">
-              <p className="text-xs uppercase tracking-wider font-bold text-slate-900 mb-3">Observaciones / EvoluciÃ³n</p>
+              <p className="text-xs uppercase tracking-wider font-bold text-slate-900 mb-3">Observaciones / Evolución</p>
               <p className="leading-relaxed text-slate-300 whitespace-pre-wrap">{sesion.observaciones}</p>
             </div>
           )}

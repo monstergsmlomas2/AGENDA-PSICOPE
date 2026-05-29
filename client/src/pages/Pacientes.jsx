@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacientes, crearPaciente, actualizarPaciente, eliminarPaciente, getPacientesSinSesion } from '../services/pacientesService';
@@ -32,11 +32,11 @@ export default function Pacientes() {
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
-  // NavegaciÃ³n y modales
+  // Navegación y modales
   const [showNewModal, setShowNewModal] = useState(false);
   const [editandoPaciente, setEditandoPaciente] = useState(null); // null = crear, number = ID del paciente a editar
 
-  // Estados del Formulario (Alta/EdiciÃ³n)
+  // Estados del Formulario (Alta/Edición)
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [dni, setDni] = useState("");
@@ -55,7 +55,7 @@ export default function Pacientes() {
   const [inicioSesiones, setInicioSesiones] = useState("");
   const [consentimiento, setConsentimiento] = useState(false);
 
-  // Turnos del paciente en ediciÃ³n
+  // Turnos del paciente en edición
   const [turnosPaciente, setTurnosPaciente] = useState([]);
   const [loadingTurnos, setLoadingTurnos] = useState(false);
   const [consultorios, setConsultorios] = useState([]);
@@ -64,7 +64,7 @@ export default function Pacientes() {
   const [submittingTurno, setSubmittingTurno] = useState(false);
   const [turnosExpandido, setTurnosExpandido] = useState(true);
 
-  // Errores de validaciÃ³n
+  // Errores de validación
   const [formErrors, setFormErrors] = useState({});
 
   const { confirm, ConfirmModal } = useConfirm();
@@ -75,7 +75,7 @@ export default function Pacientes() {
     if (!nombre.trim() || nombre.trim().length < 2) errors.nombre = 'El nombre debe tener al menos 2 caracteres.';
     if (!apellido.trim() || apellido.trim().length < 2) errors.apellido = 'El apellido debe tener al menos 2 caracteres.';
     if (!dni.trim()) errors.dni = 'El DNI es obligatorio.';
-    if (telefono && !/^[\d\s\-().+]+$/.test(telefono)) errors.telefono = 'Formato de telÃ©fono invÃ¡lido.';
+    if (telefono && !/^[\d\s\-().+]+$/.test(telefono)) errors.telefono = 'Formato de teléfono inválido.';
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -217,7 +217,7 @@ export default function Pacientes() {
   const handleEliminarTurno = async (turno) => {
     const ok = await confirm({
       title: 'Cancelar turno',
-      message: `Â¿EliminÃ¡s el turno del ${new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-AR')} a las ${turno.hora?.slice(0,5)}?`,
+      message: `¿Eliminás el turno del ${new Date(turno.fecha + 'T12:00:00').toLocaleDateString('es-AR')} a las ${turno.hora?.slice(0,5)}?`,
       confirmLabel: 'Eliminar',
       variant: 'danger',
     });
@@ -230,7 +230,7 @@ export default function Pacientes() {
   const handleDelete = async (p) => {
     const ok = await confirm({
       title: 'Eliminar paciente',
-      message: `Â¿EstÃ¡s seguro de que querÃ©s eliminar a "${p.nombre} ${p.apellido}"? Se eliminarÃ¡n todos sus datos asociados.`,
+      message: `¿Estás seguro de que querés eliminar a "${p.nombre} ${p.apellido}"? Se eliminarán todos sus datos asociados.`,
       confirmLabel: 'Eliminar',
       variant: 'danger',
     });
@@ -245,7 +245,7 @@ export default function Pacientes() {
   };
 
 
-  // Set de IDs sin sesiÃ³n reciente
+  // Set de IDs sin sesión reciente
   const idsSinSesion = new Set(pacientesSinSesion.map(p => p.id));
 
   // Filtros
@@ -306,7 +306,7 @@ export default function Pacientes() {
           </h1>
           <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">
             {pacientes.length === 0
-              ? 'No hay pacientes registrados aÃºn.'
+              ? 'No hay pacientes registrados aún.'
               : `${pacientes.length} paciente${pacientes.length !== 1 ? 's' : ''} registrado${pacientes.length !== 1 ? 's' : ''}`
             }
           </p>
@@ -322,7 +322,7 @@ export default function Pacientes() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={20} />
           <input
             type="text"
-            placeholder="Buscar por nombre, DNI o telÃ©fono..."
+            placeholder="Buscar por nombre, DNI o teléfono..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
@@ -349,7 +349,7 @@ export default function Pacientes() {
 
       {/* Estado de carga */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <SkeletonCard key={i} />
           ))}
@@ -359,7 +359,7 @@ export default function Pacientes() {
       {/* Estado de error */}
       {error && !loading && (
         <ErrorState
-          message="No se pudieron cargar los pacientes. VerificÃ¡ la conexiÃ³n e intentÃ¡ de nuevo."
+          message="No se pudieron cargar los pacientes. Verificá la conexión e intentá de nuevo."
           onRetry={() => window.location.reload()}
         />
       )}
@@ -369,23 +369,23 @@ export default function Pacientes() {
         <EmptyState
           icon={SearchX}
           title="Sin resultados"
-          description="ProbÃ¡ con otro nombre o filtro."
+          description="Probá con otro nombre o filtro."
         />
       )}
 
-      {/* Lista vacÃ­a */}
+      {/* Lista vacía */}
       {!loading && !error && pacientes.length === 0 && (
         <EmptyState
           icon={Users}
           title="No hay pacientes registrados"
-          description="ComenzÃ¡ agregando tu primer paciente."
+          description="Comenzá agregando tu primer paciente."
           action={{ label: 'Agregar Paciente', onClick: openNewPaciente }}
         />
       )}
 
       {/* Grid de Tarjetas */}
       {!loading && !error && pacientesFiltrados.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {pacientesFiltrados.map((p, idx) => (
             <div
               key={p.id}
@@ -436,12 +436,12 @@ export default function Pacientes() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Phone size={15} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shrink-0" />
-                  <span className="truncate font-medium">{p.telefono || 'Sin telÃ©fono'}</span>
+                  <span className="truncate font-medium">{p.telefono || 'Sin teléfono'}</span>
                 </div>
                 {calcularEdad(p.fecha_nacimiento) !== null && (
                   <div className="flex items-center gap-3">
                     <Calendar size={15} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shrink-0" />
-                    <span className="font-medium">{calcularEdad(p.fecha_nacimiento)} aÃ±os</span>
+                    <span className="font-medium">{calcularEdad(p.fecha_nacimiento)} años</span>
                   </div>
                 )}
               </div>
@@ -458,7 +458,7 @@ export default function Pacientes() {
                   {idsSinSesion.has(p.id) && (
                     <span className="inline-flex items-center gap-1 bg-red-100 text-red-700 border border-red-400 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">
                       <Clock size={10} />
-                      +15 dÃ­as sin sesiÃ³n
+                      +15 días sin sesión
                     </span>
                   )}
                 </div>
@@ -478,10 +478,10 @@ export default function Pacientes() {
             <div className="border-b border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{editandoPaciente ? 'Editar Paciente' : 'Alta de Paciente'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificaciÃ³n y administrativos.</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificación y administrativos.</p>
               </div>
               <button onClick={() => { setShowNewModal(false); resetForm(); }} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -543,7 +543,7 @@ export default function Pacientes() {
                       <div>
                         <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Edad</label>
                         <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-slate-300 min-h-[46px]">
-                          {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} aÃ±os` : <span className="text-slate-900 dark:text-slate-600 text-xs">â€”</span>}
+                          {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-slate-600 text-xs">—</span>}
                         </div>
                       </div>
                       <div>
@@ -565,14 +565,14 @@ export default function Pacientes() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">TelÃ©fono</label>
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Teléfono</label>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18}/>
                           <input
                             type="text"
                             value={telefono}
                             onChange={(e) => { setTelefono(e.target.value); if (formErrors.telefono) setFormErrors(prev => ({ ...prev, telefono: undefined })); }}
-                            onBlur={() => { if (telefono && !/^[\d\s\-().+]+$/.test(telefono)) setFormErrors(prev => ({ ...prev, telefono: 'Formato de telÃ©fono invÃ¡lido.' })); }}
+                            onBlur={() => { if (telefono && !/^[\d\s\-().+]+$/.test(telefono)) setFormErrors(prev => ({ ...prev, telefono: 'Formato de teléfono inválido.' })); }}
                             className={inputClass('telefono')}
                           />
                         </div>
@@ -590,7 +590,7 @@ export default function Pacientes() {
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura MÃ©dica</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
                       <select value={obraSocial} onChange={(e)=>setObraSocial(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500">
                         <option value="">Particular</option>
                         {obrasSocialesList.map(os => (
@@ -600,7 +600,7 @@ export default function Pacientes() {
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">NÂº de Afiliado</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
                       <input type="text" value={nroAfiliado} onChange={(e)=>setNroAfiliado(e.target.value)} disabled={!obraSocial} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-900" />
                     </div>
 
@@ -622,19 +622,19 @@ export default function Pacientes() {
                       <input type="text" value={cud} onChange={(e)=>setCud(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">DiagnÃ³stico</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Diagnóstico</label>
                       <textarea value={diagnostico} onChange={(e)=>setDiagnostico(e.target.value)} rows="2" className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500"></textarea>
                     </div>
                     <div className="md:col-span-2 p-4 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20">
                       <label className="block mb-2 font-semibold text-red-600 dark:text-red-500">Contacto de Emergencia</label>
-                      <input type="text" value={contactoEmergencia} onChange={(e)=>setContactoEmergencia(e.target.value)} placeholder="Nombre y telÃ©fono..." className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
+                      <input type="text" value={contactoEmergencia} onChange={(e)=>setContactoEmergencia(e.target.value)} placeholder="Nombre y teléfono..." className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
                     </div>
                   </div>
                 </section>
 
                 <section>
                   <h3 className="text-lg font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 flex items-center gap-2 mb-4 border-b border-teal-100 dark:border-teal-900/30 pb-2">
-                    <ShieldCheck size={20} /> DocumentaciÃ³n Legal (Ley 26.529)
+                    <ShieldCheck size={20} /> Documentación Legal (Ley 26.529)
                   </h3>
                   <div className="p-5 rounded-xl border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950">
                     <label className="flex items-start gap-3 cursor-pointer group">
@@ -644,7 +644,7 @@ export default function Pacientes() {
                       <div>
                         <p className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Consentimiento Informado y Confidencialidad</p>
                         <p className="text-xs mt-1 leading-relaxed text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
-                          El paciente o tutor legal ha sido informado sobre la protecciÃ³n de sus datos personales y de salud. Se garantiza la confidencialidad absoluta.
+                          El paciente o tutor legal ha sido informado sobre la protección de sus datos personales y de salud. Se garantiza la confidencialidad absoluta.
                         </p>
                       </div>
                     </label>

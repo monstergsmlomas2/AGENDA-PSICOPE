@@ -11,8 +11,8 @@ const tiposTest = [
   { value: 'htp', label: 'HTP / Figura Humana (proyectivos)' },
   { value: 'ple', label: 'Prueba de Lectura y Escritura (PLE)' },
   { value: 'raven', label: 'Test de Raven (matrices progresivas)' },
-  { value: 'dictado', label: 'Dictado / Copia / Escritura espontÃ¡nea' },
-  { value: 'ludica', label: 'Entrevista lÃºdica diagnÃ³stica' },
+  { value: 'dictado', label: 'Dictado / Copia / Escritura espontánea' },
+  { value: 'ludica', label: 'Entrevista lúdica diagnóstica' },
   { value: 'otro', label: 'Otro' },
 ];
 
@@ -54,7 +54,7 @@ export default function Evaluaciones() {
       setPacientes(Array.isArray(dataPacientes) ? dataPacientes : []);
       setProximasVencer(Array.isArray(dataProximas) ? dataProximas : []);
     } catch {
-      setError('No se pudieron cargar las evaluaciones. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar las evaluaciones. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -113,8 +113,8 @@ export default function Evaluaciones() {
 
   const handleDelete = async (id) => {
     const ok = await confirm({
-      title: 'Eliminar evaluaciÃ³n',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s eliminar esta evaluaciÃ³n? Esta acciÃ³n no se puede deshacer.',
+      title: 'Eliminar evaluación',
+      message: '¿Estás seguro de que querés eliminar esta evaluación? Esta acción no se puede deshacer.',
       confirmLabel: 'Eliminar',
       variant: 'danger'
     });
@@ -122,9 +122,9 @@ export default function Evaluaciones() {
     try {
       await eliminarEvaluacion(id);
       await cargarData();
-      toast.success('EvaluaciÃ³n eliminada', 'La evaluaciÃ³n fue eliminada correctamente.');
+      toast.success('Evaluación eliminada', 'La evaluación fue eliminada correctamente.');
     } catch {
-      toast.error('Error', 'No se pudo eliminar la evaluaciÃ³n.');
+      toast.error('Error', 'No se pudo eliminar la evaluación.');
     }
   };
 
@@ -197,25 +197,25 @@ export default function Evaluaciones() {
             </span>
             Evaluaciones
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Registro de tests y evaluaciones psicopedagÃ³gicas.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Registro de tests y evaluaciones psicopedagógicas.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
-          <Plus size={20} /> Nueva EvaluaciÃ³n
+          <Plus size={20} /> Nueva Evaluación
         </button>
       </div>
 
-      {/* Banner: PrÃ³ximas a vencer */}
+      {/* Banner: Próximas a vencer */}
       {proximasVencer.length > 0 && (
         <div className="bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-2xl p-4 flex items-start gap-3">
           <AlertTriangle size={20} className="text-amber-500 dark:text-amber-400 shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
             <p className="font-bold text-amber-800 dark:text-amber-300 text-sm">
-              {proximasVencer.length} evaluaciÃ³n{proximasVencer.length > 1 ? 'es' : ''} prÃ³xima{proximasVencer.length > 1 ? 's' : ''} a vencer (30 dÃ­as)
+              {proximasVencer.length} evaluación{proximasVencer.length > 1 ? 'es' : ''} próxima{proximasVencer.length > 1 ? 's' : ''} a vencer (30 días)
             </p>
             <div className="mt-1.5 flex flex-wrap gap-2">
               {proximasVencer.map(ev => (
                 <span key={ev.id} className="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2.5 py-1 rounded-lg font-medium border border-amber-200 dark:border-amber-500/30">
-                  {ev.paciente_nombre} {ev.paciente_apellido} â€” vence {new Date(ev.fecha_vencimiento + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
+                  {ev.paciente_nombre} {ev.paciente_apellido} — vence {new Date(ev.fecha_vencimiento + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
                 </span>
               ))}
             </div>
@@ -254,8 +254,8 @@ export default function Evaluaciones() {
             <EmptyState
               icon={ClipboardCheck}
               title="No hay evaluaciones registradas"
-              description='HacÃ© clic en "Nueva EvaluaciÃ³n" para empezar.'
-              action={{ label: 'Nueva EvaluaciÃ³n', onClick: () => { resetForm(); setShowModal(true); } }}
+              description='Hacé clic en "Nueva Evaluación" para empezar.'
+              action={{ label: 'Nueva Evaluación', onClick: () => { resetForm(); setShowModal(true); } }}
             />
           </div>
         )}
@@ -321,10 +321,10 @@ export default function Evaluaciones() {
           <div className="bg-white dark:bg-[#141414] w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar EvaluaciÃ³n' : 'Nueva EvaluaciÃ³n'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">RegistrÃ¡ un test o evaluaciÃ³n administrada.</p>
+                <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Evaluación' : 'Nueva Evaluación'}</h2>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Registrá un test o evaluación administrada.</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
@@ -347,13 +347,13 @@ export default function Evaluaciones() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha de AdministraciÃ³n</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha de Administración</label>
                   <input type="date" value={fechaAdmin} onChange={(e)=>setFechaAdmin(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert shadow-sm font-medium" />
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Resultados (descripciÃ³n cualitativa)</label>
-                  <textarea value={resultados} onChange={(e)=>setResultados(e.target.value)} rows="4" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="DescribÃ­ los resultados obtenidos..."></textarea>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Resultados (descripción cualitativa)</label>
+                  <textarea value={resultados} onChange={(e)=>setResultados(e.target.value)} rows="4" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Describí los resultados obtenidos..."></textarea>
                 </div>
 
                 <div>
@@ -371,7 +371,7 @@ export default function Evaluaciones() {
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
               <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="evalForm" loading={submitting}>
-                {editing ? 'Guardar Cambios' : 'Crear EvaluaciÃ³n'}
+                {editing ? 'Guardar Cambios' : 'Crear Evaluación'}
               </Button>
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function Evaluaciones() {
                   {viewing.paciente_nombre} {viewing.paciente_apellido}
                 </p>
               </div>
-              <button onClick={() => setViewing(null)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => setViewing(null)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-sm overflow-y-auto flex-1 custom-scrollbar">

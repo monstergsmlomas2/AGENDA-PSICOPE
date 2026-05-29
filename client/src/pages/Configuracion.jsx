@@ -51,13 +51,13 @@ export default function Configuracion() {
   const [telefonoProfesional, setTelefonoProfesional] = useState('');
   const [horaEnvio, setHoraEnvio] = useState('17:00');
   const [mensajePaciente, setMensajePaciente] = useState(
-    'Hola {nombre}! Te recordamos que tenÃ©s turno maÃ±ana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. Â¡Hasta maÃ±ana!'
+    'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!'
   );
   const [mensajeProfesional, setMensajeProfesional] = useState(
-    'Recordatorio: maÃ±ana {fecha} tenÃ©s {cantidad} turno(s):\n{lista_turnos}'
+    'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}'
   );
 
-  // Cargar configuraciÃ³n al montar
+  // Cargar configuración al montar
   useEffect(() => {
     const cargarConfig = async () => {
       try {
@@ -69,16 +69,16 @@ export default function Configuracion() {
           setHoraEnvio(config.hora_envio || '17:00');
           setMensajePaciente(
             config.mensaje_paciente ||
-              'Hola {nombre}! Te recordamos que tenÃ©s turno maÃ±ana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. Â¡Hasta maÃ±ana!'
+              'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!'
           );
           setMensajeProfesional(
             config.mensaje_profesional ||
-              'Recordatorio: maÃ±ana {fecha} tenÃ©s {cantidad} turno(s):\n{lista_turnos}'
+              'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}'
           );
         }
       } catch (error) {
-        console.error('Error al cargar configuraciÃ³n:', error);
-        toast.error('Error', 'No se pudo cargar la configuraciÃ³n');
+        console.error('Error al cargar configuración:', error);
+        toast.error('Error', 'No se pudo cargar la configuración');
       } finally {
         setLoading(false);
       }
@@ -100,13 +100,13 @@ export default function Configuracion() {
       });
 
       if (result) {
-        toast.success('ConfiguraciÃ³n guardada', 'Los cambios se aplicaron correctamente.');
+        toast.success('Configuración guardada', 'Los cambios se aplicaron correctamente.');
       } else {
-        toast.error('Error', 'No se pudo guardar la configuraciÃ³n');
+        toast.error('Error', 'No se pudo guardar la configuración');
       }
     } catch (error) {
-      console.error('Error al guardar configuraciÃ³n:', error);
-      toast.error('Error', 'No se pudo guardar la configuraciÃ³n');
+      console.error('Error al guardar configuración:', error);
+      toast.error('Error', 'No se pudo guardar la configuración');
     } finally {
       setSaving(false);
     }
@@ -128,14 +128,14 @@ export default function Configuracion() {
           <Settings size={22} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">ConfiguraciÃ³n</h1>
-          <p className="text-sm text-slate-900 dark:text-gray-400">AdministrÃ¡ las preferencias del sistema</p>
+          <h1 className="text-xl font-bold text-slate-900 dark:text-white">Configuración</h1>
+          <p className="text-sm text-slate-900 dark:text-gray-400">Administrá las preferencias del sistema</p>
         </div>
       </div>
 
-      {/* â”€â”€â”€ SecciÃ³n: Notificaciones WhatsApp â”€â”€â”€ */}
+      {/* â”€â”€â”€ Sección: Notificaciones WhatsApp â”€â”€â”€ */}
       <div className="bg-white dark:bg-gray-900 border border-purple-300 dark:border-gray-700 rounded-2xl overflow-hidden">
-        {/* TÃ­tulo de secciÃ³n */}
+        {/* Título de sección */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-purple-300 dark:border-gray-700">
           <MessageCircle size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Notificaciones WhatsApp</h2>
@@ -146,8 +146,8 @@ export default function Configuracion() {
           <SwitchToggle
             valor={notificacionesPacientes}
             onChange={setNotificacionesPacientes}
-            label="Enviar recordatorio automÃ¡tico a pacientes"
-            descripcion={`Se envÃ­a a las ${horaEnvio} hs del dÃ­a anterior al turno`}
+            label="Enviar recordatorio automático a pacientes"
+            descripcion={`Se envía a las ${horaEnvio} hs del día anterior al turno`}
           />
 
           {/* â”€â”€â”€ Divisor â”€â”€â”€ */}
@@ -158,14 +158,14 @@ export default function Configuracion() {
             valor={notificacionesProfesional}
             onChange={setNotificacionesProfesional}
             label="Recibir resumen diario de turnos"
-            descripcion="Se envÃ­a un resumen con todos los turnos del dÃ­a siguiente"
+            descripcion="Se envía un resumen con todos los turnos del día siguiente"
           />
 
-          {/* â”€â”€â”€ TelÃ©fono del profesional (solo si activo) â”€â”€â”€ */}
+          {/* â”€â”€â”€ Teléfono del profesional (solo si activo) â”€â”€â”€ */}
           {notificacionesProfesional && (
             <div className="space-y-2 pl-0">
               <label className="block text-sm font-medium text-slate-900 dark:text-white">
-                TelÃ©fono del profesional
+                Teléfono del profesional
               </label>
               <input
                 type="text"
@@ -175,16 +175,16 @@ export default function Configuracion() {
                 className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors"
               />
               <p className="text-xs text-slate-900 dark:text-gray-400">
-                Sin cÃ³digo de paÃ­s, solo el nÃºmero argentino
+                Sin código de país, solo el número argentino
               </p>
             </div>
           )}
 
-          {/* â”€â”€â”€ Horario de envÃ­o â”€â”€â”€ */}
+          {/* â”€â”€â”€ Horario de envío â”€â”€â”€ */}
           <div className="space-y-3">
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white">Horario de envÃ­o</h3>
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white">Horario de envío</h3>
             <p className="text-xs text-slate-900 dark:text-gray-400">
-              Los recordatorios se envÃ­an a las:
+              Los recordatorios se envían a las:
             </p>
             <TimePicker
               value={horaEnvio}
@@ -259,7 +259,7 @@ export default function Configuracion() {
           </div>
         </div>
 
-        {/* â”€â”€â”€ Footer con botÃ³n guardar â”€â”€â”€ */}
+        {/* â”€â”€â”€ Footer con botón guardar â”€â”€â”€ */}
         <div className="px-6 py-4 bg-purple-100/50 dark:bg-gray-950/50 border-t border-purple-300 dark:border-gray-700 flex justify-end">
           <button
             onClick={handleGuardar}
@@ -271,7 +271,7 @@ export default function Configuracion() {
             ) : (
               <Save size={16} />
             )}
-            {saving ? 'Guardando...' : 'Guardar configuraciÃ³n'}
+            {saving ? 'Guardando...' : 'Guardar configuración'}
           </button>
         </div>
       </div>

@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Building2, Plus, MapPin, Trash2, AlertCircle } from 'lucide-react';
 import { getConsultorios, crearConsultorio, eliminarConsultorio } from '../services/consultoriosService';
 import { useToast, ErrorState, EmptyState, Button } from '../components/ui';
@@ -25,7 +25,7 @@ export default function Consultorios() {
       const data = await getConsultorios();
       setConsultorios(Array.isArray(data) ? data : []);
     } catch {
-      setError('No se pudieron cargar los consultorios. VerificÃ¡ tu conexiÃ³n e intentÃ¡ de nuevo.');
+      setError('No se pudieron cargar los consultorios. Verificá tu conexión e intentá de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export default function Consultorios() {
   const handleDelete = async (id) => {
     const ok = await confirm({
       title: 'Eliminar consultorio',
-      message: 'Â¿EstÃ¡s seguro de que querÃ©s eliminar este consultorio? Los turnos asociados podrÃ­an verse afectados.',
+      message: '¿Estás seguro de que querés eliminar este consultorio? Los turnos asociados podrían verse afectados.',
       confirmLabel: 'Eliminar',
       variant: 'danger'
     });
@@ -97,7 +97,7 @@ export default function Consultorios() {
           <div className="h-12 w-40 bg-pink-200 dark:bg-[#262626] rounded-xl animate-pulse" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#262626] rounded-2xl p-6">
               <div className="space-y-4">
@@ -140,7 +140,7 @@ export default function Consultorios() {
             </span> 
             Sedes y Consultorios
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">AdministrÃ¡ los espacios fÃ­sicos donde atendÃ©s a tus pacientes.</p>
+          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Administrá los espacios físicos donde atendés a tus pacientes.</p>
         </div>
         
         <button onClick={() => setShowModal(true)} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
@@ -149,13 +149,13 @@ export default function Consultorios() {
       </div>
 
       {/* Grilla de Tarjetas */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {consultorios.length === 0 && (
           <div className="col-span-full">
             <EmptyState
               icon={Building2}
-              title="No tenÃ©s consultorios cargados"
-              description="AgregÃ¡ tu primera sede para poder usarla en la agenda."
+              title="No tenés consultorios cargados"
+              description="Agregá tu primera sede para poder usarla en la agenda."
               action={{ label: 'Nueva Sede', onClick: () => setShowModal(true) }}
             />
           </div>
@@ -176,7 +176,7 @@ export default function Consultorios() {
             <div className="space-y-3.5 text-sm text-slate-900 dark:text-slate-300 font-medium">
               <div className="flex items-start gap-3">
                 <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mt-0.5"><MapPin size={16} /></div>
-                <span className="leading-relaxed">{c.direccion || 'Sin direcciÃ³n registrada'}</span>
+                <span className="leading-relaxed">{c.direccion || 'Sin dirección registrada'}</span>
               </div>
             </div>
           </div>
@@ -191,9 +191,9 @@ export default function Consultorios() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">Nueva Sede</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">RegistrÃ¡ un nuevo lugar de atenciÃ³n.</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Registrá un nuevo lugar de atención.</p>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">âœ•</button>
+              <button onClick={() => setShowModal(false)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
@@ -208,7 +208,7 @@ export default function Consultorios() {
                       if (!nombre || nombre.trim().length < 2) setFormErrors(prev => ({ ...prev, nombre: 'El nombre debe tener al menos 2 caracteres.' }));
                       else setFormErrors(prev => ({ ...prev, nombre: '' }));
                     }}
-                    placeholder="Ej: Consultorio 3 (CÃ¡mara Gesell)"
+                    placeholder="Ej: Consultorio 3 (Cámara Gesell)"
                     className={inputClass('nombre')}
                   />
                   {formErrors.nombre && (
@@ -219,7 +219,7 @@ export default function Consultorios() {
                 </div>
                 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">DirecciÃ³n</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">Dirección</label>
                   <input type="text" value={direccion} onChange={(e)=>setDireccion(e.target.value)} placeholder="Ej: Loria 123, Lomas de Zamora" className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" />
                 </div>
               </form>
