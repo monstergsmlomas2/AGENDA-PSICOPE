@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X, Search,
+  FileText, DollarSign, Settings, Sun, Moon, LogOut, X, Search,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -124,7 +124,7 @@ export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
         <div className="p-4 border-b border-pink-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1.5 rounded-xl shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
-              <Brain size={22} className="text-pink-600 dark:text-teal-400" />
+              <img src="/favicon.svg" alt="Agenda Psicope" width={22} height={22} />
             </div>
             <div>
               <h1 className="text-base font-bold tracking-tight leading-tight">
