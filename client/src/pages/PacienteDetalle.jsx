@@ -8,7 +8,7 @@ import { getTurnos, crearTurno, actualizarTurno, eliminarTurno } from '../servic
 import { getConsultorios } from '../services/consultoriosService';
 import {
   ArrowLeft, FileText, ClipboardList, ClipboardCheck, User, Phone, Mail, MapPin,
-  Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock
+  Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus
 } from 'lucide-react';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
@@ -281,6 +281,11 @@ export default function PacienteDetalle() {
   const [submittingTurno, setSubmittingTurno] = useState(false);
   const [turnoFormErrors, setTurnoFormErrors] = useState({});
 
+  // Turno rápido (Próximo turno)
+  const [showTurnoRapido, setShowTurnoRapido] = useState(false);
+  const [turnoRapidoForm, setTurnoRapidoForm] = useState({ fecha: '', hora: '', consultorio: '', notas: '' });
+  const [submittingTurnoRapido, setSubmittingTurnoRapido] = useState(false);
+
   const estadoTurnoConfig = {
     pendiente:    { label: 'Pendiente',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' },
     confirmado:   { label: 'Confirmado',   color: 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/30' },
@@ -351,7 +356,7 @@ export default function PacienteDetalle() {
   };
 
   useEffect(() => {
-    if (tabActivo === 'turnos') cargarTurnos();
+    if (tabActivo === 'turnos' || tabActivo === 'sesiones') cargarTurnos();
   }, [tabActivo]);
 
   const handleGuardarTurno = async () => {
@@ -453,6 +458,72 @@ export default function PacienteDetalle() {
       toast.error('Error', 'No se pudo crear el turno.');
     } finally {
       setSubmittingTurno(false);
+    }
+  };
+
+  const handleAbrirTurnoRapido = () => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+
+    let ultimoTurno = null;
+    if (turnos.length > 0) {
+      const sorted = [...turnos].sort((a, b) => new Date(b.fecha + 'T12:00:00') - new Date(a.fecha + 'T12:00:00'));
+      ultimoTurno = sorted[0];
+    }
+
+    const fechaBase = ultimoTurno ? new Date(ultimoTurno.fecha + 'T12:00:00') : new Date();
+    fechaBase.setDate(fechaBase.getDate() + 7);
+    const fechaStr = fechaBase.toISOString().slice(0, 10);
+
+    const horaDefault = ultimoTurno?.hora?.slice(0, 5) || '09:00';
+    const consultorioDefault = ultimoTurno?.consultorio || (consultorios.length > 0 ? consultorios[0].nombre : '');
+
+    setTurnoRapidoForm({
+      fecha: fechaStr,
+      hora: horaDefault,
+      consultorio: consultorioDefault,
+      notas: '',
+    });
+    setShowTurnoRapido(true);
+  };
+
+  const handleGuardarTurnoRapido = async () => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fechaIngresada = new Date(turnoRapidoForm.fecha + 'T12:00:00');
+
+    if (!turnoRapidoForm.fecha || fechaIngresada < hoy) {
+      toast.error('Error', 'La fecha no puede ser anterior a hoy.');
+      return;
+    }
+    if (!turnoRapidoForm.hora) {
+      toast.error('Error', 'La hora es obligatoria.');
+      return;
+    }
+    if (!turnoRapidoForm.consultorio) {
+      toast.error('Error', 'El consultorio es obligatorio.');
+      return;
+    }
+
+    setSubmittingTurnoRapido(true);
+    try {
+      const tipo_cobertura = paciente?.obra_social ? 'obra_social' : 'particular';
+      await crearTurno({
+        paciente_id: id,
+        fecha: turnoRapidoForm.fecha,
+        hora: turnoRapidoForm.hora,
+        consultorio: turnoRapidoForm.consultorio,
+        observaciones: turnoRapidoForm.notas || '',
+        estado: 'pendiente',
+        tipo_cobertura,
+      });
+      toast.success('Turno creado', `Turno creado para ${new Date(turnoRapidoForm.fecha + 'T12:00:00').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}`);
+      setShowTurnoRapido(false);
+      await cargarTurnos();
+    } catch {
+      toast.error('Error', 'No se pudo crear el turno rápido.');
+    } finally {
+      setSubmittingTurnoRapido(false);
     }
   };
 
@@ -790,12 +861,22 @@ export default function PacienteDetalle() {
             <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
               <ClipboardList size={22} className="text-blue-400" /> Sesiones
             </h3>
-            <button
-              onClick={() => navigate(`/pacientes/${id}/sesiones/nueva`)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 transition-colors"
-            >
-              <Plus size={16} /> Nueva Sesión
-            </button>
+            <div className="flex items-center gap-2">
+              {!loadingTurnos && (
+                <button
+                  onClick={handleAbrirTurnoRapido}
+                  className="inline-flex items-center gap-1.5 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 text-pink-600 dark:text-teal-400 hover:bg-pink-50 dark:hover:bg-slate-800 px-3 py-1.5 rounded-xl text-sm font-bold transition-colors"
+                >
+                  <CalendarPlus size={16} /> Próximo turno
+                </button>
+              )}
+              <button
+                onClick={() => navigate(`/pacientes/${id}/sesiones/nueva`)}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20 transition-colors"
+              >
+                <Plus size={16} /> Nueva Sesión
+              </button>
+            </div>
           </div>
           {loadingSesiones ? (
             <div className="space-y-3">
@@ -927,6 +1008,87 @@ export default function PacienteDetalle() {
         paciente={paciente}
         onSaved={cargarPaciente}
       />
+
+      {/* Modal turno rápido */}
+      {showTurnoRapido && (
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white dark:bg-slate-900 w-full max-w-md mx-auto max-h-screen sm:max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-pink-300 dark:border-slate-800">
+            <div className="border-b border-pink-300 dark:border-slate-800 bg-pink-100/50 dark:bg-slate-950 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+                Nuevo turno — {paciente?.nombre} {paciente?.apellido}
+              </h2>
+              <button onClick={() => setShowTurnoRapido(false)} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-5 overflow-y-auto custom-scrollbar flex-1 space-y-4">
+              <div>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Fecha *</label>
+                <input
+                  type="date"
+                  value={turnoRapidoForm.fecha}
+                  onChange={e => setTurnoRapidoForm(f => ({ ...f, fecha: e.target.value }))}
+                  className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Hora *</label>
+                <TimePicker
+                  value={turnoRapidoForm.hora}
+                  onChange={val => setTurnoRapidoForm(f => ({ ...f, hora: val }))}
+                  className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Consultorio *</label>
+                <select
+                  value={turnoRapidoForm.consultorio}
+                  onChange={e => setTurnoRapidoForm(f => ({ ...f, consultorio: e.target.value }))}
+                  className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500"
+                >
+                  <option value="">Seleccionar...</option>
+                  {consultorios.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Notas</label>
+                <textarea
+                  value={turnoRapidoForm.notas}
+                  onChange={e => setTurnoRapidoForm(f => ({ ...f, notas: e.target.value }))}
+                  rows={3}
+                  placeholder="Opcional..."
+                  className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500"
+                />
+              </div>
+            </div>
+            <div className="border-t border-pink-300 dark:border-slate-800 bg-pink-100/50 dark:bg-slate-950 px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowTurnoRapido(false)}
+                disabled={submittingTurnoRapido}
+                className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-pink-200 dark:bg-slate-800"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleGuardarTurnoRapido}
+                disabled={submittingTurnoRapido}
+                className="inline-flex items-center gap-2 px-6 py-2.5 font-bold rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors disabled:opacity-60"
+              >
+                {submittingTurnoRapido ? (
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                ) : (
+                  'Guardar'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

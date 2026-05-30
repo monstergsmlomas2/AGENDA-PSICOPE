@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Calendar as CalendarIcon, Clock, Activity, ArrowRight, MapPin, DollarSign, AlertTriangle, TrendingUp, TrendingDown, BarChart3, CreditCard, PieChart as PieChartIcon } from 'lucide-react';
+import { Users, Calendar as CalendarIcon, Clock, Activity, ArrowRight, MapPin, DollarSign, AlertTriangle, TrendingUp, TrendingDown, BarChart3, CreditCard, PieChart as PieChartIcon, UserX } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import RecordatoriosWidget from '../components/RecordatoriosWidget';
 import { Skeleton, ErrorState } from '../components/ui';
@@ -297,6 +297,7 @@ export default function Dashboard() {
   const {
     loading, error, stats, pagosPendientes,
     ingresosMensuales, sesionesSemanales, pacientesPorObraSocial, resumenMes,
+    sinSesionReciente,
     recargar,
   } = useDashboardData();
 
@@ -324,6 +325,15 @@ export default function Dashboard() {
 
   const sesPct = pctChange(Number(resumenMes.sesiones_este_mes), Number(resumenMes.sesiones_mes_anterior));
   const ingPct = pctChange(Number(resumenMes.ingresos_este_mes), Number(resumenMes.ingresos_mes_anterior));
+
+  const calcularDiasDesde = (fechaStr) => {
+    if (!fechaStr) return null;
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    const fecha = new Date(fechaStr + 'T12:00:00Z');
+    const diff = Math.floor((hoy - fecha) / (1000 * 60 * 60 * 24));
+    return diff;
+  };
 
   // Formatear datos para charts
   const ingresosData = ingresosMensuales.map(d => ({ ...d, mes: formatMonth(d.mes) }));
@@ -565,6 +575,62 @@ export default function Dashboard() {
 
         <RecordatoriosWidget />
       </div>
+
+      {/* ────────── 6. PACIENTES SIN ATENCIÓN RECIENTE ────────── */}
+      <SectionCard
+        title="Pacientes sin atención reciente"
+        icon={<UserX size={20} className="text-orange-500" />}
+        linkTo="/pacientes"
+        linkLabel="Ver todos"
+      >
+        {loading ? (
+          <ListSkeleton items={4} />
+        ) : sinSesionReciente.length === 0 ? (
+          <EmptySection message="Todos los pacientes tuvieron sesión esta semana." />
+        ) : (
+          <div className="space-y-3">
+            {sinSesionReciente.slice(0, 6).map((p) => {
+              const dias = calcularDiasDesde(p.ultima_sesion);
+              return (
+                <div
+                  key={p.id}
+                  className="flex items-center justify-between p-3.5 rounded-xl bg-purple-100/50 dark:bg-slate-950/50 border border-purple-300 dark:border-slate-800 hover:border-pink-500/50 dark:hover:border-teal-500/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="bg-white dark:bg-orange-500/10 p-2 rounded-lg text-orange-600 dark:text-orange-400 shrink-0">
+                      <UserX size={16} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-slate-900 dark:text-white capitalize text-sm truncate">
+                        {p.nombre} {p.apellido}
+                      </p>
+                      <p className="text-xs text-slate-900 dark:text-slate-400 mt-0.5">
+                        {dias !== null
+                          ? `Última sesión: hace ${dias} ${dias === 1 ? 'día' : 'días'}`
+                          : 'Sin sesiones registradas'}
+                      </p>
+                    </div>
+                  </div>
+                  <Link
+                    to={`/pacientes/${p.id}`}
+                    className="px-4 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors shrink-0"
+                  >
+                    Ver ficha
+                  </Link>
+                </div>
+              );
+            })}
+            {sinSesionReciente.length > 6 && (
+              <Link
+                to="/pacientes"
+                className="block text-center py-3 text-sm font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:text-pink-700 dark:hover:text-teal-300 transition-colors"
+              >
+                Ver todos →
+              </Link>
+            )}
+          </div>
+        )}
+      </SectionCard>
 
     </div>
   );

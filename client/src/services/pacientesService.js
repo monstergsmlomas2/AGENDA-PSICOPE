@@ -79,6 +79,8 @@ export const getPacientesSinSesion = async () => {
   }
 };
 
+export const getPacientesSinSesionReciente = getPacientesSinSesion;
+
 export const enviarRecordatorioSeguimiento = async (pacienteId) => {
   try {
     return await apiPost(`/pacientes/${pacienteId}/recordatorio-seguimiento`);

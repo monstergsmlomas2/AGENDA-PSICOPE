@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X,
+  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X, Search,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -147,6 +147,24 @@ export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
 
         {/* ─── Navegación ─── */}
         <nav className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+          {/* Búsqueda rápida */}
+          <div className="mb-2">
+            <button
+              onClick={() =>
+                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+              }
+              className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
+            >
+              <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
+                <Search size={17} />
+              </span>
+              <span className="truncate flex-1 text-left">Buscar paciente</span>
+              <span className="text-xs text-slate-400 font-medium">
+                {navigator.platform.toUpperCase().includes('MAC') ? '⌘K' : 'Ctrl+K'}
+              </span>
+            </button>
+          </div>
+
           {/* Menú Principal */}
           <div className="mb-1">
             <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">

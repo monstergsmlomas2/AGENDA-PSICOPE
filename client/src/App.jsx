@@ -20,6 +20,7 @@ import Login from './pages/Login';
 import { ToastProvider } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { Loader2 } from 'lucide-react';
+import GlobalSearch from './components/GlobalSearch';
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -87,6 +88,9 @@ function ProtectedLayout({ children }) {
       </main>
       {/* Bottom navigation — solo en móvil */}
       <BottomNav />
+
+      {/* Búsqueda global — Ctrl+K */}
+      <GlobalSearch />
     </div>
   );
 }

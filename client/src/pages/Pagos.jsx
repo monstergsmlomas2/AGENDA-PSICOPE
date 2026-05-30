@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Plus, Search, Edit, Trash2, X, Calendar, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown, Wallet, ShieldCheck, AlertCircle } from 'lucide-react';
+import { DollarSign, Plus, Search, Edit, Trash2, X, Calendar, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown, Wallet, ShieldCheck, AlertCircle, FileDown, Loader2 } from 'lucide-react';
+
 import { getPagos, crearPago, actualizarPago, eliminarPago, getResumenMes } from '../services/pagosService';
 import { getPacientes } from '../services/pacientesService';
 import { useToast, Badge, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
+import { generarReciboPDF } from '../utils/generarReciboPDF';
+import { getConfiguracion } from '../services/configuracionService';
+
 
 const meses = [
   { value: '01', label: 'Enero' }, { value: '02', label: 'Febrero' }, { value: '03', label: 'Marzo' },
@@ -132,6 +136,20 @@ export default function Pagos() {
   };
 
   const toast = useToast();
+  const [downloadLoading, setDownloadLoading] = useState(null);
+
+  const handleDownloadPDF = async (pago) => {
+    setDownloadLoading(pago.id);
+    try {
+      const config = await getConfiguracion();
+      generarReciboPDF(pago, config);
+      toast.success('PDF generado', 'El recibo se descargó correctamente.');
+    } catch {
+      toast.error('Error', 'No se pudo generar el recibo PDF.');
+    } finally {
+      setDownloadLoading(null);
+    }
+  };
 
   const handleDelete = async (id) => {
     const ok = await confirm({
@@ -380,6 +398,14 @@ export default function Pagos() {
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => handleDownloadPDF(p)}
+                        disabled={downloadLoading === p.id}
+                        title="Descargar recibo PDF"
+                        className="p-2 rounded-lg text-slate-900 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-[#262626] transition-all disabled:opacity-40"
+                      >
+                        {downloadLoading === p.id ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
+                      </button>
                       <button onClick={() => openEdit(p)} className="p-2 rounded-lg text-slate-900 hover:text-teal-600 dark:hover:text-teal-400 hover:bg-slate-100 dark:hover:bg-[#262626] transition-all">
                         <Edit size={16} />
                       </button>
@@ -388,6 +414,7 @@ export default function Pagos() {
                       </button>
                     </div>
                   </td>
+
                 </tr>
               ))}
             </tbody>

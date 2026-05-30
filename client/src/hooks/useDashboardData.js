@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getPacientes } from '../services/pacientesService';
+import { getPacientes, getPacientesSinSesionReciente } from '../services/pacientesService';
 import { getTurnos } from '../services/turnosService';
 import { getPagos } from '../services/pagosService';
 import {
@@ -28,6 +28,7 @@ export function useDashboardData() {
   const [error, setError] = useState(null);
   const [stats, setStats] = useState(defaultStats);
   const [pagosPendientes, setPagosPendientes] = useState([]);
+  const [sinSesionReciente, setSinSesionReciente] = useState([]);
 
   // Datos de analytics
   const [ingresosMensuales, setIngresosMensuales] = useState([]);
@@ -49,6 +50,7 @@ export function useDashboardData() {
       if (_cache && now - _cacheTs < CACHE_TTL) {
         setStats(_cache.stats);
         setPagosPendientes(_cache.pagosPendientes);
+        setSinSesionReciente(_cache.sinSesionReciente);
         setIngresosMensuales(_cache.ingresosMensuales);
         setSesionesSemanales(_cache.sesionesSemanales);
         setPacientesPorObraSocial(_cache.pacientesPorObraSocial);
@@ -79,6 +81,7 @@ export function useDashboardData() {
         sesiones,
         obrasSociales,
         resumen,
+        sinSesionData,
       ] = await Promise.all([
         getPacientes(),
         getTurnos({ desde, hasta }),
@@ -88,6 +91,7 @@ export function useDashboardData() {
         getSesionesSemanales(),
         getPacientesPorObraSocial(),
         getResumenMesActual(),
+        getPacientesSinSesionReciente(),
       ]);
 
       const turnos = Array.isArray(dataTurnos) ? dataTurnos : [];
@@ -134,6 +138,9 @@ export function useDashboardData() {
       ];
       setPagosPendientes(newPagos);
 
+      const newSinSesion = Array.isArray(sinSesionData) ? sinSesionData : [];
+      setSinSesionReciente(newSinSesion);
+
       const newIngresos = Array.isArray(ingresos) ? ingresos : [];
       const newSesiones = Array.isArray(sesiones) ? sesiones : [];
       const newObrasSociales = Array.isArray(obrasSociales) ? obrasSociales : [];
@@ -148,6 +155,7 @@ export function useDashboardData() {
       _cache = {
         stats: newStats,
         pagosPendientes: newPagos,
+        sinSesionReciente: newSinSesion,
         ingresosMensuales: newIngresos,
         sesionesSemanales: newSesiones,
         pacientesPorObraSocial: newObrasSociales,
@@ -177,6 +185,7 @@ export function useDashboardData() {
     error,
     stats,
     pagosPendientes,
+    sinSesionReciente,
     ingresosMensuales,
     sesionesSemanales,
     pacientesPorObraSocial,
