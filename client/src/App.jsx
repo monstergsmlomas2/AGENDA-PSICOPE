@@ -17,10 +17,11 @@ import EvaluacionDetalle from './pages/EvaluacionDetalle';
 import EvaluacionForm from './pages/EvaluacionForm';
 import Configuracion from './pages/Configuracion';
 import Login from './pages/Login';
-import { ToastProvider } from './components/ui';
+import { ToastProvider, useToast } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { Loader2 } from 'lucide-react';
 import GlobalSearch from './components/GlobalSearch';
+import InstallPrompt from './components/InstallPrompt';
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -64,11 +65,24 @@ function ProtectedLayout({ children }) {
     });
   };
 
+  const toast = useToast();
+
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('drive') === 'connected') {
+      toast.success('Google Drive conectado', 'Ya podés adjuntar archivos a los pacientes.');
+      window.history.replaceState({}, '', window.location.pathname);
+    } else if (params.get('drive') === 'error') {
+      toast.error('Error', 'No se pudo conectar Google Drive. Intentá de nuevo.');
+      window.history.replaceState({}, '', window.location.pathname);
     }
   }, []);
 
@@ -91,6 +105,9 @@ function ProtectedLayout({ children }) {
 
       {/* Búsqueda global — Ctrl+K */}
       <GlobalSearch />
+
+      {/* PWA Install Prompt */}
+      <InstallPrompt />
     </div>
   );
 }

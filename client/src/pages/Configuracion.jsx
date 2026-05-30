@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle } from 'lucide-react';
+import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive } from 'lucide-react';
+import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
+import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
 import {
   getConfiguracionNotificaciones,
@@ -64,6 +66,7 @@ function VariableChip({ children, onClick }) {
 
 export default function Configuracion() {
   const toast = useToast();
+  const { confirm, ConfirmModal } = useConfirm();
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -91,6 +94,11 @@ export default function Configuracion() {
   // --- Estado historial ---
   const [historial, setHistorial] = useState([]);
   const [historialLoading, setHistorialLoading] = useState(true);
+
+  // --- Estado Google Drive ---
+  const [driveConnected, setDriveConnected] = useState(null);
+  const [loadingDrive, setLoadingDrive] = useState(true);
+  const [disconnectingDrive, setDisconnectingDrive] = useState(false);
 
   const mensajeRef = useRef(null);
 
@@ -146,6 +154,10 @@ export default function Configuracion() {
 
     cargarConfig();
     cargarHistorial();
+    getDriveStatus().then(s => {
+      setDriveConnected(s?.connected ?? false);
+      setLoadingDrive(false);
+    });
   }, []);
 
   // --- Handlers ---
@@ -590,13 +602,78 @@ export default function Configuracion() {
           )}
         </div>
       </div>
+      {/* ─── SECCIÓN GOOGLE DRIVE ─── */}
+      <ConfirmModal />
+      <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="bg-blue-100 dark:bg-blue-500/10 p-2.5 rounded-xl">
+            <HardDrive size={20} className="text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Google Drive</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Adjuntos de pacientes guardados en tu Drive personal</p>
+          </div>
+        </div>
+
+        {loadingDrive ? (
+          <div className="flex items-center gap-2 text-slate-400">
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm">Verificando conexión...</span>
+          </div>
+        ) : driveConnected ? (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30">
+                <CheckCircle size={13} /> Conectado
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Los archivos se guardan en "Agenda Psicope" en tu Drive</span>
+            </div>
+            <button
+              onClick={async () => {
+                const ok = await confirm({
+                  title: 'Desconectar Google Drive',
+                  message: '¿Desconectás Google Drive? Los archivos no se eliminarán, pero no podrás acceder a ellos desde la app.',
+                  confirmLabel: 'Desconectar',
+                  variant: 'danger',
+                });
+                if (!ok) return;
+                setDisconnectingDrive(true);
+                await disconnectDrive();
+                setDriveConnected(false);
+                setDisconnectingDrive(false);
+                toast.success('Drive desconectado', 'Ya no se pueden acceder a los archivos desde la app.');
+              }}
+              disabled={disconnectingDrive}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold border border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-60"
+            >
+              {disconnectingDrive ? <Loader2 size={14} className="animate-spin" /> : null}
+              Desconectar
+            </button>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                No conectado
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Conectá tu cuenta para adjuntar archivos a los pacientes</span>
+            </div>
+            <button
+              onClick={async () => {
+                const data = await getDriveAuthUrl();
+                if (data?.url) window.location.href = data.url;
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
+            >
+              <HardDrive size={14} /> Conectar Google Drive
+            </button>
+          </div>
+        )}
+      </div>
+
     </div>
   );
 }
-
-
-
-
 
 
 

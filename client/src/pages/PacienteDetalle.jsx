@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
@@ -8,8 +8,10 @@ import { getTurnos, crearTurno, actualizarTurno, eliminarTurno } from '../servic
 import { getConsultorios } from '../services/consultoriosService';
 import {
   ArrowLeft, FileText, ClipboardList, ClipboardCheck, User, Phone, Mail, MapPin,
-  Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus
+  Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
+  Paperclip, Upload, ExternalLink, File, Image, Loader2
 } from 'lucide-react';
+import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -286,6 +288,15 @@ export default function PacienteDetalle() {
   const [turnoRapidoForm, setTurnoRapidoForm] = useState({ fecha: '', hora: '', consultorio: '', notas: '' });
   const [submittingTurnoRapido, setSubmittingTurnoRapido] = useState(false);
 
+  // Archivos adjuntos (Google Drive)
+  const [showAdjuntos, setShowAdjuntos] = useState(false);
+  const [driveConnected, setDriveConnected] = useState(null);
+  const [archivos, setArchivos] = useState([]);
+  const [loadingArchivos, setLoadingArchivos] = useState(false);
+  const [subiendoArchivo, setSubiendoArchivo] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
+
   const estadoTurnoConfig = {
     pendiente:    { label: 'Pendiente',    color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/30' },
     confirmado:   { label: 'Confirmado',   color: 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/30' },
@@ -528,6 +539,70 @@ export default function PacienteDetalle() {
   };
 
 
+  const handleAbrirAdjuntos = async () => {
+    const next = !showAdjuntos;
+    setShowAdjuntos(next);
+    if (next && driveConnected === null) {
+      const status = await getDriveStatus();
+      setDriveConnected(status?.connected ?? false);
+      if (status?.connected) {
+        setLoadingArchivos(true);
+        const data = await getArchivos(id);
+        setArchivos(Array.isArray(data) ? data : []);
+        setLoadingArchivos(false);
+      }
+    }
+  };
+
+  const handleConectarDrive = async () => {
+    const data = await getDriveAuthUrl();
+    if (data?.url) window.location.href = data.url;
+  };
+
+  const handleSubirArchivo = async (file) => {
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('Error', 'El archivo supera los 10 MB.');
+      return;
+    }
+    setSubiendoArchivo(true);
+    const resultado = await subirArchivo(id, file);
+    if (resultado) {
+      const data = await getArchivos(id);
+      setArchivos(Array.isArray(data) ? data : []);
+      toast.success('Archivo subido', resultado.name);
+    } else {
+      toast.error('Error', 'No se pudo subir el archivo.');
+    }
+    setSubiendoArchivo(false);
+  };
+
+  const handleEliminarArchivo = async (archivo) => {
+    const ok = await confirm({
+      title: 'Eliminar archivo',
+      message: `¿Eliminás "${archivo.name}"? Esta acción no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    await eliminarArchivo(id, archivo.id);
+    setArchivos(prev => prev.filter(a => a.id !== archivo.id));
+    toast.success('Archivo eliminado', '');
+  };
+
+  const getFileIcon = (mimeType) => {
+    if (mimeType?.includes('pdf')) return <FileText size={18} className="text-red-500" />;
+    if (mimeType?.includes('image')) return <Image size={18} className="text-green-500" />;
+    if (mimeType?.includes('word') || mimeType?.includes('document')) return <FileText size={18} className="text-blue-500" />;
+    return <File size={18} className="text-slate-400" />;
+  };
+
+  const formatFileSize = (bytes) => {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -675,6 +750,16 @@ export default function PacienteDetalle() {
           }`}
         >
           <ClipboardCheck size={18} /> Evaluaciones
+        </button>
+        <button
+          onClick={handleAbrirAdjuntos}
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+            showAdjuntos
+              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
+              : 'bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20'
+          }`}
+        >
+          <Paperclip size={18} /> Archivos
         </button>
       </div>
 
@@ -1008,6 +1093,130 @@ export default function PacienteDetalle() {
         paciente={paciente}
         onSaved={cargarPaciente}
       />
+
+      {/* ─────────────────────────────────────── */}
+      {/* PANEL DE ARCHIVOS ADJUNTOS (GOOGLE DRIVE) */}
+      {/* ─────────────────────────────────────── */}
+      {showAdjuntos && (
+        <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <Paperclip size={20} className="text-purple-500" />
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Archivos adjuntos</h3>
+          </div>
+
+          {driveConnected === null && (
+            <div className="flex justify-center py-8">
+              <Loader2 size={24} className="animate-spin text-slate-400" />
+            </div>
+          )}
+
+          {driveConnected === false && (
+            <div className="flex flex-col items-center gap-3 py-8 px-4 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-xl text-center">
+              <Paperclip size={28} className="text-blue-400" />
+              <p className="text-blue-700 dark:text-blue-300 font-semibold">Conectá tu Google Drive para adjuntar archivos a este paciente</p>
+              <p className="text-blue-500 dark:text-blue-400 text-sm">Los archivos se guardarán en tu Drive personal en la carpeta "Agenda Psicope"</p>
+              <button
+                onClick={handleConectarDrive}
+                className="mt-1 inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+              >
+                Conectar Google Drive
+              </button>
+            </div>
+          )}
+
+          {driveConnected === true && (
+            <div className="space-y-4">
+              {/* Zona de subida */}
+              <div
+                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                onDragLeave={() => setDragOver(false)}
+                onDrop={e => {
+                  e.preventDefault();
+                  setDragOver(false);
+                  const file = e.dataTransfer.files[0];
+                  if (file) handleSubirArchivo(file);
+                }}
+                className={`border-2 border-dashed rounded-xl p-5 text-center transition-colors ${
+                  dragOver
+                    ? 'border-pink-500 dark:border-teal-500 bg-pink-50/50 dark:bg-pink-500/5'
+                    : 'border-purple-300 dark:border-slate-700 bg-purple-50/30 dark:bg-slate-950/30'
+                }`}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) handleSubirArchivo(f); e.target.value = ''; }}
+                />
+                {subiendoArchivo ? (
+                  <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
+                    <Loader2 size={18} className="animate-spin" />
+                    <span className="text-sm">Subiendo...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Upload size={20} className="mx-auto mb-2 text-slate-400" />
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Arrastrá un archivo o hacé clic para seleccionar</p>
+                    <p className="text-xs text-slate-400 mb-3">PDF, JPG, PNG, DOC, DOCX · Máx 10 MB</p>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-slate-900 dark:text-slate-200"
+                    >
+                      <Upload size={14} /> Seleccionar archivo
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Lista de archivos */}
+              {loadingArchivos ? (
+                <div className="space-y-2">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="h-12 bg-purple-100 dark:bg-slate-800 rounded-xl animate-pulse" />
+                  ))}
+                </div>
+              ) : archivos.length === 0 ? (
+                <p className="text-center text-sm text-slate-400 py-4">No hay archivos adjuntos. Subí el primero con el botón de arriba.</p>
+              ) : (
+                <div className="space-y-2">
+                  {archivos.map(archivo => (
+                    <div key={archivo.id} className="bg-purple-100/50 dark:bg-slate-950/50 border border-purple-300 dark:border-slate-800 rounded-xl p-3 flex items-center gap-3">
+                      <div className="shrink-0">{getFileIcon(archivo.mimeType)}</div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 truncate max-w-[200px]">
+                          {archivo.name?.replace(/^\d+-/, '')}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {formatFileSize(archivo.size)}{archivo.createdTime ? ` · ${new Date(archivo.createdTime).toLocaleDateString('es-AR')}` : ''}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <a
+                          href={archivo.webViewLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded-lg hover:bg-purple-200 dark:hover:bg-slate-800 text-slate-400 hover:text-blue-600 dark:hover:text-teal-400 transition-colors"
+                          title="Abrir en Drive"
+                        >
+                          <ExternalLink size={15} />
+                        </a>
+                        <button
+                          onClick={() => handleEliminarArchivo(archivo)}
+                          className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/10 text-slate-400 hover:text-red-500 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Modal turno rápido */}
       {showTurnoRapido && (

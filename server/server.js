@@ -10,6 +10,7 @@ import evaluacionesRoutes from "./routes/evaluaciones.js";
 import pagosRoutes from "./routes/pagos.js";
 import analyticsRoutes from "./routes/analytics.js";
 import configuracionRouter from "./routes/configuracion.js";
+import driveRoutes, { handleGoogleCallback } from "./routes/drive.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
 import authMiddleware from "./middleware/auth.js";
@@ -55,6 +56,8 @@ app.use("/evaluaciones", authMiddleware, evaluacionesRoutes);
 app.use("/pagos", authMiddleware, pagosRoutes);
 app.use("/analytics", authMiddleware, analyticsRoutes);
 app.use("/configuracion", authMiddleware, configuracionRouter);
+app.use("/drive", authMiddleware, driveRoutes);
+app.get("/auth/google/callback", handleGoogleCallback);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

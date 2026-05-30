@@ -1,0 +1,62 @@
+import { apiGet, apiDelete } from './api.js';
+import API_URL from '../config/api.js';
+import { getToken } from './authService.js';
+
+export const getDriveStatus = async () => {
+  try {
+    return await apiGet('/drive/status');
+  } catch {
+    return { connected: false };
+  }
+};
+
+export const getDriveAuthUrl = async () => {
+  try {
+    return await apiGet('/drive/auth-url');
+  } catch {
+    return null;
+  }
+};
+
+export const disconnectDrive = async () => {
+  try {
+    return await apiDelete('/drive/disconnect');
+  } catch {
+    return null;
+  }
+};
+
+export const getArchivos = async (pacienteId) => {
+  try {
+    return await apiGet(`/drive/archivos/${pacienteId}`);
+  } catch {
+    return [];
+  }
+};
+
+export const subirArchivo = async (pacienteId, file) => {
+  try {
+    const token = getToken();
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const res = await fetch(`${API_URL}/drive/archivos/${pacienteId}`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: formData,
+    });
+
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+};
+
+export const eliminarArchivo = async (pacienteId, fileId) => {
+  try {
+    return await apiDelete(`/drive/archivos/${pacienteId}/${fileId}`);
+  } catch {
+    return null;
+  }
+};
