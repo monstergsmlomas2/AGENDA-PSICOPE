@@ -1,30 +1,117 @@
-﻿import { FileText } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { FileText, Printer, Upload, Loader2 } from 'lucide-react';
+import { subirArchivo } from '../../services/driveService';
+import { getDriveStatus } from '../../services/driveService';
 
 export default function EntrevistaModal({ paciente, onClose, onSave }) {
   if (!paciente) return null;
 
   const entrevista = paciente?.entrevista;
+  const printRef = useRef(null);
+  const [uploadingDrive, setUploadingDrive] = useState(false);
+  const [driveMsg, setDriveMsg] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const entrevistaData = Object.fromEntries(formData.entries());
-    // Capturar checkboxes
     const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(cb => { entrevistaData[cb.name] = cb.checked; });
     onSave(entrevistaData);
   };
 
-  return (
-    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-950 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-300 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden">
+  const handlePrint = () => {
+    window.print();
+  };
 
-        <div className="bg-purple-100/50 dark:bg-slate-900 border-b border-purple-300 dark:border-slate-800 px-8 py-5 flex items-center justify-between shrink-0">
+  const generarPdfBlob = async () => {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: html2canvas } = await import('html2canvas');
+
+    const el = printRef.current;
+    if (!el) return null;
+
+    const canvas = await html2canvas(el, {
+      scale: 1.5,
+      useCORS: true,
+      backgroundColor: '#ffffff',
+      windowWidth: 900,
+    });
+
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const usableW = pageW - margin * 2;
+    const imgH = (canvas.height * usableW) / canvas.width;
+
+    let yOffset = 0;
+    let remaining = imgH;
+
+    while (remaining > 0) {
+      const sliceH = Math.min(remaining, pageH - margin * 2);
+      const srcY = (yOffset / imgH) * canvas.height;
+      const srcH = (sliceH / imgH) * canvas.height;
+
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = srcH;
+      const ctx = sliceCanvas.getContext('2d');
+      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+
+      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.85);
+      if (yOffset > 0) pdf.addPage();
+      pdf.addImage(sliceData, 'JPEG', margin, margin, usableW, sliceH);
+
+      yOffset += sliceH;
+      remaining -= sliceH;
+    }
+
+    return pdf.output('blob');
+  };
+
+  const handleSubirDrive = async () => {
+    setDriveMsg(null);
+    setUploadingDrive(true);
+    try {
+      const status = await getDriveStatus();
+      if (!status?.connected) {
+        setDriveMsg({ tipo: 'error', texto: 'Google Drive no está conectado. Configuralo en Configuración.' });
+        return;
+      }
+
+      const blob = await generarPdfBlob();
+      if (!blob) {
+        setDriveMsg({ tipo: 'error', texto: 'No se pudo generar el PDF.' });
+        return;
+      }
+
+      const nombreArchivo = `Entrevista_${paciente.apellido}_${paciente.nombre}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const file = new File([blob], nombreArchivo, { type: 'application/pdf' });
+
+      const result = await subirArchivo(paciente.id, file);
+      if (result) {
+        setDriveMsg({ tipo: 'ok', texto: `Subido a Drive: ${nombreArchivo}` });
+      } else {
+        setDriveMsg({ tipo: 'error', texto: 'Error al subir el archivo a Drive.' });
+      }
+    } finally {
+      setUploadingDrive(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm print:relative print:inset-auto print:bg-transparent print:p-0 print:block">
+      <div className="bg-white dark:bg-slate-950 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-300 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden print:max-h-none print:shadow-none print:border-none print:rounded-none">
+
+        <div className="bg-purple-100/50 dark:bg-slate-900 border-b border-purple-300 dark:border-slate-800 px-8 py-5 flex items-center justify-between shrink-0 print:hidden">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-teal-400 flex items-center gap-3">
               <FileText size={26} /> Entrevista de Admisión
             </h2>
-            <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-sm mt-1">
+            <p className="text-slate-900 font-bold dark:text-slate-400 text-sm mt-1">
               Paciente: <span className="capitalize font-semibold">{paciente.nombre} {paciente.apellido}</span>
             </p>
           </div>
@@ -33,15 +120,24 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
           </button>
         </div>
 
-        {/* FORMULARIO GIGANTE */}
-        <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 overflow-y-auto custom-scrollbar flex-1 text-sm text-slate-900 dark:text-slate-300 space-y-10">
+        {/* Cabecera visible solo al imprimir */}
+        <div className="hidden print:block px-8 pt-6 pb-2">
+          <h2 className="text-2xl font-bold text-slate-900 text-center">Entrevista de Admisión</h2>
+          <p className="text-center text-slate-600 mt-1 capitalize">{paciente.nombre} {paciente.apellido}</p>
+          <hr className="mt-3 border-slate-300" />
+        </div>
+
+        {/* FORMULARIO */}
+        <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 overflow-y-auto custom-scrollbar flex-1 text-sm text-slate-900 dark:text-slate-300 space-y-10 print:overflow-visible">
+          {/* Contenido capturado para PDF */}
+          <div ref={printRef}>
 
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Datos Escolares</h3>
             <div className="grid grid-cols-3 gap-4">
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Escuela</label><input type="text" name="escuela" defaultValue={entrevista?.escuela} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Cursa</label><input type="text" name="cursa" defaultValue={entrevista?.cursa} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Turno</label><input type="text" name="turno" defaultValue={entrevista?.turno} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Escuela</label><input type="text" name="escuela" defaultValue={entrevista?.escuela} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Cursa</label><input type="text" name="cursa" defaultValue={entrevista?.cursa} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Turno</label><input type="text" name="turno" defaultValue={entrevista?.turno} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
             </div>
           </section>
 
@@ -68,25 +164,25 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Hermanos (Nombres y Edades)</label><textarea name="hermanos" defaultValue={entrevista?.hermanos} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">¿Viven solos o con otros familiares?</label><textarea name="viven_con" defaultValue={entrevista?.viven_con} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Hermanos (Nombres y Edades)</label><textarea name="hermanos" defaultValue={entrevista?.hermanos} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">¿Viven solos o con otros familiares?</label><textarea name="viven_con" defaultValue={entrevista?.viven_con} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
             </div>
           </section>
 
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Antecedentes e Hitos del Desarrollo</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Perinatales / Parto / Posnatales</label><textarea name="perinatales" defaultValue={entrevista?.perinatales} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Antecedentes Familiares</label><textarea name="antecedentes_familiares" defaultValue={entrevista?.antecedentes_familiares} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Perinatales / Parto / Posnatales</label><textarea name="perinatales" defaultValue={entrevista?.perinatales} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Antecedentes Familiares</label><textarea name="antecedentes_familiares" defaultValue={entrevista?.antecedentes_familiares} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Primeros balbuceos</label><input type="text" name="balbuceos" defaultValue={entrevista?.balbuceos} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Se sentó a:</label><input type="text" name="sento" defaultValue={entrevista?.sento} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Caminó a:</label><input type="text" name="camino" defaultValue={entrevista?.camino} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Tomó pecho hasta:</label><input type="text" name="pecho" defaultValue={entrevista?.pecho} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Control esfínteres a:</label><input type="text" name="esfinteres" defaultValue={entrevista?.esfinteres} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Comida sólida a:</label><input type="text" name="comida_solida" defaultValue={entrevista?.comida_solida} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Primeras palabras (y cuáles):</label><input type="text" name="primeras_palabras" defaultValue={entrevista?.primeras_palabras} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Sostén cefálico</label><input type="text" name="sosten_cefalico" defaultValue={entrevista?.sosten_cefalico ?? entrevista?.balbuceos} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Se sentó a:</label><input type="text" name="sento" defaultValue={entrevista?.sento} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Caminó a:</label><input type="text" name="camino" defaultValue={entrevista?.camino} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Tomó pecho hasta:</label><input type="text" name="pecho" defaultValue={entrevista?.pecho} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Control esfínteres a:</label><input type="text" name="esfinteres" defaultValue={entrevista?.esfinteres} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Comida sólida a:</label><input type="text" name="comida_solida" defaultValue={entrevista?.comida_solida} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Primeras palabras (y cuáles):</label><input type="text" name="primeras_palabras" defaultValue={entrevista?.primeras_palabras} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
             </div>
           </section>
 
@@ -107,15 +203,15 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-4">
                 <h4 className="text-teal-600 dark:text-teal-500 font-bold">Hábitos Diarios</h4>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Alimentación</label><input type="text" name="habito_alimentacion" defaultValue={entrevista?.habito_alimentacion} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Sueño</label><input type="text" name="habito_sueno" defaultValue={entrevista?.habito_sueno} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Aseo y Vestido</label><input type="text" name="habito_aseo" defaultValue={entrevista?.habito_aseo} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Alimentación</label><input type="text" name="habito_alimentacion" defaultValue={entrevista?.habito_alimentacion} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Sueño</label><input type="text" name="habito_sueno" defaultValue={entrevista?.habito_sueno} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Aseo y Vestido</label><input type="text" name="habito_aseo" defaultValue={entrevista?.habito_aseo} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
               </div>
               <div className="space-y-4">
                 <h4 className="text-teal-600 dark:text-teal-500 font-bold">Procesamiento Sensorial</h4>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Táctil / Auditivo / Visual</label><input type="text" name="sensorial_tactil_auditivo_visual" defaultValue={entrevista?.sensorial_tactil_auditivo_visual} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Olfatorio</label><input type="text" name="sensorial_olfatorio" defaultValue={entrevista?.sensorial_olfatorio} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-                <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs font-semibold">Vestibular (Vértigo)</label><input type="text" name="sensorial_vestibular" defaultValue={entrevista?.sensorial_vestibular} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Táctil / Auditivo / Visual</label><input type="text" name="sensorial_tactil_auditivo_visual" defaultValue={entrevista?.sensorial_tactil_auditivo_visual} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Olfatorio</label><input type="text" name="sensorial_olfatorio" defaultValue={entrevista?.sensorial_olfatorio} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+                <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs font-semibold">Vestibular (Vértigo)</label><input type="text" name="sensorial_vestibular" defaultValue={entrevista?.sensorial_vestibular} className="w-full bg-transparent border-b border-slate-300 dark:border-slate-700 p-2 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
               </div>
             </div>
           </section>
@@ -134,6 +230,9 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinza" defaultChecked={entrevista?.motricidad_pinza} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Pinza fina / Toma el lápiz en pinza</label>
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinta_bien" defaultChecked={entrevista?.motricidad_pinta_bien} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Pinta bien / Sin salirse del contorno</label>
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_tijera" defaultChecked={entrevista?.motricidad_tijera} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Dificultad para cortar con tijera</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_botones" defaultChecked={entrevista?.motricidad_botones} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Abrocha botones</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cierres" defaultChecked={entrevista?.motricidad_cierres} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Cierra y abre cierres</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cordones" defaultChecked={entrevista?.motricidad_cordones} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Ata cordones</label>
               </div>
             </div>
           </section>
@@ -141,14 +240,24 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Socialización, Juego y Rutina</h3>
             <div className="grid grid-cols-2 gap-4">
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Socialización y Juego</label><textarea name="socializacion" defaultValue={entrevista?.socializacion} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Uso de pantallas (Celular/PC)</label><textarea name="pantallas" defaultValue={entrevista?.pantallas} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Miedos</label><input type="text" name="miedos" defaultValue={entrevista?.miedos} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Persona muy significativa</label><input type="text" name="persona_significativa" defaultValue={entrevista?.persona_significativa} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">¿Qué le gusta hacer?</label><input type="text" name="gusta_hacer" defaultValue={entrevista?.gusta_hacer} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">¿Qué le disgusta?</label><input type="text" name="disgusta" defaultValue={entrevista?.disgusta} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Tareas escolares (¿Solo o con ayuda? ¿Lugar propio?)</label><input type="text" name="tareas_escolares" defaultValue={entrevista?.tareas_escolares} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
-              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs uppercase font-semibold">Describir cómo es un día de su vida</label><textarea name="dia_de_vida" defaultValue={entrevista?.dia_de_vida} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Socialización y Juego</label><textarea name="socializacion" defaultValue={entrevista?.socializacion} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Uso de pantallas (Celular/PC)</label><textarea name="pantallas" defaultValue={entrevista?.pantallas} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Miedos</label><input type="text" name="miedos" defaultValue={entrevista?.miedos} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Persona muy significativa</label><input type="text" name="persona_significativa" defaultValue={entrevista?.persona_significativa} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">¿Qué le gusta hacer?</label><input type="text" name="gusta_hacer" defaultValue={entrevista?.gusta_hacer} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">¿Qué le disgusta?</label><input type="text" name="disgusta" defaultValue={entrevista?.disgusta} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Tareas escolares (¿Solo o con ayuda? ¿Lugar propio?)</label><input type="text" name="tareas_escolares" defaultValue={entrevista?.tareas_escolares} className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div className="col-span-2"><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Describir cómo es un día de su vida</label><textarea name="dia_de_vida" defaultValue={entrevista?.dia_de_vida} rows="2" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Conducta y Observaciones Clínicas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Conducta</label><textarea name="conducta" defaultValue={entrevista?.conducta} rows="4" placeholder="Descripción de la conducta del paciente..." className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Observaciones</label><textarea name="observaciones" defaultValue={entrevista?.observaciones} rows="4" placeholder="Observaciones generales del profesional..." className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Intervenciones y Hospitalizaciones</label><textarea name="intervenciones" defaultValue={entrevista?.intervenciones} rows="4" placeholder="Cirugías, internaciones, intervenciones previas..." className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
+              <div><label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Controles de Salud</label><textarea name="controles_salud" defaultValue={entrevista?.controles_salud} rows="4" placeholder="Médico de cabecera, especialistas, controles periódicos..." className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white"></textarea></div>
             </div>
           </section>
 
@@ -160,26 +269,49 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
             </div>
           </section>
 
+          </div>{/* fin printRef */}
         </form>
 
-        <div className="bg-purple-100/50 dark:bg-slate-900 border-t border-purple-300 dark:border-slate-800 px-8 py-5 flex justify-end gap-4 shrink-0">
-          <button onClick={onClose} className="px-6 py-2.5 text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-bold transition-colors">
-            Cerrar Planilla
-          </button>
-          <button type="submit" form="entrevistaForm" className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-0.5">
-            Guardar Entrevista Completa
-          </button>
+        {/* Mensaje Drive */}
+        {driveMsg && (
+          <div className={`mx-8 mb-2 px-4 py-2 rounded-lg text-sm font-medium print:hidden ${driveMsg.tipo === 'ok' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}`}>
+            {driveMsg.texto}
+          </div>
+        )}
+
+        <div className="bg-purple-100/50 dark:bg-slate-900 border-t border-purple-300 dark:border-slate-800 px-8 py-5 flex items-center justify-between gap-4 shrink-0 print:hidden">
+          {/* Acciones secundarias */}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-purple-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-700 font-semibold text-sm transition-all"
+            >
+              <Printer size={16} /> Imprimir
+            </button>
+            <button
+              type="button"
+              onClick={handleSubirDrive}
+              disabled={uploadingDrive}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-purple-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-700 font-semibold text-sm transition-all disabled:opacity-60"
+            >
+              {uploadingDrive ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              {uploadingDrive ? 'Subiendo...' : 'Subir a Drive'}
+            </button>
+          </div>
+
+          {/* Acciones principales */}
+          <div className="flex gap-4">
+            <button onClick={onClose} className="px-6 py-2.5 text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-bold transition-colors">
+              Cerrar Planilla
+            </button>
+            <button type="submit" form="entrevistaForm" className="bg-teal-600 hover:bg-teal-700 dark:bg-teal-500 dark:hover:bg-teal-600 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-0.5">
+              Guardar Entrevista
+            </button>
+          </div>
         </div>
 
       </div>
     </div>
   );
 }
-
-
-
-
-
-
-
-

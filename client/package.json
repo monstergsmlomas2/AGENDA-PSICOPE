@@ -16,6 +16,7 @@
     "@mui/x-date-pickers": "^9.3.0",
     "@supabase/supabase-js": "^2.106.2",
     "dayjs": "^1.11.21",
+    "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.577.0",
     "moment": "^2.30.1",

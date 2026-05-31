@@ -1,7 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById, guardarEntrevista } from '../services/pacientesService';
-import { ArrowLeft, FileText } from 'lucide-react';
+import { subirArchivo, getDriveStatus } from '../services/driveService';
+import { ArrowLeft, FileText, Printer, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
 export default function EntrevistaPage() {
@@ -12,6 +13,9 @@ export default function EntrevistaPage() {
   const [paciente, setPaciente] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadingDrive, setUploadingDrive] = useState(false);
+  const [driveMsg, setDriveMsg] = useState(null);
+  const printRef = useRef(null);
 
   useEffect(() => {
     getPacienteById(id)
@@ -58,6 +62,61 @@ export default function EntrevistaPage() {
 
   const entrevista = paciente?.entrevista;
 
+  const handlePrint = () => window.print();
+
+  const generarPdfBlob = async () => {
+    const { default: jsPDF } = await import('jspdf');
+    const { default: html2canvas } = await import('html2canvas');
+    const el = printRef.current;
+    if (!el) return null;
+    const canvas = await html2canvas(el, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff', windowWidth: 900 });
+    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
+    const margin = 10;
+    const usableW = pageW - margin * 2;
+    const imgH = (canvas.height * usableW) / canvas.width;
+    let yOffset = 0;
+    let remaining = imgH;
+    while (remaining > 0) {
+      const sliceH = Math.min(remaining, pageH - margin * 2);
+      const srcY = (yOffset / imgH) * canvas.height;
+      const srcH = (sliceH / imgH) * canvas.height;
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = srcH;
+      sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
+      if (yOffset > 0) pdf.addPage();
+      pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.85), 'JPEG', margin, margin, usableW, sliceH);
+      yOffset += sliceH;
+      remaining -= sliceH;
+    }
+    return pdf.output('blob');
+  };
+
+  const handleSubirDrive = async () => {
+    setDriveMsg(null);
+    setUploadingDrive(true);
+    try {
+      const status = await getDriveStatus();
+      if (!status?.connected) {
+        setDriveMsg({ tipo: 'error', texto: 'Google Drive no está conectado. Configuralo en Configuración.' });
+        return;
+      }
+      const blob = await generarPdfBlob();
+      if (!blob) { setDriveMsg({ tipo: 'error', texto: 'No se pudo generar el PDF.' }); return; }
+      const nombreArchivo = `Entrevista_${paciente.apellido}_${paciente.nombre}_${new Date().toISOString().slice(0, 10)}.pdf`;
+      const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }));
+      setDriveMsg(result
+        ? { tipo: 'ok', texto: `Subido a Drive: ${nombreArchivo}` }
+        : { tipo: 'error', texto: 'Error al subir el archivo a Drive.' }
+      );
+    } finally {
+      setUploadingDrive(false);
+    }
+  };
+
   return (
     <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in max-w-5xl mx-auto">
       <button
@@ -80,6 +139,7 @@ export default function EntrevistaPage() {
         </div>
 
         <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 text-sm text-slate-900 dark:text-slate-300 space-y-10 overflow-y-auto">
+          <div ref={printRef}>
 
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Datos Escolares</h3>
@@ -125,7 +185,7 @@ export default function EntrevistaPage() {
               <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs uppercase font-semibold">Antecedentes Familiares</label><textarea name="antecedentes_familiares" defaultValue={entrevista?.antecedentes_familiares} rows="2" className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white" /></div>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs font-semibold">Primeros balbuceos</label><input type="text" name="balbuceos" defaultValue={entrevista?.balbuceos} className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs font-semibold">Sostén cefálico</label><input type="text" name="sosten_cefalico" defaultValue={entrevista?.sosten_cefalico ?? entrevista?.balbuceos} className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
               <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs font-semibold">Se sentó a:</label><input type="text" name="sento" defaultValue={entrevista?.sento} className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
               <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs font-semibold">Caminó a:</label><input type="text" name="camino" defaultValue={entrevista?.camino} className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
               <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs font-semibold">Tomó pecho hasta:</label><input type="text" name="pecho" defaultValue={entrevista?.pecho} className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" /></div>
@@ -179,6 +239,9 @@ export default function EntrevistaPage() {
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinza" defaultChecked={entrevista?.motricidad_pinza} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Pinza fina / Toma el lápiz en pinza</label>
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinta_bien" defaultChecked={entrevista?.motricidad_pinta_bien} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Pinta bien / Sin salirse del contorno</label>
                 <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_tijera" defaultChecked={entrevista?.motricidad_tijera} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Dificultad para cortar con tijera</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_botones" defaultChecked={entrevista?.motricidad_botones} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Abrocha botones</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cierres" defaultChecked={entrevista?.motricidad_cierres} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Cierra y abre cierres</label>
+                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cordones" defaultChecked={entrevista?.motricidad_cordones} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Ata cordones</label>
               </div>
             </div>
           </section>
@@ -197,6 +260,16 @@ export default function EntrevistaPage() {
             </div>
           </section>
 
+          <section className="space-y-4">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Conducta y Observaciones Clínicas</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs uppercase font-semibold">Conducta</label><textarea name="conducta" defaultValue={entrevista?.conducta} rows="4" placeholder="Descripción de la conducta del paciente..." className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs uppercase font-semibold">Observaciones</label><textarea name="observaciones" defaultValue={entrevista?.observaciones} rows="4" placeholder="Observaciones generales del profesional..." className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs uppercase font-semibold">Intervenciones y Hospitalizaciones</label><textarea name="intervenciones" defaultValue={entrevista?.intervenciones} rows="4" placeholder="Cirugías, internaciones, intervenciones previas..." className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white" /></div>
+              <div><label className="text-slate-900 font-bold dark:text-pink-600 dark:text-slate-500 text-xs uppercase font-semibold">Controles de Salud</label><textarea name="controles_salud" defaultValue={entrevista?.controles_salud} rows="4" placeholder="Médico de cabecera, especialistas, controles periódicos..." className="w-full border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-lg p-2.5 mt-1 outline-none focus:border-pink-500 dark:focus:border-teal-500 resize-none text-slate-900 dark:text-white" /></div>
+            </div>
+          </section>
+
           <section className="space-y-4 bg-pink-100/50 dark:bg-teal-900/10 p-5 rounded-xl border border-purple-300 dark:border-teal-900/30">
             <h3 className="text-lg font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 border-b border-purple-300 dark:border-teal-900/30 pb-2">Encuadre Profesional</h3>
             <div className="grid grid-cols-2 gap-4">
@@ -205,25 +278,52 @@ export default function EntrevistaPage() {
             </div>
           </section>
 
+          </div>{/* fin printRef */}
         </form>
 
-        <div className="border-t border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-8 py-5 flex justify-end gap-4">
-          <button
-            type="button"
-            onClick={() => navigate(`/pacientes/${id}`)}
-            disabled={submitting}
-            className="px-6 py-2.5 font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors disabled:opacity-50"
-          >
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            form="entrevistaForm"
-            disabled={submitting}
-            className="bg-pink-500 dark:bg-teal-600 hover:bg-pink-400 dark:hover:bg-teal-500 text-slate-900 dark:text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-pink-500/20 dark:shadow-teal-500/20 transition-all disabled:opacity-50"
-          >
-            Guardar Entrevista
-          </button>
+        {driveMsg && (
+          <div className={`mx-8 mb-2 px-4 py-2 rounded-lg text-sm font-medium print:hidden ${driveMsg.tipo === 'ok' ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'}`}>
+            {driveMsg.texto}
+          </div>
+        )}
+
+        <div className="border-t border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-8 py-5 flex items-center justify-between gap-4 print:hidden">
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handlePrint}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-purple-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-700 font-semibold text-sm transition-all"
+            >
+              <Printer size={16} /> Imprimir
+            </button>
+            <button
+              type="button"
+              onClick={handleSubirDrive}
+              disabled={uploadingDrive}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-purple-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-700 font-semibold text-sm transition-all disabled:opacity-60"
+            >
+              {uploadingDrive ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              {uploadingDrive ? 'Subiendo...' : 'Subir a Drive'}
+            </button>
+          </div>
+          <div className="flex gap-4">
+            <button
+              type="button"
+              onClick={() => navigate(`/pacientes/${id}`)}
+              disabled={submitting}
+              className="px-6 py-2.5 font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              form="entrevistaForm"
+              disabled={submitting}
+              className="bg-pink-500 dark:bg-teal-600 hover:bg-pink-400 dark:hover:bg-teal-500 text-slate-900 dark:text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-pink-500/20 dark:shadow-teal-500/20 transition-all disabled:opacity-50"
+            >
+              Guardar Entrevista
+            </button>
+          </div>
         </div>
       </div>
     </div>
