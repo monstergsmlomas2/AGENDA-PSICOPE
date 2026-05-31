@@ -1,7 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById, guardarEntrevista } from '../services/pacientesService';
-import { subirArchivo, getDriveStatus } from '../services/driveService';
+import { subirArchivo, getDriveToken } from '../services/driveService';
 import { ArrowLeft, FileText, Printer, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
@@ -97,17 +97,42 @@ export default function EntrevistaPage() {
 
   const handleSubirDrive = async () => {
     setDriveMsg(null);
+
+    const tokenData = await getDriveToken();
+    if (!tokenData?.access_token) {
+      setDriveMsg({ tipo: 'error', texto: 'Drive no está conectado. Configuralo en Configuración.' });
+      return;
+    }
+
+    const elegirCarpeta = () => new Promise((resolve) => {
+      window.gapi.load('picker', () => {
+        const folderView = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
+          .setIncludeFolders(true)
+          .setSelectFolderEnabled(true)
+          .setMimeTypes('application/vnd.google-apps.folder');
+
+        new window.google.picker.PickerBuilder()
+          .addView(folderView)
+          .setOAuthToken(tokenData.access_token)
+          .setTitle('Elegí la carpeta de destino')
+          .setCallback((data) => {
+            if (data.action === window.google.picker.Action.PICKED) resolve(data.docs[0].id);
+            else if (data.action === window.google.picker.Action.CANCEL) resolve(null);
+          })
+          .build()
+          .setVisible(true);
+      });
+    });
+
+    const folderId = await elegirCarpeta();
+    if (!folderId) return;
+
     setUploadingDrive(true);
     try {
-      const status = await getDriveStatus();
-      if (!status?.connected) {
-        setDriveMsg({ tipo: 'error', texto: 'Google Drive no está conectado. Configuralo en Configuración.' });
-        return;
-      }
       const blob = await generarPdfBlob();
       if (!blob) { setDriveMsg({ tipo: 'error', texto: 'No se pudo generar el PDF.' }); return; }
       const nombreArchivo = `Entrevista_${paciente.apellido}_${paciente.nombre}_${new Date().toISOString().slice(0, 10)}.pdf`;
-      const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }));
+      const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }), folderId);
       setDriveMsg(result
         ? { tipo: 'ok', texto: `Subido a Drive: ${nombreArchivo}` }
         : { tipo: 'error', texto: 'Error al subir el archivo a Drive.' }
