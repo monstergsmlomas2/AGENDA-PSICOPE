@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacientes, crearPaciente, actualizarPaciente, eliminarPaciente, getPacientesSinSesion } from '../services/pacientesService';
 import { getObrasSociales } from '../services/obrasSocialesService';
@@ -123,6 +123,7 @@ const imprimirConsentimiento = ({ nombre, apellido, dni, fechaNacimiento }) => {
 
 export default function Pacientes() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [pacientes, setPacientes] = useState([]);
   const [obrasSocialesList, setObrasSocialesList] = useState([]);
   const [pacientesSinSesion, setPacientesSinSesion] = useState([]);
@@ -233,6 +234,13 @@ export default function Pacientes() {
     setShowNewModal(true);
   };
 
+  useEffect(() => {
+    if (location.state?.openNew) {
+      openNewPaciente();
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
+
   const openEditPaciente = (p) => {
     setNombre(p.nombre || "");
     setApellido(p.apellido || "");
@@ -266,13 +274,20 @@ export default function Pacientes() {
       if (editandoPaciente) {
         await actualizarPaciente(editandoPaciente, datos);
         toast.success('Paciente actualizado', 'Los datos se guardaron correctamente.');
+        resetForm();
+        setShowNewModal(false);
+        await cargarPacientes();
       } else {
-        await crearPaciente({ ...datos, consentimiento });
+        const nuevo = await crearPaciente({ ...datos, consentimiento });
         toast.success('Paciente creado', 'El paciente fue registrado correctamente.');
+        resetForm();
+        setShowNewModal(false);
+        if (location.state?.returnTo === 'turnos' && nuevo?.id) {
+          navigate('/turnos', { state: { pacienteId: nuevo.id } });
+          return;
+        }
+        await cargarPacientes();
       }
-      resetForm();
-      setShowNewModal(false);
-      await cargarPacientes();
     } catch (err) {
       toast.error('Error', err?.message || 'No se pudieron guardar los datos del paciente.');
     } finally {

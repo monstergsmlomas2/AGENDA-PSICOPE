@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, List, Plus, Clock, MapPin, Trash2, ChevronLeft, ChevronRight, User, ShieldCheck, Check, X, AlertTriangle, Bell, AlertCircle, Pencil, MessageCircle } from 'lucide-react';
 import { getTurnos, crearTurno, eliminarTurno, actualizarEstadoTurno, actualizarTurno, enviarRecordatorio } from '../services/turnosService';
-import { getPacientes } from '../services/pacientesService';
+import { getPacientes, crearPaciente } from '../services/pacientesService';
 import { getConsultorios } from '../services/consultoriosService';
 import { useToast, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
@@ -71,6 +71,15 @@ export default function Turnos() {
   const [tipoTurno, setTipoTurno] = useState("tratamiento");
   const [importeCustom, setImporteCustom] = useState("");
 
+  // Mini-formulario nuevo paciente inline
+  const [showNuevoPaciente, setShowNuevoPaciente] = useState(false);
+  const [npNombre, setNpNombre] = useState('');
+  const [npApellido, setNpApellido] = useState('');
+  const [npDni, setNpDni] = useState('');
+  const [npTelefono, setNpTelefono] = useState('');
+  const [npErrors, setNpErrors] = useState({});
+  const [npSubmitting, setNpSubmitting] = useState(false);
+
   const { confirm, ConfirmModal } = useConfirm();
 
   const cargarData = async () => {
@@ -124,6 +133,31 @@ export default function Turnos() {
   }, []);
 
   const pacienteSeleccionado = pacientes.find(p => p.id === Number(pacienteId));
+
+  const handleGuardarNuevoPaciente = async () => {
+    const errors = {};
+    if (!npNombre.trim() || npNombre.trim().length < 2) errors.npNombre = 'Mínimo 2 caracteres.';
+    if (!npApellido.trim() || npApellido.trim().length < 2) errors.npApellido = 'Mínimo 2 caracteres.';
+    if (!npDni.trim()) errors.npDni = 'El DNI es obligatorio.';
+    if (npTelefono && !/^[\d\s\-().+]+$/.test(npTelefono)) errors.npTelefono = 'Formato inválido.';
+    if (Object.keys(errors).length) { setNpErrors(errors); return; }
+    setNpSubmitting(true);
+    try {
+      const nuevo = await crearPaciente({ nombre: npNombre.trim(), apellido: npApellido.trim(), dni: npDni.trim(), telefono: npTelefono.trim() });
+      if (nuevo?.id) {
+        setPacientes(prev => [...prev, nuevo]);
+        setPacienteId(String(nuevo.id));
+        setFormErrors(prev => ({ ...prev, pacienteId: '' }));
+        toast.success('Paciente creado', `${nuevo.nombre} ${nuevo.apellido} fue registrado.`);
+      }
+      setShowNuevoPaciente(false);
+      setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({});
+    } catch {
+      toast.error('Error', 'No se pudo crear el paciente.');
+    } finally {
+      setNpSubmitting(false);
+    }
+  };
 
   const validateTurnoForm = () => {
     const errors = {};
@@ -894,7 +928,7 @@ export default function Turnos() {
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editingTurno ? 'Editar Turno' : 'Nuevo Turno'}</h2>
                 <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editingTurno ? 'Modificá los datos del turno.' : 'Asigná fecha, hora y consultorio al paciente.'}</p>
               </div>
-              <button onClick={() => { setShowModal(false); setEditingTurno(null); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
+              <button onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
@@ -904,30 +938,89 @@ export default function Turnos() {
                     <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
                     <button
                       type="button"
-                      onClick={() => navigate('/pacientes', { state: { openNew: true, returnTo: 'turnos' } })}
+                      onClick={() => { setShowNuevoPaciente(v => !v); setNpErrors({}); }}
                       className="flex items-center gap-1 text-xs text-pink-600 dark:text-teal-400 hover:underline font-semibold"
                     >
-                      <Plus size={13} /> Nuevo paciente
+                      <Plus size={13} /> {showNuevoPaciente ? 'Cancelar' : 'Nuevo paciente'}
                     </button>
                   </div>
-                  <select
-                    value={pacienteId}
-                    onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
-                    onBlur={() => {
-                      if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'Debés seleccionar un paciente.' }));
-                      else setFormErrors(prev => ({ ...prev, pacienteId: '' }));
-                    }}
-                    className={inputClass('pacienteId')}
-                  >
-                    <option value="">Seleccionar Paciente...</option>
-                    {pacientes.map(p => (
-                      <option key={p.id} value={p.id}>{p.apellido}, {p.nombre} (DNI: {p.dni})</option>
-                    ))}
-                  </select>
-                  {formErrors.pacienteId && (
-                    <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1 font-medium">
-                      <AlertCircle size={12} /> {formErrors.pacienteId}
-                    </p>
+
+                  {showNuevoPaciente ? (
+                    <div className="bg-purple-50 dark:bg-[#0f1115] border border-purple-300 dark:border-[#333] rounded-xl p-4 space-y-3">
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Datos del nuevo paciente</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Nombre *"
+                            value={npNombre}
+                            onChange={(e) => { setNpNombre(e.target.value); setNpErrors(prev => ({ ...prev, npNombre: '' })); }}
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                          />
+                          {npErrors.npNombre && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npNombre}</p>}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Apellido *"
+                            value={npApellido}
+                            onChange={(e) => { setNpApellido(e.target.value); setNpErrors(prev => ({ ...prev, npApellido: '' })); }}
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                          />
+                          {npErrors.npApellido && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npApellido}</p>}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="DNI *"
+                            value={npDni}
+                            onChange={(e) => { setNpDni(e.target.value); setNpErrors(prev => ({ ...prev, npDni: '' })); }}
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                          />
+                          {npErrors.npDni && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npDni}</p>}
+                        </div>
+                        <div>
+                          <input
+                            type="text"
+                            placeholder="Teléfono (opcional)"
+                            value={npTelefono}
+                            onChange={(e) => { setNpTelefono(e.target.value); setNpErrors(prev => ({ ...prev, npTelefono: '' })); }}
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                          />
+                          {npErrors.npTelefono && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npTelefono}</p>}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleGuardarNuevoPaciente}
+                        disabled={npSubmitting}
+                        className="w-full py-2 rounded-lg bg-pink-500 hover:bg-pink-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white text-sm font-bold transition-colors disabled:opacity-50"
+                      >
+                        {npSubmitting ? 'Guardando...' : 'Crear y seleccionar paciente'}
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <select
+                        value={pacienteId}
+                        onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
+                        onBlur={() => {
+                          if (!pacienteId) setFormErrors(prev => ({ ...prev, pacienteId: 'Debés seleccionar un paciente.' }));
+                          else setFormErrors(prev => ({ ...prev, pacienteId: '' }));
+                        }}
+                        className={inputClass('pacienteId')}
+                      >
+                        <option value="">Seleccionar Paciente...</option>
+                        {pacientes.map(p => (
+                          <option key={p.id} value={p.id}>{p.apellido}, {p.nombre} (DNI: {p.dni})</option>
+                        ))}
+                      </select>
+                      {formErrors.pacienteId && (
+                        <p className="mt-1.5 text-xs text-red-500 dark:text-red-400 flex items-center gap-1 font-medium">
+                          <AlertCircle size={12} /> {formErrors.pacienteId}
+                        </p>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -1071,7 +1164,7 @@ export default function Turnos() {
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="turnoForm" loading={submitting}>
                 {editingTurno ? 'Guardar Cambios' : 'Agendar Turno'}
               </Button>
