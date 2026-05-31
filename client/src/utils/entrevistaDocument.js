@@ -152,7 +152,7 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
       border-top: 1px solid #c4b5fd;
       padding-top: 10px;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       gap: 60px;
     }
     .firma { text-align: center; }
@@ -337,6 +337,10 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
 
   <!-- FIRMA -->
   <div class="footer">
+    <div class="firma">
+      <div class="firma-line"></div>
+      <div class="firma-label">Firma Padre / Madre / Tutor</div>
+    </div>
     <div class="firma">
       <div class="firma-line"></div>
       <div class="firma-label">Firma y Sello Profesional</div>
