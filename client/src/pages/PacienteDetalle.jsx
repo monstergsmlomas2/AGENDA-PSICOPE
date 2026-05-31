@@ -651,14 +651,6 @@ export default function PacienteDetalle() {
     setCargandoPorSeccion(prev => ({ ...prev, [seccion]: false }));
   };
 
-  const handleSeleccionarArchivoSeccion = (seccion, file) => {
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error('Error', 'El archivo supera los 10 MB.');
-      return;
-    }
-    setArchivoPendientePorSeccion(prev => ({ ...prev, [seccion]: file }));
-  };
-
   const handleSeleccionarArchivoSeccion = async (seccion, file) => {
     if (file.size > 10 * 1024 * 1024) {
       toast.error('Error', 'El archivo supera los 10 MB.');

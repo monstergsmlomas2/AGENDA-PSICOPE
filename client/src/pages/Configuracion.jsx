@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
 import { useConfirm } from '../hooks/useConfirm';
@@ -275,7 +275,7 @@ export default function Configuracion() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
-      {/* â”€â”€â”€ Header â”€â”€â”€ */}
+      {/* â"€â"€â"€ Header â"€â"€â"€ */}
       <div className="flex items-center gap-3">
         <div className="bg-pink-100 dark:bg-teal-500/15 p-2 rounded-xl">
           <Settings size={22} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
@@ -288,29 +288,29 @@ export default function Configuracion() {
 
       {/* ─── SECCIÓN GOOGLE DRIVE ─── */}
       <ConfirmModal />
-      <div className=”bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-sm”>
-        <div className=”flex items-center gap-3 mb-5”>
-          <div className=”bg-blue-100 dark:bg-blue-500/10 p-2.5 rounded-xl”>
-            <HardDrive size={20} className=”text-blue-600 dark:text-blue-400” />
+      <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="bg-blue-100 dark:bg-blue-500/10 p-2.5 rounded-xl">
+            <HardDrive size={20} className="text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h2 className=”text-base font-bold text-slate-900 dark:text-white”>Google Drive</h2>
-            <p className=”text-xs text-slate-500 dark:text-slate-400”>Adjuntos de pacientes guardados en tu Drive personal</p>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Google Drive</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Adjuntos de pacientes guardados en tu Drive personal</p>
           </div>
         </div>
 
         {loadingDrive ? (
-          <div className=”flex items-center gap-2 text-slate-400”>
-            <Loader2 size={16} className=”animate-spin” />
-            <span className=”text-sm”>Verificando conexión...</span>
+          <div className="flex items-center gap-2 text-slate-400">
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm">Verificando conexión...</span>
           </div>
         ) : driveConnected ? (
-          <div className=”flex items-center justify-between flex-wrap gap-3”>
-            <div className=”flex items-center gap-2”>
-              <span className=”inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30”>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30">
                 <CheckCircle size={13} /> Conectado
               </span>
-              <span className=”text-sm text-slate-500 dark:text-slate-400”>Los archivos se guardan en “Agenda Psicope” en tu Drive</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Los archivos se guardan en "Agenda Psicope" en tu Drive</span>
             </div>
             <button
               onClick={async () => {
@@ -328,26 +328,26 @@ export default function Configuracion() {
                 toast.success('Drive desconectado', 'Ya no se pueden acceder a los archivos desde la app.');
               }}
               disabled={disconnectingDrive}
-              className=”inline-flex items-center gap-2 px-4 py-2 text-sm font-bold border border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-60”
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold border border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-60"
             >
-              {disconnectingDrive ? <Loader2 size={14} className=”animate-spin” /> : null}
+              {disconnectingDrive ? <Loader2 size={14} className="animate-spin" /> : null}
               Desconectar
             </button>
           </div>
         ) : (
-          <div className=”flex items-center justify-between flex-wrap gap-3”>
-            <div className=”flex items-center gap-2”>
-              <span className=”inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700”>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                 No conectado
               </span>
-              <span className=”text-sm text-slate-500 dark:text-slate-400”>Conectá tu cuenta para adjuntar archivos a los pacientes</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Conectá tu cuenta para adjuntar archivos a los pacientes</span>
             </div>
             <button
               onClick={async () => {
                 const data = await getDriveAuthUrl();
                 if (data?.url) window.location.href = data.url;
               }}
-              className=”inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors”
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors"
             >
               <HardDrive size={14} /> Conectar Google Drive
             </button>
@@ -355,7 +355,7 @@ export default function Configuracion() {
         )}
       </div>
 
-      {/* â”€â”€â”€ Sección: Notificaciones WhatsApp â”€â”€â”€ */}
+      {/* â"€â"€â"€ Sección: Notificaciones WhatsApp â"€â"€â"€ */}
       <div className="bg-white dark:bg-gray-900 border border-purple-300 dark:border-gray-700 rounded-2xl overflow-hidden">
         {/* Título de sección */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-purple-300 dark:border-gray-700">
@@ -364,7 +364,7 @@ export default function Configuracion() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* â”€â”€â”€ Switch: Recordatorios a pacientes â”€â”€â”€ */}
+          {/* â"€â"€â"€ Switch: Recordatorios a pacientes â"€â"€â"€ */}
           <SwitchToggle
             valor={notificacionesPacientes}
             onChange={setNotificacionesPacientes}
@@ -372,10 +372,10 @@ export default function Configuracion() {
             descripcion={`Se envía a las ${horaEnvio} hs del día anterior al turno`}
           />
 
-          {/* â”€â”€â”€ Divisor â”€â”€â”€ */}
+          {/* â"€â"€â"€ Divisor â"€â"€â"€ */}
           <div className="border-t border-purple-300 dark:border-gray-700" />
 
-          {/* â”€â”€â”€ Switch: Recordatorios al profesional â”€â”€â”€ */}
+          {/* â"€â"€â"€ Switch: Recordatorios al profesional â"€â"€â"€ */}
           <SwitchToggle
             valor={notificacionesProfesional}
             onChange={setNotificacionesProfesional}
@@ -383,7 +383,7 @@ export default function Configuracion() {
             descripcion="Se envía un resumen con todos los turnos del día siguiente"
           />
 
-          {/* â”€â”€â”€ Teléfono del profesional (solo si activo) â”€â”€â”€ */}
+          {/* â"€â"€â"€ Teléfono del profesional (solo si activo) â"€â"€â"€ */}
           {notificacionesProfesional && (
             <div className="space-y-2 pl-0">
               <label className="block text-sm font-medium text-slate-900 dark:text-white">
@@ -402,7 +402,7 @@ export default function Configuracion() {
             </div>
           )}
 
-          {/* â”€â”€â”€ Horario de envío â”€â”€â”€ */}
+          {/* â"€â"€â"€ Horario de envío â"€â"€â"€ */}
           <div className="space-y-3">
             <h3 className="text-sm font-medium text-slate-900 dark:text-white">Horario de envío</h3>
             <p className="text-xs text-slate-900 dark:text-gray-400">
@@ -421,10 +421,10 @@ export default function Configuracion() {
             </p>
           </div>
 
-          {/* â”€â”€â”€ Divisor â”€â”€â”€ */}
+          {/* â"€â"€â"€ Divisor â"€â"€â"€ */}
           <div className="border-t border-purple-300 dark:border-gray-700" />
 
-          {/* â”€â”€â”€ Plantillas de mensajes (colapsable) â”€â”€â”€ */}
+          {/* â"€â"€â"€ Plantillas de mensajes (colapsable) â"€â"€â"€ */}
           <div>
             <button
               onClick={() => setPlantillasAbiertas(!plantillasAbiertas)}
@@ -481,7 +481,7 @@ export default function Configuracion() {
           </div>
         </div>
 
-        {/* â”€â”€â”€ Footer con botón guardar â”€â”€â”€ */}
+        {/* â"€â"€â"€ Footer con botón guardar â"€â"€â"€ */}
         <div className="px-6 py-4 bg-purple-100/50 dark:bg-gray-950/50 border-t border-purple-300 dark:border-gray-700 flex justify-end">
           <button
             onClick={handleGuardar}
@@ -498,7 +498,7 @@ export default function Configuracion() {
         </div>
       </div>
 
-      {/* â”€â”€â”€ Sección: Recordatorios por WhatsApp â”€â”€â”€ */}
+      {/* â"€â"€â"€ Sección: Recordatorios por WhatsApp â"€â"€â"€ */}
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden">
         {/* Título de sección */}
         <div className="flex items-center gap-3 px-6 py-4 border-b border-purple-300 dark:border-slate-700">
@@ -610,7 +610,7 @@ export default function Configuracion() {
         </div>
       </div>
 
-      {/* â”€â”€â”€ Sección: Historial de envíos recientes â”€â”€â”€ */}
+      {/* â"€â"€â"€ Sección: Historial de envíos recientes â"€â"€â"€ */}
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden">
         <div className="flex items-center gap-3 px-6 py-4 border-b border-purple-300 dark:border-slate-700">
           <History size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
