@@ -87,7 +87,7 @@ function ProtectedLayout({ children }) {
   }, []);
 
   return (
-    <div className="flex h-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
+    <div className="flex h-[100dvh] w-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
       {/* Sidebar — oculto en móvil, visible en desktop */}
       <div className="hidden md:flex">
         <Sidebar
