@@ -49,6 +49,25 @@ router.get('/auth-url', (req, res) => {
   res.json({ url });
 });
 
+// GET /drive/token — devuelve el access_token para el Google Picker en el cliente
+router.get('/token', async (req, res) => {
+  try {
+    let tokens = await getTokensFromDB(req.userId);
+    if (!tokens) return res.status(401).json({ error: 'drive_not_connected' });
+
+    const { tokens: refreshed, refreshed: didRefresh } = await refreshTokensIfNeeded(tokens);
+    if (didRefresh) {
+      await saveTokensToDB(req.userId, refreshed);
+      tokens = refreshed;
+    }
+
+    res.json({ access_token: tokens.access_token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener token' });
+  }
+});
+
 // GET /drive/status
 router.get('/status', async (req, res) => {
   try {
@@ -116,7 +135,7 @@ router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => 
     const drive = getAuthenticatedDrive(tokens);
     const folderId = await getOrCreateFolder(drive, req.params.pacienteId);
 
-    const fileName = `${Date.now()}-${req.file.originalname}`;
+    const fileName = req.file.originalname;
     const result = await drive.files.create({
       requestBody: { name: fileName, parents: [folderId] },
       media: { mimeType: req.file.mimetype, body: bufferToStream(req.file.buffer) },
@@ -127,6 +146,38 @@ router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => 
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Error al subir archivo' });
+  }
+});
+
+// POST /drive/vincular/:pacienteId — copia un archivo existente del Drive a la carpeta del paciente
+router.post('/vincular/:pacienteId', async (req, res) => {
+  try {
+    const { fileId, fileName, mimeType } = req.body;
+    if (!fileId || !fileName) return res.status(400).json({ error: 'fileId y fileName requeridos' });
+
+    let tokens = await getTokensFromDB(req.userId);
+    if (!tokens) return res.status(401).json({ error: 'drive_not_connected' });
+
+    const { tokens: refreshed, refreshed: didRefresh } = await refreshTokensIfNeeded(tokens);
+    if (didRefresh) {
+      await saveTokensToDB(req.userId, refreshed);
+      tokens = refreshed;
+    }
+
+    const drive = getAuthenticatedDrive(tokens);
+    const folderId = await getOrCreateFolder(drive, req.params.pacienteId);
+
+    // Copiar el archivo a la carpeta del paciente
+    const result = await drive.files.copy({
+      fileId,
+      requestBody: { name: fileName, parents: [folderId] },
+      fields: 'id,name,webViewLink,mimeType,size,createdTime',
+    });
+
+    res.json(result.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al vincular archivo' });
   }
 });
 

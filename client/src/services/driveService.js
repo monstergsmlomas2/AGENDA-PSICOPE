@@ -2,6 +2,14 @@ import { apiGet, apiDelete } from './api.js';
 import API_URL from '../config/api.js';
 import { getToken } from './authService.js';
 
+export const getDriveToken = async () => {
+  try {
+    return await apiGet('/drive/token');
+  } catch {
+    return null;
+  }
+};
+
 export const getDriveStatus = async () => {
   try {
     return await apiGet('/drive/status');

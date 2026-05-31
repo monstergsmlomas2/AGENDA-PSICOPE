@@ -11,7 +11,7 @@ import {
   Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
   Paperclip, Upload, ExternalLink, File, Image, Loader2
 } from 'lucide-react';
-import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
+import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo, getDriveToken } from '../services/driveService';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -589,6 +589,60 @@ export default function PacienteDetalle() {
     toast.success('Archivo eliminado', '');
   };
 
+  const handlePickerDrive = async () => {
+    const data = await getDriveToken();
+    if (!data?.access_token) {
+      toast.error('Error', 'No se pudo obtener el token de Drive.');
+      return;
+    }
+
+    const accessToken = data.access_token;
+
+    const loadPicker = () => {
+      window.gapi.load('picker', () => {
+        const picker = new window.google.picker.PickerBuilder()
+          .addView(new window.google.picker.DocsView()
+            .setIncludeFolders(false)
+            .setSelectFolderEnabled(false))
+          .setOAuthToken(accessToken)
+          .setCallback(async (pickerData) => {
+            if (pickerData.action === window.google.picker.Action.PICKED) {
+              const doc = pickerData.docs[0];
+              // Vincular el archivo: copiarlo a la carpeta del paciente vía servidor
+              try {
+                const res = await fetch(`/drive/vincular/${id}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${(await import('../services/authService.js')).getToken()}`,
+                  },
+                  body: JSON.stringify({ fileId: doc.id, fileName: doc.name, mimeType: doc.mimeType }),
+                });
+                if (res.ok) {
+                  const newFile = await res.json();
+                  toast.success('Archivo vinculado', doc.name);
+                  const updated = await getArchivos(id);
+                  setArchivos(Array.isArray(updated) ? updated : []);
+                } else {
+                  toast.error('Error', 'No se pudo vincular el archivo.');
+                }
+              } catch {
+                toast.error('Error', 'No se pudo vincular el archivo.');
+              }
+            }
+          })
+          .build();
+        picker.setVisible(true);
+      });
+    };
+
+    if (window.gapi) {
+      loadPicker();
+    } else {
+      toast.error('Error', 'La API de Google no está disponible. Recargá la página.');
+    }
+  };
+
   const getFileIcon = (mimeType) => {
     if (mimeType?.includes('pdf')) return <FileText size={18} className="text-red-500" />;
     if (mimeType?.includes('image')) return <Image size={18} className="text-green-500" />;
@@ -1159,12 +1213,20 @@ export default function PacienteDetalle() {
                     <Upload size={20} className="mx-auto mb-2 text-slate-400" />
                     <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">Arrastrá un archivo o hacé clic para seleccionar</p>
                     <p className="text-xs text-slate-400 mb-3">PDF, JPG, PNG, DOC, DOCX · Máx 10 MB</p>
-                    <button
-                      onClick={() => fileInputRef.current?.click()}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-slate-900 dark:text-slate-200"
-                    >
-                      <Upload size={14} /> Seleccionar archivo
-                    </button>
+                    <div className="flex items-center gap-2 justify-center flex-wrap">
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-slate-900 dark:text-slate-200"
+                      >
+                        <Upload size={14} /> Subir archivo
+                      </button>
+                      <button
+                        onClick={handlePickerDrive}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-white dark:bg-slate-900 border border-blue-300 dark:border-blue-700 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors text-blue-600 dark:text-blue-400"
+                      >
+                        <ExternalLink size={14} /> Seleccionar de mi Drive
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
@@ -1185,7 +1247,7 @@ export default function PacienteDetalle() {
                       <div className="shrink-0">{getFileIcon(archivo.mimeType)}</div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-900 dark:text-slate-200 truncate max-w-[200px]">
-                          {archivo.name?.replace(/^\d+-/, '')}
+                          {archivo.name}
                         </p>
                         <p className="text-xs text-slate-400">
                           {formatFileSize(archivo.size)}{archivo.createdTime ? ` · ${new Date(archivo.createdTime).toLocaleDateString('es-AR')}` : ''}
