@@ -164,17 +164,18 @@ export default function Pagos() {
     return null;
   };
 
-  const handleRegistrarPagoDesdeTurno = async (turno) => {
+  const handleRegistrarPagoDesdeTurno = (turno) => {
     const monto = importeTurno(turno);
     const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
+    const fechaTurno = turno.fecha ? turno.fecha.slice(0, 10) : hoy.toISOString().split('T')[0];
     resetForm();
     setPacienteId(String(turno.paciente_id));
-    setFecha(turno.fecha.slice(0, 10));
+    setFecha(fechaTurno);
     setConcepto(concepto);
     if (monto != null) setMonto(String(monto));
-    setShowModal(true);
-    // guardamos referencia al turno para enviarlo al crear
+    setEstadoPago('pagado');
     setPendingTurnoId(turno.id);
+    setShowModal(true);
   };
 
   const toast = useToast();
