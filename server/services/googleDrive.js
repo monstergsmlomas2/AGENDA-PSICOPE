@@ -26,11 +26,26 @@ export async function refreshTokensIfNeeded(tokens) {
   return { tokens: credentials, refreshed: true };
 }
 
-export async function getOrCreateFolder(drive, pacienteId, pacienteNombre) {
+async function findOrCreateFolder(drive, name, parentId) {
+  const search = await drive.files.list({
+    q: `name='${name}' and mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents and trashed=false`,
+    fields: 'files(id)',
+    spaces: 'drive',
+  });
+  if (search.data.files.length > 0) return search.data.files[0].id;
+
+  const created = await drive.files.create({
+    requestBody: { name, mimeType: 'application/vnd.google-apps.folder', parents: [parentId] },
+    fields: 'id',
+  });
+  return created.data.id;
+}
+
+export async function getOrCreateFolder(drive, pacienteId, subfolderName = null) {
   const rootName = 'Agenda Psicope';
   const folderName = `Psicope-Paciente-${pacienteId}`;
 
-  // Buscar carpeta raíz
+  // Carpeta raíz
   const rootSearch = await drive.files.list({
     q: `name='${rootName}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
     fields: 'files(id)',
@@ -42,36 +57,21 @@ export async function getOrCreateFolder(drive, pacienteId, pacienteNombre) {
     rootId = rootSearch.data.files[0].id;
   } else {
     const root = await drive.files.create({
-      requestBody: {
-        name: rootName,
-        mimeType: 'application/vnd.google-apps.folder',
-      },
+      requestBody: { name: rootName, mimeType: 'application/vnd.google-apps.folder' },
       fields: 'id',
     });
     rootId = root.data.id;
   }
 
-  // Buscar carpeta del paciente
-  const folderSearch = await drive.files.list({
-    q: `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${rootId}' in parents and trashed=false`,
-    fields: 'files(id)',
-    spaces: 'drive',
-  });
+  // Carpeta del paciente
+  const pacienteId_ = await findOrCreateFolder(drive, folderName, rootId);
 
-  if (folderSearch.data.files.length > 0) {
-    return folderSearch.data.files[0].id;
+  // Subcarpeta de sección (Informes, Evaluaciones, etc.)
+  if (subfolderName) {
+    return await findOrCreateFolder(drive, subfolderName, pacienteId_);
   }
 
-  const folder = await drive.files.create({
-    requestBody: {
-      name: folderName,
-      mimeType: 'application/vnd.google-apps.folder',
-      parents: [rootId],
-    },
-    fields: 'id',
-  });
-
-  return folder.data.id;
+  return pacienteId_;
 }
 
 export function bufferToStream(buffer) {

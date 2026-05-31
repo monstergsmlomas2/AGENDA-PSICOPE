@@ -88,7 +88,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
         return;
       }
       const nombreArchivo = `Entrevista_${paciente.apellido}_${paciente.nombre}_${new Date().toISOString().slice(0, 10)}.pdf`;
-      const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }), folderId);
+      const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }), { seccion: 'Entrevista de Admisión' });
       setDriveMsg(result
         ? { tipo: 'ok', texto: `Subido a Drive: ${nombreArchivo}` }
         : { tipo: 'error', texto: 'Error al subir el archivo a Drive.' }

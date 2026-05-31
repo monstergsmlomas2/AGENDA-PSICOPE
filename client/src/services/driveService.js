@@ -42,20 +42,22 @@ export const crearCarpeta = async (nombre, parentId = null) => {
   }
 };
 
-export const getArchivos = async (pacienteId) => {
+export const getArchivos = async (pacienteId, seccion = null) => {
   try {
-    return await apiGet(`/drive/archivos/${pacienteId}`);
+    const query = seccion ? `?seccion=${encodeURIComponent(seccion)}` : '';
+    return await apiGet(`/drive/archivos/${pacienteId}${query}`);
   } catch {
     return [];
   }
 };
 
-export const subirArchivo = async (pacienteId, file, folderId = null) => {
+export const subirArchivo = async (pacienteId, file, { folderId = null, seccion = null } = {}) => {
   try {
     const token = getToken();
     const formData = new FormData();
     formData.append('file', file);
     if (folderId) formData.append('folderId', folderId);
+    if (seccion) formData.append('seccion', seccion);
 
     const res = await fetch(`${API_URL}/drive/archivos/${pacienteId}`, {
       method: 'POST',

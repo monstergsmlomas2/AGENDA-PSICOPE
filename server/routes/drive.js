@@ -103,10 +103,10 @@ router.get('/archivos/:pacienteId', async (req, res) => {
     }
 
     const drive = getAuthenticatedDrive(tokens);
-    const folderId = await getOrCreateFolder(drive, req.params.pacienteId);
+    const folderId = await getOrCreateFolder(drive, req.params.pacienteId, req.query.seccion || null);
 
     const result = await drive.files.list({
-      q: `'${folderId}' in parents and trashed=false`,
+      q: `'${folderId}' in parents and mimeType!='application/vnd.google-apps.folder' and trashed=false`,
       fields: 'files(id,name,size,mimeType,createdTime,webViewLink)',
       orderBy: 'createdTime desc',
     });
@@ -167,7 +167,7 @@ router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => 
     }
 
     const drive = getAuthenticatedDrive(tokens);
-    const targetFolderId = req.body.folderId || await getOrCreateFolder(drive, req.params.pacienteId);
+    const targetFolderId = req.body.folderId || await getOrCreateFolder(drive, req.params.pacienteId, req.body.seccion || null);
 
     const fileName = req.file.originalname;
     const result = await drive.files.create({
@@ -186,7 +186,7 @@ router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => 
 // POST /drive/vincular/:pacienteId — copia un archivo existente del Drive a la carpeta del paciente
 router.post('/vincular/:pacienteId', async (req, res) => {
   try {
-    const { fileId, fileName, mimeType } = req.body;
+    const { fileId, fileName, mimeType, seccion } = req.body;
     if (!fileId || !fileName) return res.status(400).json({ error: 'fileId y fileName requeridos' });
 
     let tokens = await getTokensFromDB(req.userId);
@@ -199,7 +199,7 @@ router.post('/vincular/:pacienteId', async (req, res) => {
     }
 
     const drive = getAuthenticatedDrive(tokens);
-    const folderId = await getOrCreateFolder(drive, req.params.pacienteId);
+    const folderId = await getOrCreateFolder(drive, req.params.pacienteId, seccion || null);
 
     // Copiar el archivo a la carpeta del paciente
     const result = await drive.files.copy({
