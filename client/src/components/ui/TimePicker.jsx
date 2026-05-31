@@ -33,7 +33,7 @@ function Drum({ items, selected, onSelect }) {
             <div
               key={item}
               onClick={() => onSelect(item)}
-              style={{ height: itemHeight, scrollSnapAlign: 'start' }}
+              style={{ height: itemHeight, scrollSnapAlign: 'center' }}
               className={`flex items-center justify-center text-xl font-bold cursor-pointer transition-colors select-none ${item === selected ? 'text-pink-500 dark:text-teal-400' : 'text-slate-900 dark:text-gray-500'}`}
             >
               {item}
