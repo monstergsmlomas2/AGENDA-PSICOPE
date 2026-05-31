@@ -279,7 +279,7 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
       <div>
         <div class="family-title" style="color:#555;font-size:9pt;margin-bottom:6px">Motricidad Gruesa</div>
         <div class="checks-row" style="flex-direction:column;gap:5px">
-          <span class="check-item"><span class="check-symbol">${check(e.motricidad_acorde)}</span> ¿Es acorde a la edad?</span>
+          <span class="check-item">¿Es acorde a la edad? <strong>${e.motricidad_acorde_edad === 'si' ? 'Sí' : e.motricidad_acorde_edad === 'no' ? 'No' : '—'}</strong></span>
           <span class="check-item"><span class="check-symbol">${check(e.motricidad_dificultad_peso)}</span> Dificultad para agarrar objetos pesados</span>
           <span class="check-item"><span class="check-symbol">${check(e.motricidad_coordinado)}</span> Movimientos coordinados</span>
         </div>
@@ -305,7 +305,6 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
       ${textarea('Socialización y Juego', e.socializacion)}
       ${textarea('Uso de pantallas (Celular/PC)', e.pantallas)}
       ${field('Miedos', e.miedos)}
-      ${field('Persona muy significativa', e.persona_significativa)}
       ${field('¿Qué le gusta hacer?', e.gusta_hacer)}
       ${field('¿Qué le disgusta?', e.disgusta)}
     </div>
@@ -317,10 +316,32 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
   <section>
     <div class="section-title">Conducta y Observaciones Clínicas</div>
     <div class="grid-2">
-      ${textarea('Conducta', e.conducta)}
+      <div>
+        <div class="field-label">Conducta</div>
+        <div class="checks-row" style="flex-direction:column;gap:5px;margin-top:4px">
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_desafiante)}</span> Desafiante</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_tranquilo)}</span> Tranquilo/a</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_inquieto)}</span> Inquieto/a</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_desobediente)}</span> Desobediente</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_ansioso)}</span> Ansioso/a</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_autolesiona)}</span> Se auto lesiona</span>
+        </div>
+      </div>
       ${textarea('Observaciones', e.observaciones)}
       ${textarea('Intervenciones y Hospitalizaciones', e.intervenciones)}
-      ${textarea('Controles de Salud', e.controles_salud)}
+      <div>
+        ${textarea('Controles de Salud', e.controles_salud)}
+        ${textarea('Tratamientos Anteriores', e.tratamientos_anteriores)}
+      </div>
+    </div>
+  </section>
+
+  <!-- LENGUAJE Y COMUNICACIÓN -->
+  <section>
+    <div class="section-title">Lenguaje y Comunicación</div>
+    <div class="grid-2">
+      ${field('Primeras palabras', e.lenguaje_primeras_palabras)}
+      ${textarea('Dificultades', e.lenguaje_dificultades)}
     </div>
   </section>
 
