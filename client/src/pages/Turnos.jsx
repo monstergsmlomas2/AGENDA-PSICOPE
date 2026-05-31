@@ -344,7 +344,7 @@ export default function Turnos() {
     const end = new Date(start.getTime() + 30 * 60 * 1000);
     return {
       id: t.id,
-      title: `${t.hora.slice(0, 5)} \u00b7 ${t.paciente_apellido}`,
+      title: `${t.hora.slice(0, 5)} \u00b7 ${t.paciente_apellido}${t.paciente_nombre ? ' ' + t.paciente_nombre.charAt(0).toUpperCase() + '.' : ''}`,
       start,
       end,
       turno: t,
