@@ -67,6 +67,8 @@ export default function Turnos() {
   const [observaciones, setObservaciones] = useState("");
   const [estado, setEstado] = useState("pendiente");
   const [recurrencia, setRecurrencia] = useState("");
+  const [tipoTurno, setTipoTurno] = useState("tratamiento");
+  const [importeCustom, setImporteCustom] = useState("");
 
   const { confirm, ConfirmModal } = useConfirm();
 
@@ -152,8 +154,9 @@ export default function Turnos() {
     setSubmitting(true);
     try {
       const tipo_cobertura = pacienteSeleccionado?.obra_social ? 'obra_social' : 'particular';
+      const importe = importeCustom !== '' ? Number(importeCustom) : null;
       if (editingTurno) {
-        await actualizarTurno(editingTurno.id, { paciente_id: pacienteId, fecha, hora, consultorio, observaciones, estado, tipo_cobertura });
+        await actualizarTurno(editingTurno.id, { paciente_id: pacienteId, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno: tipoTurno, importe_custom: importe });
         toast.success('Turno actualizado', 'Los cambios se guardaron correctamente.');
       } else if (recurrencia) {
         const meses = parseInt(recurrencia);
@@ -167,14 +170,14 @@ export default function Turnos() {
           cur.setDate(cur.getDate() + 7);
         }
         await Promise.all(
-          fechas.map(f => crearTurno({ paciente_id: pacienteId, fecha: f, hora, consultorio, observaciones, estado, tipo_cobertura }))
+          fechas.map(f => crearTurno({ paciente_id: pacienteId, fecha: f, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno: tipoTurno, importe_custom: importe }))
         );
         toast.success('Turnos recurrentes creados', `Se agendaron ${fechas.length} turnos semanales.`);
       } else {
-        await crearTurno({ paciente_id: pacienteId, fecha, hora, consultorio, observaciones, estado, tipo_cobertura });
+        await crearTurno({ paciente_id: pacienteId, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno: tipoTurno, importe_custom: importe });
         toast.success('Turno agendado', 'El turno fue creado correctamente.');
       }
-      setPacienteId(""); setFecha(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setRecurrencia("");
+      setPacienteId(""); setFecha(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setRecurrencia(""); setTipoTurno("tratamiento"); setImporteCustom("");
       setFormErrors({});
       setShowModal(false);
       setEditingTurno(null);
@@ -196,6 +199,8 @@ export default function Turnos() {
     setObservaciones(turno.observaciones || "");
     setEstado(turno.estado);
     setRecurrencia("");
+    setTipoTurno(turno.tipo_turno || "tratamiento");
+    setImporteCustom(turno.importe_custom != null ? String(turno.importe_custom) : "");
     setFormErrors({});
     setPopoverTurno(null);
     setShowModal(true);
@@ -327,7 +332,7 @@ export default function Turnos() {
     } else {
       setFecha(fechaStr);
       setEditingTurno(null);
-      setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setFormErrors({});
+      setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setTipoTurno("tratamiento"); setImporteCustom(""); setFormErrors({});
       setShowModal(true);
     }
   }, [turnos]);
@@ -553,7 +558,7 @@ export default function Turnos() {
             </button>
           </div>
 
-          <button onClick={() => { setEditingTurno(null); setPacienteId(""); setFecha(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setFormErrors({}); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
+          <button onClick={() => { setEditingTurno(null); setPacienteId(""); setFecha(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setTipoTurno("tratamiento"); setImporteCustom(""); setFormErrors({}); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
             <Plus size={20} /> Nuevo Turno
           </button>
         </div>
@@ -645,44 +650,46 @@ export default function Turnos() {
       {/* ============================== */}
       {diaPanel && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-sm" onClick={() => setDiaPanel(null)} />
-          <div className="fixed right-0 top-0 h-full w-80 z-50 bg-white dark:bg-[#141414] border-l border-purple-300 dark:border-[#333] shadow-2xl flex flex-col">
-            <div className="px-5 py-4 border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] flex items-center justify-between shrink-0">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-0.5">Turnos del día</p>
-                <h3 className="font-black text-slate-900 dark:text-white text-base">
-                  {new Date(diaPanel.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
-                </h3>
+          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setDiaPanel(null)} />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl shadow-2xl flex flex-col w-full max-w-md max-h-[80vh] pointer-events-auto">
+              <div className="px-5 py-4 border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] flex items-center justify-between shrink-0 rounded-t-2xl">
+                <div>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-0.5">Turnos del día</p>
+                  <h3 className="font-black text-slate-900 dark:text-white text-base">
+                    {new Date(diaPanel.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  </h3>
+                </div>
+                <button onClick={() => setDiaPanel(null)} className="p-2 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 font-bold dark:text-slate-400 transition-colors text-sm font-bold">✕</button>
               </div>
-              <button onClick={() => setDiaPanel(null)} className="p-2 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 transition-colors text-sm font-bold">✕</button>
-            </div>
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
-              {diaPanel.turnos.map(turno => {
-                const estConfig = estadoConfig[turno.estado] || estadoConfig.pendiente;
-                return (
-                  <div
-                    key={turno.id}
-                    className="rounded-xl p-3.5 cursor-pointer hover:brightness-105 transition-all shadow-sm border"
-                    style={{ backgroundColor: estConfig.bg + '15', borderColor: estConfig.bg + '40' }}
-                    onClick={(e) => { setDiaPanel(null); handleTurnoClick(turno, e); }}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-black text-slate-900 dark:text-white text-sm">{turno.hora.slice(0, 5)} hs</span>
-                      <BadgeEstado estado={turno.estado} />
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-3">
+                {diaPanel.turnos.map(turno => {
+                  const estConfig = estadoConfig[turno.estado] || estadoConfig.pendiente;
+                  return (
+                    <div
+                      key={turno.id}
+                      className="rounded-xl p-3.5 cursor-pointer hover:brightness-105 transition-all shadow-sm border"
+                      style={{ backgroundColor: estConfig.bg + '15', borderColor: estConfig.bg + '40' }}
+                      onClick={(e) => { setDiaPanel(null); handleTurnoClick(turno, e); }}
+                    >
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-black text-slate-900 dark:text-white text-sm">{turno.hora.slice(0, 5)} hs</span>
+                        <BadgeEstado estado={turno.estado} />
+                      </div>
+                      <p className="font-bold text-slate-900 dark:text-slate-200 text-sm truncate">{turno.paciente_apellido}, {turno.paciente_nombre}</p>
+                      <p className="text-slate-900 font-bold dark:text-slate-400 text-xs mt-0.5 flex items-center gap-1"><MapPin size={10} /> {turno.consultorio}</p>
                     </div>
-                    <p className="font-bold text-slate-900 dark:text-slate-200 text-sm truncate">{turno.paciente_apellido}, {turno.paciente_nombre}</p>
-                    <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs mt-0.5 flex items-center gap-1"><MapPin size={10} /> {turno.consultorio}</p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="px-4 py-3 border-t border-purple-300 dark:border-[#262626] shrink-0">
-              <button
-                onClick={() => { const f = diaPanel.fecha; setDiaPanel(null); setFecha(f); setEditingTurno(null); setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setFormErrors({}); setShowModal(true); }}
-                className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
-              >
-                <Plus size={16} /> Nuevo turno este día
-              </button>
+                  );
+                })}
+              </div>
+              <div className="px-4 py-3 border-t border-purple-300 dark:border-[#262626] shrink-0 rounded-b-2xl">
+                <button
+                  onClick={() => { const f = diaPanel.fecha; setDiaPanel(null); setFecha(f); setEditingTurno(null); setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setTipoTurno("tratamiento"); setImporteCustom(""); setFormErrors({}); setShowModal(true); }}
+                  className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
+                >
+                  <Plus size={16} /> Nuevo turno este día
+                </button>
+              </div>
             </div>
           </div>
         </>
@@ -693,14 +700,11 @@ export default function Turnos() {
       {/* ============================== */}
       {popoverTurno && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setPopoverTurno(null)} />
+          <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setPopoverTurno(null)} />
 
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
           <div
-            className="turno-popover fixed z-50 bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] rounded-2xl shadow-2xl p-5 w-72"
-            style={{
-              left: Math.max(16, Math.min(popoverPos.x - 144, window.innerWidth - 304)),
-              top: Math.max(16, popoverPos.y - 220)
-            }}
+            className="turno-popover bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] rounded-2xl shadow-2xl p-5 w-80 pointer-events-auto"
           >
             <div className="border-b border-slate-100 dark:border-[#262626] pb-3 mb-3">
               <div className="flex items-center gap-2.5 mb-1">
@@ -758,6 +762,7 @@ export default function Turnos() {
                 );
               })}
             </div>
+          </div>
           </div>
         </>
       )}
@@ -990,6 +995,32 @@ export default function Turnos() {
                       <AlertCircle size={12} /> {formErrors.consultorio}
                     </p>
                   )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-5">
+                  <div>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Turno</label>
+                    <select value={tipoTurno} onChange={(e) => setTipoTurno(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
+                      <option value="tratamiento">Tratamiento</option>
+                      <option value="evaluacion">Evaluación</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Importe Especial</label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={importeCustom}
+                        onChange={(e) => setImporteCustom(e.target.value)}
+                        placeholder="Del consultorio"
+                        className="w-full rounded-xl p-3.5 pl-7 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
+                      />
+                    </div>
+                    <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500">Dejá vacío para usar la tarifa del consultorio.</p>
+                  </div>
                 </div>
 
                 <div>

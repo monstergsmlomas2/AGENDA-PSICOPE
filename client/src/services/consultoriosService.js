@@ -1,4 +1,4 @@
-import { apiGet, apiPost, apiDelete } from './api.js';
+import { apiGet, apiPost, apiPut, apiDelete } from './api.js';
 
 export const getConsultorios = async () => {
   try {
@@ -14,6 +14,15 @@ export const crearConsultorio = async (data) => {
     return await apiPost('/consultorios', data);
   } catch (error) {
     console.error("Error al crear consultorio:", error);
+    return null;
+  }
+};
+
+export const actualizarConsultorio = async (id, data) => {
+  try {
+    return await apiPut(`/consultorios/${id}`, data);
+  } catch (error) {
+    console.error("Error al actualizar consultorio:", error);
     return null;
   }
 };

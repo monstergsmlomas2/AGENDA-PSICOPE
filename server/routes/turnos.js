@@ -2,6 +2,7 @@ import express from "express";
 import pool from "../config/db.js";
 
 const ESTADOS_VALIDOS = ['pendiente', 'confirmado', 'inasistencia', 'cancelado'];
+const TIPOS_TURNO_VALIDOS = ['tratamiento', 'evaluacion'];
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ router.get("/", async (req, res) => {
     const result = await pool.query(`
       SELECT
         t.id, t.paciente_id, t.estado, t.observaciones, t.tipo_cobertura,
-        t.consultorio, t.hora,
+        t.consultorio, t.hora, t.tipo_turno, t.importe_custom,
         TO_CHAR(t.fecha, 'YYYY-MM-DD') AS fecha,
         p.nombre AS paciente_nombre,
         p.apellido AS paciente_apellido,
@@ -49,11 +50,45 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 2. CREAR UN TURNO
-router.post("/", async (req, res) => {
-  const { paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura } = req.body;
+// 2. TURNOS CONFIRMADOS SIN PAGO REGISTRADO (para caja)
+router.get("/sin-pago", async (req, res) => {
+  const { mes } = req.query;
+  try {
+    const conditions = ["t.usuario_id = $1", "t.estado NOT IN ('cancelado', 'inasistencia')", "p_link.turno_id IS NULL"];
+    const params = [req.userId];
 
-  // Validación de campos obligatorios
+    if (mes) {
+      params.push(mes);
+      conditions.push(`TO_CHAR(t.fecha, 'YYYY-MM') = $${params.length}`);
+    }
+
+    const result = await pool.query(`
+      SELECT
+        t.id, t.paciente_id, t.estado, t.tipo_cobertura, t.consultorio, t.hora,
+        t.tipo_turno, t.importe_custom,
+        TO_CHAR(t.fecha, 'YYYY-MM-DD') AS fecha,
+        p.nombre AS paciente_nombre,
+        p.apellido AS paciente_apellido,
+        c.monto_tratamiento, c.monto_evaluacion
+      FROM turnos t
+      JOIN pacientes p ON t.paciente_id = p.id
+      LEFT JOIN consultorios c ON c.nombre = t.consultorio AND c.usuario_id = t.usuario_id
+      LEFT JOIN pagos p_link ON p_link.turno_id = t.id
+      WHERE ${conditions.join(' AND ')}
+      ORDER BY t.fecha DESC, t.hora ASC
+    `, params);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al obtener turnos sin pago" });
+  }
+});
+
+// 3. CREAR UN TURNO
+router.post("/", async (req, res) => {
+  const { paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom } = req.body;
+
   if (!paciente_id || !fecha || !hora || !consultorio) {
     return res.status(400).json({ error: "Los campos paciente, fecha, hora y consultorio son obligatorios" });
   }
@@ -63,11 +98,16 @@ router.post("/", async (req, res) => {
     return res.status(400).json({ error: "Estado no válido. Usar: pendiente, confirmado, inasistencia o cancelado" });
   }
 
+  const tipoTurnoFinal = tipo_turno || 'tratamiento';
+  if (!TIPOS_TURNO_VALIDOS.includes(tipoTurnoFinal)) {
+    return res.status(400).json({ error: "Tipo de turno no válido. Usar: tratamiento o evaluacion" });
+  }
+
   try {
     const result = await pool.query(
-      `INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, usuario_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
-      [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular', req.userId]
+      `INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular', tipoTurnoFinal, importe_custom || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -76,7 +116,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 3. ACTUALIZAR ESTADO DE UN TURNO (cambio rápido desde calendario)
+// 4. ACTUALIZAR ESTADO DE UN TURNO (cambio rápido desde calendario)
 router.patch("/:id/estado", async (req, res) => {
   const { id } = req.params;
   const { estado } = req.body;
@@ -100,10 +140,10 @@ router.patch("/:id/estado", async (req, res) => {
   }
 });
 
-// 4. ACTUALIZAR TURNO COMPLETO
+// 5. ACTUALIZAR TURNO COMPLETO
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
-  const { fecha, hora, consultorio, observaciones, estado, tipo_cobertura } = req.body;
+  const { fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom } = req.body;
 
   if (estado && !ESTADOS_VALIDOS.includes(estado)) {
     return res.status(400).json({ error: "Estado no válido. Usar: pendiente, confirmado, inasistencia o cancelado" });
@@ -111,9 +151,10 @@ router.put("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE turnos SET fecha = $1, hora = $2, consultorio = $3, observaciones = $4, estado = $5, tipo_cobertura = $6
-       WHERE id = $7 AND usuario_id = $8 RETURNING *`,
-      [fecha, hora, consultorio, observaciones, estado, tipo_cobertura, id, req.userId]
+      `UPDATE turnos SET fecha = $1, hora = $2, consultorio = $3, observaciones = $4, estado = $5,
+       tipo_cobertura = $6, tipo_turno = $7, importe_custom = $8
+       WHERE id = $9 AND usuario_id = $10 RETURNING *`,
+      [fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno || 'tratamiento', importe_custom || null, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
@@ -125,7 +166,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-// 5. ENVIAR RECORDATORIO WHATSAPP
+// 6. ENVIAR RECORDATORIO WHATSAPP
 router.post("/:id/recordatorio", async (req, res) => {
   const { id } = req.params;
 
@@ -180,7 +221,7 @@ router.post("/:id/recordatorio", async (req, res) => {
   }
 });
 
-// 6. ELIMINAR UN TURNO
+// 7. ELIMINAR UN TURNO
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {

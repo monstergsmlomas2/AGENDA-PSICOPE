@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { DollarSign, Plus, Search, Edit, Trash2, X, Calendar, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown, Wallet, ShieldCheck, AlertCircle, FileDown, Loader2 } from 'lucide-react';
+import { DollarSign, Plus, Search, Edit, Trash2, X, Calendar, CreditCard, Banknote, Receipt, TrendingUp, TrendingDown, Wallet, ShieldCheck, AlertCircle, FileDown, Loader2, ClipboardList, CheckCircle2 } from 'lucide-react';
 
 import { getPagos, crearPago, actualizarPago, eliminarPago, getResumenMes } from '../services/pagosService';
 import { getPacientes } from '../services/pacientesService';
+import { getTurnosSinPago } from '../services/turnosService';
 import { useToast, Badge, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 import { generarReciboPDF } from '../utils/generarReciboPDF';
@@ -22,6 +23,10 @@ export default function Pagos() {
   const [resumen, setResumen] = useState({ total_pagos: 0, total_cobrado: 0, total_pendiente: 0, total_facturado: 0 });
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState("");
+  const [activeTab, setActiveTab] = useState('pagos'); // 'pagos' | 'caja'
+  const [turnosSinPago, setTurnosSinPago] = useState([]);
+  const [loadingCaja, setLoadingCaja] = useState(false);
+  const [pendingTurnoId, setPendingTurnoId] = useState(null);
 
   const hoy = new Date();
   const [mesFiltro, setMesFiltro] = useState(`${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}`);
@@ -64,13 +69,27 @@ export default function Pagos() {
     }
   };
 
+  const cargarCaja = async () => {
+    setLoadingCaja(true);
+    try {
+      const data = await getTurnosSinPago(mesFiltro);
+      setTurnosSinPago(Array.isArray(data) ? data : []);
+    } catch {
+      setTurnosSinPago([]);
+    } finally {
+      setLoadingCaja(false);
+    }
+  };
+
   useEffect(() => { cargarData(); }, [mesFiltro, filtroEstado]);
+  useEffect(() => { if (activeTab === 'caja') cargarCaja(); }, [activeTab, mesFiltro]);
 
   const resetForm = () => {
     setPacienteId(""); setFecha(hoy.toISOString().split('T')[0]);
     setConcepto(""); setMonto(""); setTipoPago("efectivo");
     setEstadoPago("pendiente"); setObservaciones(""); setNroSesion("");
     setEditing(null); setFormErrors({});
+    setPendingTurnoId(null);
   };
 
   const openEdit = (pago) => {
@@ -117,12 +136,14 @@ export default function Pagos() {
         estado: estadoPago,
         observaciones,
         nro_sesion_facturada: nroSesion ? Number(nroSesion) : null,
+        turno_id: pendingTurnoId || null,
       };
 
       if (editing) {
         await actualizarPago(editing, data);
       } else {
         await crearPago(data);
+        if (pendingTurnoId) await cargarCaja();
       }
 
       resetForm();
@@ -133,6 +154,26 @@ export default function Pagos() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const importeTurno = (t) => {
+    if (t.importe_custom != null) return Number(t.importe_custom);
+    if (t.tipo_turno === 'evaluacion' && t.monto_evaluacion != null) return Number(t.monto_evaluacion);
+    if (t.monto_tratamiento != null) return Number(t.monto_tratamiento);
+    return null;
+  };
+
+  const handleRegistrarPagoDesdeTurno = async (turno) => {
+    const monto = importeTurno(turno);
+    const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
+    resetForm();
+    setPacienteId(String(turno.paciente_id));
+    setFecha(turno.fecha.slice(0, 10));
+    setConcepto(concepto);
+    if (monto != null) setMonto(String(monto));
+    setShowModal(true);
+    // guardamos referencia al turno para enviarlo al crear
+    setPendingTurnoId(turno.id);
   };
 
   const toast = useToast();
@@ -254,10 +295,27 @@ export default function Pagos() {
           </h1>
           <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Gestión de cobros, facturación y resúmenes mensuales.</p>
         </div>
-        <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
-          <Plus size={20} /> Nuevo Pago
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="flex bg-pink-100 dark:bg-[#0f1115] border border-purple-300 dark:border-[#262626] rounded-xl overflow-hidden p-1 shadow-inner">
+            <button onClick={() => setActiveTab('pagos')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'pagos' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'}`}>
+              <Receipt size={16} /> Pagos
+            </button>
+            <button onClick={() => setActiveTab('caja')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'caja' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'}`}>
+              <ClipboardList size={16} /> Caja
+              {turnosSinPago.length > 0 && (
+                <span className="bg-pink-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">{turnosSinPago.length}</span>
+              )}
+            </button>
+          </div>
+          {activeTab === 'pagos' && (
+            <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
+              <Plus size={20} /> Nuevo Pago
+            </button>
+          )}
+        </div>
       </div>
+
+      {activeTab === 'pagos' && <>
 
       {/* Resumen Mensual */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -421,6 +479,99 @@ export default function Pagos() {
           </table>
         </div>
       </div>
+      )}
+
+      </>}
+
+      {/* ============================== */}
+      {/* PESTAÑA: CAJA                  */}
+      {/* ============================== */}
+      {activeTab === 'caja' && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-black text-slate-900 dark:text-white">Turnos pendientes de cobro</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Turnos confirmados o pendientes del mes sin pago registrado.</p>
+            </div>
+            <input type="month" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}
+              className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-2.5 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium dark:[&::-webkit-calendar-picker-indicator]:invert"
+            />
+          </div>
+
+          {loadingCaja ? (
+            <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl overflow-hidden">
+              <SkeletonTable rows={5} cols={5} />
+            </div>
+          ) : turnosSinPago.length === 0 ? (
+            <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl overflow-hidden">
+              <EmptyState
+                icon={CheckCircle2}
+                title="Todo al día"
+                description="No hay turnos del mes sin pago registrado."
+              />
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl overflow-hidden shadow-sm">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
+                    <tr>
+                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente</th>
+                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha</th>
+                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Consultorio</th>
+                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo</th>
+                      <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Importe</th>
+                      <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-pink-100 dark:divide-[#262626]">
+                    {turnosSinPago.map((t, idx) => {
+                      const imp = importeTurno(t);
+                      return (
+                        <tr key={t.id} className={`stagger-${Math.min(idx + 1, 12)} animate-fade-in-up hover:bg-slate-50 dark:hover:bg-[#1a1c23] transition-colors`}>
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-slate-900 dark:text-white capitalize">{t.paciente_apellido}, {t.paciente_nombre}</p>
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                            {new Date(t.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
+                            <span className="ml-1 text-slate-400 dark:text-slate-500">{t.hora.slice(0,5)}hs</span>
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 dark:text-slate-400 capitalize">{t.consultorio || '—'}</td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                              t.tipo_turno === 'evaluacion'
+                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/30'
+                                : 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400 border-teal-200 dark:border-teal-500/30'
+                            }`}>
+                              {t.tipo_turno === 'evaluacion' ? 'Evaluación' : 'Tratamiento'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {imp != null
+                              ? <span className="font-bold text-slate-900 dark:text-white">${imp.toLocaleString('es-AR')}</span>
+                              : <span className="text-slate-400 dark:text-slate-500 text-xs italic">Sin tarifa</span>
+                            }
+                            {t.importe_custom != null && (
+                              <span className="ml-1 text-[10px] text-pink-500 dark:text-pink-400">(especial)</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <button
+                              onClick={() => handleRegistrarPagoDesdeTurno(t)}
+                              className="flex items-center gap-1.5 ml-auto bg-teal-600 hover:bg-teal-500 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all"
+                            >
+                              <Plus size={13} /> Registrar pago
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* MODAL: NUEVO / EDITAR PAGO */}

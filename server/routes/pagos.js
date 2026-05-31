@@ -64,7 +64,7 @@ router.get("/resumen-mes", async (req, res) => {
 
 // 3. CREAR PAGO
 router.post("/", async (req, res) => {
-  const { paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada } = req.body;
+  const { paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, turno_id } = req.body;
 
   if (!paciente_id || !fecha || !monto) {
     return res.status(400).json({ error: "Los campos paciente, fecha y monto son obligatorios" });
@@ -72,9 +72,9 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, usuario_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [paciente_id, fecha, concepto, monto, tipo_pago, estado || 'pendiente', observaciones, nro_sesion_facturada, req.userId]
+      `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, observaciones, nro_sesion_facturada, turno_id, usuario_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [paciente_id, fecha, concepto, monto, tipo_pago, estado || 'pendiente', observaciones, nro_sesion_facturada, turno_id || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
