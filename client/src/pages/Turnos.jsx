@@ -609,6 +609,7 @@ export default function Turnos() {
           <div style={{ height: view === 'month' ? 650 : 720 }}>
             <Calendar
               localizer={localizer}
+              culture="es"
               events={events}
               startAccessor="start"
               endAccessor="end"
