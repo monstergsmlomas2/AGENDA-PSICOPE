@@ -198,13 +198,20 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
                 </div>
                 <div>
                   <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
-                  <select value={obraSocial} onChange={(e) => setObraSocial(e.target.value)}
-                    className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500">
-                    <option value="">Particular</option>
+                  <input
+                    type="text"
+                    list="os-list-editar"
+                    value={obraSocial}
+                    onChange={(e) => setObraSocial(e.target.value)}
+                    placeholder="Particular"
+                    className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500"
+                  />
+                  <datalist id="os-list-editar">
+                    <option value="Particular" />
                     {obrasSocialesList.map(os => (
-                      <option key={os.id} value={os.nombre}>{os.nombre}</option>
+                      <option key={os.id} value={os.nombre} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
                 <div>
                   <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
