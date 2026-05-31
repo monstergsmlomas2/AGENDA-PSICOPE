@@ -164,6 +164,27 @@ export default function Pagos() {
     return null;
   };
 
+  const handleInasistencia = async (turno) => {
+    const ok = await confirm({
+      title: 'Marcar inasistencia',
+      message: `¿${turno.paciente_apellido}, ${turno.paciente_nombre} no asistió a este turno?`,
+      confirmLabel: 'Sí, faltó',
+      variant: 'warning'
+    });
+    if (!ok) return;
+    try {
+      await fetch(`https://agenda-psicope.onrender.com/turnos/${turno.id}/estado`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('psicope_token') },
+        body: JSON.stringify({ estado: 'inasistencia' })
+      });
+      await cargarCaja();
+      toast.success('Inasistencia registrada', `El turno de ${turno.paciente_apellido} fue marcado como inasistencia.`);
+    } catch {
+      toast.error('Error', 'No se pudo registrar la inasistencia.');
+    }
+  };
+
   const handleRegistrarPagoDesdeTurno = (turno) => {
     const monto = importeTurno(turno);
     const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
@@ -512,67 +533,92 @@ export default function Pagos() {
                 description="No hay turnos del mes sin pago registrado."
               />
             </div>
-          ) : (
-            <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl overflow-hidden shadow-sm">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
-                    <tr>
-                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente</th>
-                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha</th>
-                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Consultorio</th>
-                      <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo</th>
-                      <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Importe</th>
-                      <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Acción</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-pink-100 dark:divide-[#262626]">
-                    {turnosSinPago.map((t, idx) => {
-                      const imp = importeTurno(t);
-                      return (
-                        <tr key={t.id} className={`stagger-${Math.min(idx + 1, 12)} animate-fade-in-up hover:bg-slate-50 dark:hover:bg-[#1a1c23] transition-colors`}>
-                          <td className="px-6 py-4">
-                            <p className="font-bold text-slate-900 dark:text-white capitalize">{t.paciente_apellido}, {t.paciente_nombre}</p>
-                          </td>
-                          <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                            {new Date(t.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' })}
-                            <span className="ml-1 text-slate-400 dark:text-slate-500">{t.hora.slice(0,5)}hs</span>
-                          </td>
-                          <td className="px-6 py-4 text-slate-600 dark:text-slate-400 capitalize">{t.consultorio || '—'}</td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                              t.tipo_turno === 'evaluacion'
-                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/30'
-                                : 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400 border-teal-200 dark:border-teal-500/30'
-                            }`}>
-                              {t.tipo_turno === 'evaluacion' ? 'Evaluación' : 'Tratamiento'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            {imp != null
-                              ? <span className="font-bold text-slate-900 dark:text-white">${imp.toLocaleString('es-AR')}</span>
-                              : <span className="text-slate-400 dark:text-slate-500 text-xs italic">Sin tarifa</span>
-                            }
-                            {t.importe_custom != null && (
-                              <span className="ml-1 text-[10px] text-pink-500 dark:text-pink-400">(especial)</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <button
-                              onClick={() => handleRegistrarPagoDesdeTurno(t)}
-                              className="flex items-center gap-1.5 ml-auto bg-teal-600 hover:bg-teal-500 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all"
-                            >
-                              <Plus size={13} /> Registrar pago
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          ) : (() => {
+            // Agrupar por fecha
+            const porDia = turnosSinPago.reduce((acc, t) => {
+              const f = t.fecha.slice(0, 10);
+              if (!acc[f]) acc[f] = [];
+              acc[f].push(t);
+              return acc;
+            }, {});
+            const dias = Object.keys(porDia).sort((a, b) => b.localeCompare(a));
+
+            return (
+              <div className="space-y-4">
+                {dias.map(dia => {
+                  const turnos = porDia[dia];
+                  const totalDia = turnos.reduce((s, t) => s + (importeTurno(t) || 0), 0);
+                  return (
+                    <div key={dia} className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl overflow-hidden shadow-sm">
+                      {/* Cabecera del día */}
+                      <div className="flex items-center justify-between px-6 py-3 bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
+                        <p className="font-black text-slate-900 dark:text-white text-sm capitalize">
+                          {new Date(dia + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </p>
+                        {totalDia > 0 && (
+                          <span className="text-xs font-bold text-teal-600 dark:text-teal-400">
+                            Total del día: ${totalDia.toLocaleString('es-AR')}
+                          </span>
+                        )}
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <tbody className="divide-y divide-pink-100 dark:divide-[#262626]">
+                            {turnos.map(t => {
+                              const imp = importeTurno(t);
+                              return (
+                                <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-[#1a1c23] transition-colors">
+                                  <td className="px-6 py-3.5">
+                                    <p className="font-bold text-slate-900 dark:text-white">{t.paciente_apellido}, {t.paciente_nombre}</p>
+                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{t.hora.slice(0,5)}hs · {t.consultorio}</p>
+                                  </td>
+                                  <td className="px-6 py-3.5">
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                      t.tipo_turno === 'evaluacion'
+                                        ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/30'
+                                        : 'bg-teal-100 text-teal-700 dark:bg-teal-500/10 dark:text-teal-400 border-teal-200 dark:border-teal-500/30'
+                                    }`}>
+                                      {t.tipo_turno === 'evaluacion' ? 'Evaluación' : 'Tratamiento'}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-3.5 text-right">
+                                    {imp != null
+                                      ? <span className="font-bold text-slate-900 dark:text-white">${imp.toLocaleString('es-AR')}</span>
+                                      : <span className="text-slate-400 dark:text-slate-500 text-xs italic">Sin tarifa</span>
+                                    }
+                                    {t.importe_custom != null && (
+                                      <span className="ml-1 text-[10px] text-pink-500 dark:text-pink-400">(especial)</span>
+                                    )}
+                                  </td>
+                                  <td className="px-6 py-3.5 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={() => handleInasistencia(t)}
+                                        title="Marcar inasistencia"
+                                        className="p-2 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
+                                      >
+                                        <Trash2 size={15} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleRegistrarPagoDesdeTurno(t)}
+                                        className="flex items-center gap-1.5 bg-teal-600 hover:bg-teal-500 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs transition-all"
+                                      >
+                                        <Plus size={13} /> Registrar pago
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
