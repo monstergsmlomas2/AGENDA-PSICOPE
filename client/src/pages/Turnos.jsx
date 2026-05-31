@@ -632,13 +632,14 @@ export default function Turnos() {
                 noEventsInRange: 'No hay turnos en este rango.',
               }}
               formats={{
-                dayFormat: (date) => moment(date).locale('es').format('ddd D'),
-                weekdayFormat: (date) => moment(date).locale('es').format('ddd'),
+                dayFormat: (date, culture, loc) => loc.format(date, 'ddd D', culture),
+                weekdayFormat: (date, culture, loc) => loc.format(date, 'ddd', culture),
+                monthHeaderFormat: (date, culture, loc) => loc.format(date, 'MMMM YYYY', culture),
                 timeGutterFormat: 'HH:mm',
                 eventTimeRangeFormat: () => '',
-                dayRangeHeaderFormat: ({ start, end }) =>
-                  `${moment(start).locale('es').format('D MMM')} – ${moment(end).locale('es').format('D MMM YYYY')}`,
-                dayHeaderFormat: (date) => moment(date).locale('es').format('dddd D [de] MMMM [de] YYYY'),
+                dayRangeHeaderFormat: ({ start, end }, culture, loc) =>
+                  `${loc.format(start, 'D MMM', culture)} – ${loc.format(end, 'D MMM YYYY', culture)}`,
+                dayHeaderFormat: (date, culture, loc) => loc.format(date, 'dddd D [de] MMMM [de] YYYY', culture),
               }}
               className="h-full"
             />
