@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Calendar as CalendarIcon, List, Plus, Clock, MapPin, Trash2, ChevronLeft, ChevronRight, User, ShieldCheck, Check, X, AlertTriangle, Bell, AlertCircle, Pencil, MessageCircle } from 'lucide-react';
 import { getTurnos, crearTurno, eliminarTurno, actualizarEstadoTurno, actualizarTurno, enviarRecordatorio } from '../services/turnosService';
 import { getPacientes } from '../services/pacientesService';
@@ -25,6 +25,7 @@ const estadoConfig = {
 
 export default function Turnos() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [turnos, setTurnos] = useState([]);
   const [pacientes, setPacientes] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
@@ -633,7 +634,7 @@ export default function Turnos() {
               }}
               formats={{
                 dayFormat: (date, culture, loc) => loc.format(date, 'ddd D', culture),
-                weekdayFormat: (date, culture, loc) => loc.format(date, 'ddd', culture),
+                weekdayFormat: (date) => ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][date.getDay()],
                 monthHeaderFormat: (date, culture, loc) => loc.format(date, 'MMMM YYYY', culture),
                 timeGutterFormat: 'HH:mm',
                 eventTimeRangeFormat: () => '',
@@ -899,7 +900,16 @@ export default function Turnos() {
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
               <form id="turnoForm" onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/pacientes', { state: { openNew: true, returnTo: 'turnos' } })}
+                      className="flex items-center gap-1 text-xs text-pink-600 dark:text-teal-400 hover:underline font-semibold"
+                    >
+                      <Plus size={13} /> Nuevo paciente
+                    </button>
+                  </div>
                   <select
                     value={pacienteId}
                     onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
