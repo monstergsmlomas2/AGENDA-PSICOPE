@@ -133,7 +133,38 @@ router.patch("/:id/estado", async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
     }
-    res.json(result.rows[0]);
+    const turno = result.rows[0];
+
+    // Al confirmar, crear pago automático si no existe uno vinculado
+    if (estado === 'confirmado') {
+      const pagoExistente = await pool.query(
+        "SELECT id FROM pagos WHERE turno_id = $1",
+        [id]
+      );
+      if (pagoExistente.rowCount === 0) {
+        // Obtener importe: custom o del consultorio según tipo_turno
+        const consultorioData = await pool.query(
+          "SELECT monto_tratamiento, monto_evaluacion FROM consultorios WHERE nombre = $1 AND usuario_id = $2",
+          [turno.consultorio, req.userId]
+        );
+        const c = consultorioData.rows[0];
+        let monto = turno.importe_custom;
+        if (monto == null && c) {
+          monto = turno.tipo_turno === 'evaluacion' ? c.monto_evaluacion : c.monto_tratamiento;
+        }
+
+        if (monto != null) {
+          const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
+          await pool.query(
+            `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, turno_id, usuario_id)
+             VALUES ($1, $2, $3, $4, 'efectivo', 'pendiente', $5, $6)`,
+            [turno.paciente_id, turno.fecha, concepto, monto, turno.id, req.userId]
+          );
+        }
+      }
+    }
+
+    res.json(turno);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al actualizar estado del turno" });
