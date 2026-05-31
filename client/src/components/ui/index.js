@@ -17,3 +17,4 @@ export { default as Skeleton, SkeletonCard, SkeletonTable } from './Skeleton';
 export { ToastProvider, useToast } from './Toast';
 export { default as ErrorState } from './ErrorState';
 export { default as ConfirmDialog } from './ConfirmDialog';
+export { default as FolderPickerDialog } from './FolderPickerDialog';

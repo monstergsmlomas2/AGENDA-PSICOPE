@@ -1,4 +1,4 @@
-import { apiGet, apiDelete } from './api.js';
+import { apiGet, apiDelete, apiPost } from './api.js';
 import API_URL from '../config/api.js';
 import { getToken } from './authService.js';
 
@@ -29,6 +29,14 @@ export const getDriveAuthUrl = async () => {
 export const disconnectDrive = async () => {
   try {
     return await apiDelete('/drive/disconnect');
+  } catch {
+    return null;
+  }
+};
+
+export const crearCarpeta = async (nombre, parentId = null) => {
+  try {
+    return await apiPost('/drive/carpeta', { nombre, parentId });
   } catch {
     return null;
   }

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { FileText, Printer, Upload, Loader2 } from 'lucide-react';
-import { subirArchivo, getDriveToken } from '../../services/driveService';
+import { subirArchivo } from '../../services/driveService';
 import { abrirVentanaImpresion, generarHtmlEntrevista } from '../../utils/entrevistaDocument';
+import FolderPickerDialog from '../ui/FolderPickerDialog';
 
 export default function EntrevistaModal({ paciente, onClose, onSave }) {
   if (!paciente) return null;
@@ -9,6 +10,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
   const entrevista = paciente?.entrevista;
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -71,39 +73,13 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
     return pdf.output('blob');
   };
 
-  const handleSubirDrive = async () => {
+  const handleSubirDrive = () => {
     setDriveMsg(null);
+    setShowFolderPicker(true);
+  };
 
-    const tokenData = await getDriveToken();
-    if (!tokenData?.access_token) {
-      setDriveMsg({ tipo: 'error', texto: 'Drive no está conectado. Configuralo en Configuración.' });
-      return;
-    }
-
-    // Picker de carpeta de destino
-    const elegirCarpeta = () => new Promise((resolve) => {
-      window.gapi.load('picker', () => {
-        const folderView = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-          .setIncludeFolders(true)
-          .setSelectFolderEnabled(true)
-          .setMimeTypes('application/vnd.google-apps.folder');
-
-        new window.google.picker.PickerBuilder()
-          .addView(folderView)
-          .setOAuthToken(tokenData.access_token)
-          .setTitle('Elegí la carpeta de destino')
-          .setCallback((data) => {
-            if (data.action === window.google.picker.Action.PICKED) resolve(data.docs[0].id);
-            else if (data.action === window.google.picker.Action.CANCEL) resolve(null);
-          })
-          .build()
-          .setVisible(true);
-      });
-    });
-
-    const folderId = await elegirCarpeta();
-    if (!folderId) return; // usuario canceló
-
+  const handleFolderSelected = async (folderId) => {
+    setShowFolderPicker(false);
     setUploadingDrive(true);
     try {
       const blob = await generarPdfBlob();
@@ -111,7 +87,6 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
         setDriveMsg({ tipo: 'error', texto: 'No se pudo generar el PDF.' });
         return;
       }
-
       const nombreArchivo = `Entrevista_${paciente.apellido}_${paciente.nombre}_${new Date().toISOString().slice(0, 10)}.pdf`;
       const result = await subirArchivo(paciente.id, new File([blob], nombreArchivo, { type: 'application/pdf' }), folderId);
       setDriveMsg(result
@@ -124,6 +99,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
   };
 
   return (
+    <>
     <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white dark:bg-slate-950 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-300 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden">
 
@@ -326,5 +302,13 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
 
       </div>
     </div>
+
+    {showFolderPicker && (
+      <FolderPickerDialog
+        onSelect={handleFolderSelected}
+        onCancel={() => setShowFolderPicker(false)}
+      />
+    )}
+    </>
   );
 }

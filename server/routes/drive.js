@@ -118,6 +118,40 @@ router.get('/archivos/:pacienteId', async (req, res) => {
   }
 });
 
+// POST /drive/carpeta — crea una carpeta nueva en Drive
+router.post('/carpeta', async (req, res) => {
+  try {
+    const { nombre, parentId } = req.body;
+    if (!nombre) return res.status(400).json({ error: 'nombre requerido' });
+
+    let tokens = await getTokensFromDB(req.userId);
+    if (!tokens) return res.status(401).json({ error: 'drive_not_connected' });
+
+    const { tokens: refreshed, refreshed: didRefresh } = await refreshTokensIfNeeded(tokens);
+    if (didRefresh) {
+      await saveTokensToDB(req.userId, refreshed);
+      tokens = refreshed;
+    }
+
+    const drive = getAuthenticatedDrive(tokens);
+    const metadata = {
+      name: nombre,
+      mimeType: 'application/vnd.google-apps.folder',
+      ...(parentId ? { parents: [parentId] } : {}),
+    };
+
+    const result = await drive.files.create({
+      requestBody: metadata,
+      fields: 'id,name',
+    });
+
+    res.json(result.data);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al crear carpeta' });
+  }
+});
+
 // POST /drive/archivos/:pacienteId
 router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => {
   try {

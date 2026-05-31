@@ -1,8 +1,9 @@
 ﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById, guardarEntrevista } from '../services/pacientesService';
-import { subirArchivo, getDriveToken } from '../services/driveService';
+import { subirArchivo } from '../services/driveService';
 import { abrirVentanaImpresion, generarHtmlEntrevista } from '../utils/entrevistaDocument';
+import FolderPickerDialog from '../components/ui/FolderPickerDialog';
 import { ArrowLeft, FileText, Printer, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
@@ -16,6 +17,7 @@ export default function EntrevistaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
+  const [showFolderPicker, setShowFolderPicker] = useState(false);
 
   useEffect(() => {
     getPacienteById(id)
@@ -105,38 +107,13 @@ export default function EntrevistaPage() {
     return pdf.output('blob');
   };
 
-  const handleSubirDrive = async () => {
+  const handleSubirDrive = () => {
     setDriveMsg(null);
+    setShowFolderPicker(true);
+  };
 
-    const tokenData = await getDriveToken();
-    if (!tokenData?.access_token) {
-      setDriveMsg({ tipo: 'error', texto: 'Drive no está conectado. Configuralo en Configuración.' });
-      return;
-    }
-
-    const elegirCarpeta = () => new Promise((resolve) => {
-      window.gapi.load('picker', () => {
-        const folderView = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-          .setIncludeFolders(true)
-          .setSelectFolderEnabled(true)
-          .setMimeTypes('application/vnd.google-apps.folder');
-
-        new window.google.picker.PickerBuilder()
-          .addView(folderView)
-          .setOAuthToken(tokenData.access_token)
-          .setTitle('Elegí la carpeta de destino')
-          .setCallback((data) => {
-            if (data.action === window.google.picker.Action.PICKED) resolve(data.docs[0].id);
-            else if (data.action === window.google.picker.Action.CANCEL) resolve(null);
-          })
-          .build()
-          .setVisible(true);
-      });
-    });
-
-    const folderId = await elegirCarpeta();
-    if (!folderId) return;
-
+  const handleFolderSelected = async (folderId) => {
+    setShowFolderPicker(false);
     setUploadingDrive(true);
     try {
       const blob = await generarPdfBlob();
@@ -153,6 +130,7 @@ export default function EntrevistaPage() {
   };
 
   return (
+    <>
     <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in max-w-5xl mx-auto">
       <button
         onClick={() => navigate(`/pacientes/${id}`)}
@@ -362,6 +340,14 @@ export default function EntrevistaPage() {
         </div>
       </div>
     </div>
+
+    {showFolderPicker && (
+      <FolderPickerDialog
+        onSelect={handleFolderSelected}
+        onCancel={() => setShowFolderPicker(false)}
+      />
+    )}
+    </>
   );
 }
 
