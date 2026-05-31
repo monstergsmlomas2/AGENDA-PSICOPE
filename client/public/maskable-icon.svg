@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <clipPath id="safe-zone">
+      <rect x="51" y="51" width="410" height="410" rx="64"/>
+    </clipPath>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="#ec4899"/>
+  <g clip-path="url(#safe-zone)">
+    <rect x="0" y="0" width="512" height="512" fill="#ec4899"/>
+    <text x="256" y="310" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="white" text-anchor="middle">AP</text>
+  </g>
+</svg>

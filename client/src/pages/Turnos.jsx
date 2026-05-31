@@ -320,9 +320,17 @@ export default function Turnos() {
     const date = slotInfo.start;
     const mes = String(date.getMonth() + 1).padStart(2, '0');
     const dia = String(date.getDate()).padStart(2, '0');
-    setFecha(`${date.getFullYear()}-${mes}-${dia}`);
-    setShowModal(true);
-  }, []);
+    const fechaStr = `${date.getFullYear()}-${mes}-${dia}`;
+    const turnosDelDia = turnos.filter(t => t.fecha.slice(0, 10) === fechaStr);
+    if (turnosDelDia.length > 0) {
+      setDiaPanel({ fecha: fechaStr, turnos: turnosDelDia });
+    } else {
+      setFecha(fechaStr);
+      setEditingTurno(null);
+      setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setFormErrors({});
+      setShowModal(true);
+    }
+  }, [turnos]);
 
   const handleSelectEvent = useCallback((event, e) => {
     handleTurnoClick(event.turno, e);
@@ -670,7 +678,7 @@ export default function Turnos() {
             </div>
             <div className="px-4 py-3 border-t border-purple-300 dark:border-[#262626] shrink-0">
               <button
-                onClick={() => { setDiaPanel(null); handleDayClick(Number(diaPanel.fecha.slice(8, 10))); }}
+                onClick={() => { const f = diaPanel.fecha; setDiaPanel(null); setFecha(f); setEditingTurno(null); setPacienteId(""); setHora(""); setConsultorio(""); setObservaciones(""); setEstado("pendiente"); setFormErrors({}); setShowModal(true); }}
                 className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm transition-all"
               >
                 <Plus size={16} /> Nuevo turno este día
