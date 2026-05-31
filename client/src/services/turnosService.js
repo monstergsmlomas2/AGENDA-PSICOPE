@@ -51,13 +51,8 @@ export const actualizarTurno = async (id, data) => {
 };
 
 export const getTurnosSinPago = async (mes) => {
-  try {
-    const query = mes ? `?mes=${mes}` : '';
-    return await apiGet(`/turnos/sin-pago${query}`);
-  } catch (error) {
-    console.error("Error al obtener turnos sin pago:", error);
-    return [];
-  }
+  const query = mes ? `?mes=${mes}` : '';
+  return await apiGet(`/turnos/sin-pago${query}`);
 };
 
 export const enviarRecordatorio = async (turnoId) => {

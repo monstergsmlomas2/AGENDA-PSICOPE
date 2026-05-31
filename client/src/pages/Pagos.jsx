@@ -74,7 +74,8 @@ export default function Pagos() {
     try {
       const data = await getTurnosSinPago(mesFiltro);
       setTurnosSinPago(Array.isArray(data) ? data : []);
-    } catch {
+    } catch (err) {
+      console.error('Error caja:', err);
       setTurnosSinPago([]);
     } finally {
       setLoadingCaja(false);
