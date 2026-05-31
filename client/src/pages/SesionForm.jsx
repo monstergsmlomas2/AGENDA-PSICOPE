@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSesiones, crearSesion, actualizarSesion } from '../services/pacientesService';
 import { getPacienteById } from '../services/pacientesService';
-import { ArrowLeft, Save, Loader2, ClipboardList } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, ClipboardList, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
 export default function SesionForm() {
@@ -19,6 +19,9 @@ export default function SesionForm() {
   const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(!!sesionId);
   const [submitting, setSubmitting] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | 'saving' | 'saved'
+  const autoSaveTimer = useRef(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     async function cargar() {
@@ -38,13 +41,32 @@ export default function SesionForm() {
         toast.error('Error', 'No se pudo cargar la sesión.');
       } finally {
         setLoading(false);
+        setTimeout(() => { isFirstLoad.current = false; }, 100);
       }
     }
     cargar();
   }, [id, sesionId]);
 
+  // Auto-guardado solo en modo edición (sesionId existe)
+  useEffect(() => {
+    if (!sesionId || isFirstLoad.current) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    setAutoSaveStatus('saving');
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        await actualizarSesion(id, sesionId, { fecha, actividades_realizadas: actividades, observaciones });
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      } catch {
+        setAutoSaveStatus(null);
+      }
+    }, 2000);
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [fecha, actividades, observaciones]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     setSubmitting(true);
     try {
       const data = { fecha, actividades_realizadas: actividades, observaciones };
@@ -92,11 +114,22 @@ export default function SesionForm() {
 
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg">
         <div className="bg-purple-100/50 dark:bg-slate-950 border-b border-purple-300 dark:border-slate-800 px-8 py-6">
-          <div className="flex items-center gap-2 text-blue-400 mb-1">
-            <ClipboardList size={18} />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              {sesionId ? 'Editar Sesión' : 'Nueva Sesión'}
-            </span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2 text-blue-400">
+              <ClipboardList size={18} />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                {sesionId ? 'Editar Sesión' : 'Nueva Sesión'}
+              </span>
+            </div>
+            {sesionId && autoSaveStatus && (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-all ${autoSaveStatus === 'saved' ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                {autoSaveStatus === 'saving' ? (
+                  <><Loader2 size={12} className="animate-spin" /> Guardando...</>
+                ) : (
+                  <><CheckCircle2 size={12} /> Guardado automáticamente</>
+                )}
+              </span>
+            )}
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
             {sesionId ? 'Editar Sesión' : 'Registrar nueva sesión'}

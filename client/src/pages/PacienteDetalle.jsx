@@ -10,9 +10,10 @@ import { getConsultorios } from '../services/consultoriosService';
 import {
   ArrowLeft, FileText, ClipboardList, ClipboardCheck, User, Phone, Mail, MapPin,
   Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
-  Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle
+  Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle, BookOpen
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
+import { getTestsParaEdad, CATEGORIAS_TESTS } from '../data/testsEstandarizados';
 import { useToast, Button, FolderPickerDialog } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -339,6 +340,8 @@ export default function PacienteDetalle() {
 
   // Informes
   const [showInformes, setShowInformes] = useState(false);
+  const [showTests, setShowTests] = useState(false);
+  const [testsFiltroEdad, setTestsFiltroEdad] = useState(true);
   const [informesPaciente, setInformesPaciente] = useState([]);
   const [loadingInformes, setLoadingInformes] = useState(false);
   const [showInformeModal, setShowInformeModal] = useState(false);
@@ -405,6 +408,7 @@ export default function PacienteDetalle() {
 
   useEffect(() => {
     cargarPaciente();
+    cargarSesiones();
   }, [id]);
 
   useEffect(() => {
@@ -870,49 +874,64 @@ export default function PacienteDetalle() {
       <div className="flex flex-wrap gap-3 justify-center">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition-colors shadow-lg shadow-amber-500/5"
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md"
         >
           <FileText size={18} /> Entrevista de Admisión
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
             tabActivo === 'sesiones'
-              ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
-              : 'bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500/20'
+              ? 'bg-blue-200 text-blue-800 border border-blue-500 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40'
+              : 'bg-blue-100 text-blue-700 border border-blue-400 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/20'
           }`}
         >
           <ClipboardList size={18} /> Sesiones
+          {sesiones.length > 0 && (
+            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
+              {sesiones.length}
+            </span>
+          )}
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
             tabActivo === 'evaluaciones'
-              ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-              : 'bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500/20'
+              ? 'bg-teal-200 text-teal-800 border border-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/40'
+              : 'bg-teal-100 text-teal-700 border border-teal-400 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30 hover:bg-teal-200 dark:hover:bg-teal-500/20'
           }`}
         >
           <ClipboardCheck size={18} /> Evaluaciones
         </button>
         <button
           onClick={handleAbrirAdjuntos}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
             showAdjuntos
-              ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-              : 'bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20'
+              ? 'bg-purple-200 text-purple-800 border border-purple-500 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40'
+              : 'bg-purple-100 text-purple-700 border border-purple-400 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/20'
           }`}
         >
           <Paperclip size={18} /> Archivos
         </button>
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
             showInformes
-              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40'
-              : 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/30 hover:bg-pink-500/20'
+              ? 'bg-pink-200 text-pink-800 border border-pink-500 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40'
+              : 'bg-pink-100 text-pink-700 border border-pink-400 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/20'
           }`}
         >
           <FileText size={18} /> Informes
+        </button>
+        <button
+          onClick={() => setShowTests(v => !v)}
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+            showTests
+              ? 'bg-indigo-200 text-indigo-800 border border-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
+              : 'bg-indigo-100 text-indigo-700 border border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/20'
+          }`}
+        >
+          <BookOpen size={18} /> Tests
         </button>
       </div>
 
@@ -1238,6 +1257,94 @@ export default function PacienteDetalle() {
           )}
         </div>
       )}
+
+      {/* ─────────────────────────────────────── */}
+      {/* PANEL DE TESTS ESTANDARIZADOS          */}
+      {/* ─────────────────────────────────────── */}
+      {showTests && (() => {
+        const edadPaciente = calcularEdad(paciente.fecha_nacimiento);
+        const categorias = testsFiltroEdad && edadPaciente !== null
+          ? getTestsParaEdad(edadPaciente)
+          : CATEGORIAS_TESTS;
+
+        const colorMap = {
+          blue:   { bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-200 dark:border-blue-800/40', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', title: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
+          green:  { bg: 'bg-green-50 dark:bg-green-900/10', border: 'border-green-200 dark:border-green-800/40', badge: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300', title: 'text-green-700 dark:text-green-300', dot: 'bg-green-500' },
+          purple: { bg: 'bg-purple-50 dark:bg-purple-900/10', border: 'border-purple-200 dark:border-purple-800/40', badge: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300', title: 'text-purple-700 dark:text-purple-300', dot: 'bg-purple-500' },
+          orange: { bg: 'bg-orange-50 dark:bg-orange-900/10', border: 'border-orange-200 dark:border-orange-800/40', badge: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300', title: 'text-orange-700 dark:text-orange-300', dot: 'bg-orange-500' },
+          red:    { bg: 'bg-red-50 dark:bg-red-900/10', border: 'border-red-200 dark:border-red-800/40', badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300', title: 'text-red-700 dark:text-red-300', dot: 'bg-red-500' },
+          pink:   { bg: 'bg-pink-50 dark:bg-pink-900/10', border: 'border-pink-200 dark:border-pink-800/40', badge: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300', title: 'text-pink-700 dark:text-pink-300', dot: 'bg-pink-500' },
+          teal:   { bg: 'bg-teal-50 dark:bg-teal-900/10', border: 'border-teal-200 dark:border-teal-800/40', badge: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300', title: 'text-teal-700 dark:text-teal-300', dot: 'bg-teal-500' },
+        };
+
+        return (
+          <div className="bg-white dark:bg-slate-900 border border-indigo-200 dark:border-indigo-800/40 rounded-2xl p-6 shadow-lg space-y-5">
+            {/* Cabecera */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                <BookOpen size={22} className="text-indigo-500 dark:text-indigo-400" /> Tests Estandarizados Aplicables
+              </h3>
+              <div className="flex items-center gap-3">
+                {edadPaciente !== null && (
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={testsFiltroEdad}
+                      onChange={e => setTestsFiltroEdad(e.target.checked)}
+                      className="accent-indigo-500 w-4 h-4"
+                    />
+                    Solo para {edadPaciente} años
+                  </label>
+                )}
+              </div>
+            </div>
+
+            {edadPaciente !== null && testsFiltroEdad && (
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-xl px-4 py-2">
+                Mostrando tests cuyo rango de edad incluye <strong>{edadPaciente} años</strong>. Desactivá el filtro para ver todos.
+              </p>
+            )}
+
+            {(!categorias || categorias.length === 0) ? (
+              <div className="text-center py-10 text-slate-400 dark:text-slate-600">
+                <BookOpen size={36} className="mx-auto mb-2 opacity-40" />
+                <p className="font-medium text-sm">No hay tests estandarizados para esta edad.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {categorias.map(cat => {
+                  const c = colorMap[cat.color] || colorMap.blue;
+                  return (
+                    <div key={cat.id} className={`rounded-xl border ${c.border} overflow-hidden`}>
+                      <div className={`flex items-center gap-3 px-4 py-3 ${c.bg}`}>
+                        <span className={`w-2 h-2 rounded-full ${c.dot} shrink-0`} />
+                        <span className={`font-bold text-sm ${c.title}`}>{cat.label}</span>
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${c.badge} ml-1`}>{cat.tests.length}</span>
+                      </div>
+                      <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-950/40">
+                        {cat.tests.map(test => (
+                          <div key={test.id} className={`rounded-xl border ${c.border} ${c.bg} p-3 space-y-1.5`}>
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <p className={`font-bold text-sm ${c.title}`}>{test.nombre}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">{test.nombreCompleto}</p>
+                              </div>
+                              <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${c.badge}`}>
+                                {test.edadMax >= 80 ? `${test.edadMin}a+` : `${test.edadMin}–${test.edadMax}a`}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{test.descripcion}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Editar paciente modal */}
       <EditarPacienteModal

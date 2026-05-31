@@ -1,10 +1,10 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById, guardarEntrevista } from '../services/pacientesService';
 import { subirArchivo } from '../services/driveService';
 import { abrirVentanaImpresion, generarHtmlEntrevista } from '../utils/entrevistaDocument';
 import FolderPickerDialog from '../components/ui/FolderPickerDialog';
-import { ArrowLeft, FileText, Printer, Upload, Loader2 } from 'lucide-react';
+import { ArrowLeft, FileText, Printer, Upload, Loader2, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
 export default function EntrevistaPage() {
@@ -18,22 +18,50 @@ export default function EntrevistaPage() {
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
+  const autoSaveTimer = useRef(null);
+  const formRef = useRef(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     getPacienteById(id)
       .then(setPaciente)
       .catch(() => toast.error('Error', 'No se pudo cargar el paciente.'))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        setTimeout(() => { isFirstLoad.current = false; }, 300);
+      });
   }, [id]);
+
+  const recogerDatosFormulario = (formEl) => {
+    const formData = new FormData(formEl);
+    const data = Object.fromEntries(formData.entries());
+    formEl.querySelectorAll('input[type="checkbox"]').forEach(cb => { data[cb.name] = cb.checked; });
+    return data;
+  };
+
+  const handleFormChange = () => {
+    if (isFirstLoad.current || !formRef.current) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    setAutoSaveStatus('saving');
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        const data = recogerDatosFormulario(formRef.current);
+        await guardarEntrevista(id, data);
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      } catch {
+        setAutoSaveStatus(null);
+      }
+    }, 2000);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     setSubmitting(true);
     try {
-      const formData = new FormData(e.target);
-      const entrevistaData = Object.fromEntries(formData.entries());
-      const checkboxes = e.target.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(cb => { entrevistaData[cb.name] = cb.checked; });
+      const entrevistaData = recogerDatosFormulario(e.target);
       await guardarEntrevista(id, entrevistaData);
       toast.success('Entrevista guardada', '¡Entrevista de Admisión guardada exitosamente!');
       navigate(`/pacientes/${id}`);
@@ -149,9 +177,18 @@ export default function EntrevistaPage() {
               {paciente.nombre} {paciente.apellido}
             </p>
           </div>
+          {autoSaveStatus && (
+            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${autoSaveStatus === 'saved' ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+              {autoSaveStatus === 'saving' ? (
+                <><Loader2 size={12} className="animate-spin" /> Guardando...</>
+              ) : (
+                <><CheckCircle2 size={12} /> Guardado automáticamente</>
+              )}
+            </span>
+          )}
         </div>
 
-        <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 text-sm text-slate-900 dark:text-slate-300 space-y-10 overflow-y-auto">
+        <form id="entrevistaForm" ref={formRef} onSubmit={handleSubmit} onChange={handleFormChange} className="p-8 text-sm text-slate-900 dark:text-slate-300 space-y-10 overflow-y-auto">
           <div>
 
           <section className="space-y-4">

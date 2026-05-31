@@ -1,8 +1,8 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById } from '../services/pacientesService';
 import { getEvaluaciones, crearEvaluacion, actualizarEvaluacion } from '../services/evaluacionesService';
-import { ArrowLeft, Save, Loader2, ClipboardCheck } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, ClipboardCheck, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
 const tiposTest = [
@@ -29,6 +29,9 @@ export default function EvaluacionForm() {
   const [observaciones, setObservaciones] = useState('');
   const [loading, setLoading] = useState(!!evalId);
   const [submitting, setSubmitting] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
+  const autoSaveTimer = useRef(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     async function cargar() {
@@ -50,13 +53,39 @@ export default function EvaluacionForm() {
         toast.error('Error', 'No se pudo cargar la evaluación.');
       } finally {
         setLoading(false);
+        setTimeout(() => { isFirstLoad.current = false; }, 100);
       }
     }
     cargar();
   }, [id, evalId]);
 
+  // Auto-guardado solo en modo edición
+  useEffect(() => {
+    if (!evalId || isFirstLoad.current) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    setAutoSaveStatus('saving');
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        await actualizarEvaluacion(evalId, {
+          paciente_id: Number(id),
+          tipo_test: tipoTest,
+          fecha_administracion: fechaAdmin,
+          resultados,
+          puntaje_obtenido: puntaje,
+          observaciones,
+        });
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus(null), 3000);
+      } catch {
+        setAutoSaveStatus(null);
+      }
+    }, 2000);
+    return () => clearTimeout(autoSaveTimer.current);
+  }, [tipoTest, fechaAdmin, resultados, puntaje, observaciones]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     setSubmitting(true);
     try {
       const data = {
@@ -105,11 +134,22 @@ export default function EvaluacionForm() {
 
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg">
         <div className="bg-purple-100/50 dark:bg-slate-950 border-b border-purple-300 dark:border-slate-800 px-8 py-6">
-          <div className="flex items-center gap-2 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mb-1">
-            <ClipboardCheck size={18} />
-            <span className="text-xs font-bold uppercase tracking-wider">
-              {evalId ? 'Editar Evaluación' : 'Nueva Evaluación'}
-            </span>
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400">
+              <ClipboardCheck size={18} />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                {evalId ? 'Editar Evaluación' : 'Nueva Evaluación'}
+              </span>
+            </div>
+            {evalId && autoSaveStatus && (
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold transition-all ${autoSaveStatus === 'saved' ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}`}>
+                {autoSaveStatus === 'saving' ? (
+                  <><Loader2 size={12} className="animate-spin" /> Guardando...</>
+                ) : (
+                  <><CheckCircle2 size={12} /> Guardado automáticamente</>
+                )}
+              </span>
+            )}
           </div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
             {evalId ? 'Editar Evaluación' : 'Registrar nueva evaluación'}
