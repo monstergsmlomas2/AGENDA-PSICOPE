@@ -3,13 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
 import { getEvaluaciones, eliminarEvaluacion } from '../services/evaluacionesService';
+import { getInformes, getInforme, crearInforme, actualizarInforme, eliminarInforme } from '../services/informesService';
 import { getObrasSociales } from '../services/obrasSocialesService';
 import { getTurnos, crearTurno, actualizarTurno, eliminarTurno } from '../services/turnosService';
 import { getConsultorios } from '../services/consultoriosService';
 import {
   ArrowLeft, FileText, ClipboardList, ClipboardCheck, User, Phone, Mail, MapPin,
   Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
-  Paperclip, Upload, ExternalLink, File, Image, Loader2
+  Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo, getDriveToken } from '../services/driveService';
 import { useToast, Button } from '../components/ui';
@@ -248,6 +249,54 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
     </div>
   );
 }
+const tiposInforme = [
+  { value: 'diagnostico', label: 'Informe Diagnóstico Psicopedagógico' },
+  { value: 'evolucion', label: 'Informe de Evolución (periódico)' },
+  { value: 'escolar', label: 'Informe Escolar (para docentes/directivos)' },
+  { value: 'obra_social', label: 'Informe para Obra Social' },
+  { value: 'derivacion', label: 'Derivación a otro profesional' },
+  { value: 'asistencia', label: 'Certificado de Asistencia' },
+];
+
+const seccionesPorTipo = {
+  diagnostico: [
+    { key: 'motivo_consulta', label: 'Motivo de Consulta' },
+    { key: 'tecnicas_administradas', label: 'Técnicas Administradas' },
+    { key: 'resultados_obtenidos', label: 'Resultados Obtenidos' },
+    { key: 'diagnostico_presuntivo', label: 'Diagnóstico Presuntivo' },
+    { key: 'orientaciones', label: 'Orientaciones y Sugerencias' },
+  ],
+  evolucion: [
+    { key: 'periodo', label: 'Período' },
+    { key: 'objetivos_trabajados', label: 'Objetivos Trabajados' },
+    { key: 'logros_alcanzados', label: 'Logros Alcanzados' },
+    { key: 'aspectos_continuar', label: 'Aspectos a Continuar Trabajando' },
+    { key: 'conclusiones', label: 'Conclusiones' },
+  ],
+  escolar: [
+    { key: 'datos_institucionales', label: 'Datos Institucionales' },
+    { key: 'desempenio_academico', label: 'Desempeño Académico' },
+    { key: 'aspectos_conductuales', label: 'Aspectos Conductuales' },
+    { key: 'recomendaciones', label: 'Recomendaciones Pedagógicas' },
+  ],
+  obra_social: [
+    { key: 'diagnostico', label: 'Diagnóstico / CIE' },
+    { key: 'justificacion', label: 'Justificación de Sesiones' },
+    { key: 'frecuencia', label: 'Frecuencia y Duración' },
+    { key: 'objetivos_terapeuticos', label: 'Objetivos Terapéuticos' },
+  ],
+  derivacion: [
+    { key: 'motivo_derivacion', label: 'Motivo de Derivación' },
+    { key: 'profesional_sugerido', label: 'Profesional Sugerido' },
+    { key: 'antecedentes', label: 'Antecedentes Relevantes' },
+  ],
+  asistencia: [
+    { key: 'periodo_asistencia', label: 'Período de Asistencia' },
+    { key: 'frecuencia_asistencia', label: 'Frecuencia' },
+    { key: 'observaciones_asistencia', label: 'Observaciones' },
+  ],
+};
+
 export default function PacienteDetalle() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -287,6 +336,19 @@ export default function PacienteDetalle() {
   const [showTurnoRapido, setShowTurnoRapido] = useState(false);
   const [turnoRapidoForm, setTurnoRapidoForm] = useState({ fecha: '', hora: '', consultorio: '', notas: '' });
   const [submittingTurnoRapido, setSubmittingTurnoRapido] = useState(false);
+
+  // Informes
+  const [showInformes, setShowInformes] = useState(false);
+  const [informesPaciente, setInformesPaciente] = useState([]);
+  const [loadingInformes, setLoadingInformes] = useState(false);
+  const [showInformeModal, setShowInformeModal] = useState(false);
+  const [editandoInforme, setEditandoInforme] = useState(null);
+  const [viewingInforme, setViewingInforme] = useState(null);
+  const [informeTipo, setInformeTipo] = useState('diagnostico');
+  const [informeFecha, setInformeFecha] = useState(new Date().toISOString().split('T')[0]);
+  const [informeContenido, setInformeContenido] = useState({});
+  const [informeEstado, setInformeEstado] = useState('borrador');
+  const [submittingInforme, setSubmittingInforme] = useState(false);
 
   // Archivos adjuntos (Google Drive)
   const [showAdjuntos, setShowAdjuntos] = useState(false);
@@ -351,6 +413,22 @@ export default function PacienteDetalle() {
   useEffect(() => {
     if (tabActivo === 'evaluaciones') cargarEvaluaciones();
   }, [tabActivo]);
+
+  const cargarInformes = async () => {
+    setLoadingInformes(true);
+    try {
+      const data = await getInformes(id);
+      setInformesPaciente(Array.isArray(data) ? data : []);
+    } catch {
+      // silent
+    } finally {
+      setLoadingInformes(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showInformes) cargarInformes();
+  }, [showInformes]);
 
   const cargarTurnos = async () => {
     setLoadingTurnos(true);
@@ -849,6 +927,16 @@ export default function PacienteDetalle() {
         >
           <Paperclip size={18} /> Archivos
         </button>
+        <button
+          onClick={() => setShowInformes(v => !v)}
+          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-lg ${
+            showInformes
+              ? 'bg-pink-500/20 text-pink-300 border border-pink-500/40'
+              : 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border border-pink-500/30 hover:bg-pink-500/20'
+          }`}
+        >
+          <FileText size={18} /> Informes
+        </button>
       </div>
 
       {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
@@ -1311,6 +1399,177 @@ export default function PacienteDetalle() {
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────── */}
+      {/* PANEL DE INFORMES */}
+      {/* ─────────────────────────────────────── */}
+      {showInformes && (
+        <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+              <FileText size={20} className="text-pink-500" /> Informes
+            </h3>
+            <button
+              onClick={() => {
+                setEditandoInforme(null);
+                setInformeTipo('diagnostico');
+                setInformeFecha(new Date().toISOString().split('T')[0]);
+                setInformeContenido({});
+                setInformeEstado('borrador');
+                setShowInformeModal(true);
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors"
+            >
+              <Plus size={16} /> Nuevo Informe
+            </button>
+          </div>
+
+          {loadingInformes ? (
+            <div className="space-y-2">
+              {[1, 2].map(i => <div key={i} className="h-14 bg-pink-100 dark:bg-slate-800 rounded-xl animate-pulse" />)}
+            </div>
+          ) : informesPaciente.length === 0 ? (
+            <p className="text-center text-sm text-slate-400 py-6">No hay informes para este paciente. Creá el primero.</p>
+          ) : viewingInforme ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <button onClick={() => setViewingInforme(null)} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-400 hover:text-pink-500 transition-colors">
+                  <ArrowLeft size={16} /> Volver a la lista
+                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
+                    <Printer size={15} /> Imprimir
+                  </button>
+                  <button onClick={() => { setViewingInforme(null); setEditandoInforme(viewingInforme.id); setInformeTipo(viewingInforme.tipo); setInformeFecha(viewingInforme.fecha); setInformeContenido(typeof viewingInforme.contenido === 'object' ? viewingInforme.contenido : {}); setInformeEstado(viewingInforme.estado); setShowInformeModal(true); }} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors">
+                    <Edit size={15} /> Editar
+                  </button>
+                </div>
+              </div>
+              <div className="bg-purple-50 dark:bg-slate-950 border border-purple-300 dark:border-slate-800 rounded-xl p-6 space-y-4">
+                <div className="border-b border-purple-300 dark:border-slate-800 pb-4">
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">{tiposInforme.find(t => t.value === viewingInforme.tipo)?.label}</h4>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {new Date(viewingInforme.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    {' · '}
+                    <span className={`font-bold ${viewingInforme.estado === 'finalizado' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                      {viewingInforme.estado === 'finalizado' ? 'Finalizado' : 'Borrador'}
+                    </span>
+                  </p>
+                </div>
+                {(seccionesPorTipo[viewingInforme.tipo] || []).map(sec => {
+                  const valor = viewingInforme.contenido?.[sec.key];
+                  if (!valor) return null;
+                  return (
+                    <div key={sec.key}>
+                      <p className="text-xs font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider mb-1">{sec.label}</p>
+                      <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{valor}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {informesPaciente.map(inf => (
+                <div key={inf.id} className="flex items-center justify-between bg-purple-50 dark:bg-slate-950 border border-purple-300 dark:border-slate-800 rounded-xl px-4 py-3 hover:bg-pink-50 dark:hover:bg-slate-900 transition-colors cursor-pointer" onClick={() => setViewingInforme(inf)}>
+                  <div className="flex items-center gap-3">
+                    <FileText size={16} className="text-pink-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">{tiposInforme.find(t => t.value === inf.tipo)?.label || inf.tipo}</p>
+                      <p className="text-xs text-slate-500">{new Date(inf.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${inf.estado === 'finalizado' ? 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/30' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/30'}`}>
+                      {inf.estado === 'finalizado' ? <CheckCircle size={11} /> : <Clock size={11} />}
+                      {inf.estado === 'finalizado' ? 'Finalizado' : 'Borrador'}
+                    </span>
+                    <button onClick={e => { e.stopPropagation(); confirm({ title: 'Eliminar informe', message: '¿Eliminar este informe? No se puede deshacer.', confirmLabel: 'Eliminar', variant: 'danger' }).then(ok => { if (ok) eliminarInforme(inf.id).then(() => cargarInformes()); }); }} className="p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors">
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Modal Nuevo/Editar Informe */}
+      {showInformeModal && (
+        <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-[#141414] w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-purple-300 dark:border-[#333]">
+            <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
+              <h2 className="text-xl font-black text-slate-900 dark:text-white">{editandoInforme ? 'Editar Informe' : 'Nuevo Informe'}</h2>
+              <button onClick={() => setShowInformeModal(false)} className="p-2 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="p-5 overflow-y-auto custom-scrollbar flex-1 text-sm space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Informe *</label>
+                  <select value={informeTipo} onChange={e => setInformeTipo(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500">
+                    {tiposInforme.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
+                  <input type="date" value={informeFecha} onChange={e => setInformeFecha(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
+                </div>
+              </div>
+              <div>
+                <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
+                <select value={informeEstado} onChange={e => setInformeEstado(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500">
+                  <option value="borrador">Borrador</option>
+                  <option value="finalizado">Finalizado</option>
+                </select>
+              </div>
+              <div className="border-t border-purple-300 dark:border-[#333] pt-4 space-y-4">
+                <p className="font-bold text-pink-600 dark:text-pink-400 text-sm uppercase tracking-wider">Contenido del informe</p>
+                {(seccionesPorTipo[informeTipo] || []).map(sec => (
+                  <div key={sec.key}>
+                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">{sec.label}</label>
+                    <textarea
+                      value={informeContenido[sec.key] || ''}
+                      onChange={e => setInformeContenido(prev => ({ ...prev, [sec.key]: e.target.value }))}
+                      rows={3}
+                      className="w-full rounded-xl p-3 outline-none resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500"
+                      placeholder={`${sec.label}...`}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
+              <button onClick={() => setShowInformeModal(false)} disabled={submittingInforme} className="px-5 py-2 font-bold rounded-xl text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50 transition-colors">Cancelar</button>
+              <button
+                onClick={async () => {
+                  setSubmittingInforme(true);
+                  try {
+                    const data = { paciente_id: Number(id), tipo: informeTipo, fecha: informeFecha, contenido: informeContenido, estado: informeEstado };
+                    if (editandoInforme) {
+                      await actualizarInforme(editandoInforme, data);
+                    } else {
+                      await crearInforme(data);
+                    }
+                    setShowInformeModal(false);
+                    setEditandoInforme(null);
+                    await cargarInformes();
+                  } finally {
+                    setSubmittingInforme(false);
+                  }
+                }}
+                disabled={submittingInforme}
+                className="inline-flex items-center gap-2 px-6 py-2 font-bold rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors disabled:opacity-60"
+              >
+                {submittingInforme ? <Loader2 size={16} className="animate-spin" /> : null}
+                {editandoInforme ? 'Guardar Cambios' : 'Crear Informe'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
