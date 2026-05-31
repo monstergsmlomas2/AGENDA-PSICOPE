@@ -12,8 +12,8 @@ import {
   Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
   Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle
 } from 'lucide-react';
-import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo, getDriveToken } from '../services/driveService';
-import { useToast, Button } from '../components/ui';
+import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
+import { useToast, Button, FolderPickerDialog } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
 const calcularEdad = (fechaNac) => {
@@ -357,6 +357,7 @@ export default function PacienteDetalle() {
   const [loadingArchivos, setLoadingArchivos] = useState(false);
   const [subiendoArchivo, setSubiendoArchivo] = useState(false);
   const [dragOver, setDragOver] = useState(false);
+  const [archivoPendiente, setArchivoPendiente] = useState(null);
   const fileInputRef = useRef(null);
 
   const estadoTurnoConfig = {
@@ -637,55 +638,30 @@ export default function PacienteDetalle() {
     if (data?.url) window.location.href = data.url;
   };
 
-  const handleSubirArchivo = async (file) => {
+  const handleSubirArchivo = (file) => {
     if (file.size > 10 * 1024 * 1024) {
       toast.error('Error', 'El archivo supera los 10 MB.');
       return;
     }
+    setArchivoPendiente(file);
+  };
 
-    // Abrir folder picker para elegir destino
-    const tokenData = await getDriveToken();
-    if (!tokenData?.access_token) {
-      toast.error('Error', 'No se pudo obtener el token de Drive.');
-      return;
-    }
-
-    const elegirCarpetaYSubir = () => new Promise((resolve) => {
-      window.gapi.load('picker', () => {
-        const folderView = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-          .setIncludeFolders(true)
-          .setSelectFolderEnabled(true)
-          .setMimeTypes('application/vnd.google-apps.folder');
-
-        const picker = new window.google.picker.PickerBuilder()
-          .addView(folderView)
-          .setOAuthToken(tokenData.access_token)
-          .setTitle('Elegí la carpeta de destino')
-          .setCallback((pickerData) => {
-            if (pickerData.action === window.google.picker.Action.PICKED) {
-              resolve(pickerData.docs[0].id);
-            } else if (pickerData.action === window.google.picker.Action.CANCEL) {
-              resolve(null);
-            }
-          })
-          .build();
-        picker.setVisible(true);
-      });
-    });
-
-    const folderId = await elegirCarpetaYSubir();
-    if (!folderId) return; // usuario canceló
-
+  const handleFolderSelectedArchivo = async (folderId) => {
+    const file = archivoPendiente;
+    setArchivoPendiente(null);
     setSubiendoArchivo(true);
-    const resultado = await subirArchivo(id, file, folderId);
-    if (resultado) {
-      const data = await getArchivos(id);
-      setArchivos(Array.isArray(data) ? data : []);
-      toast.success('Archivo subido', resultado.name);
-    } else {
-      toast.error('Error', 'No se pudo subir el archivo.');
+    try {
+      const resultado = await subirArchivo(id, file, folderId);
+      if (resultado) {
+        const data = await getArchivos(id);
+        setArchivos(Array.isArray(data) ? data : []);
+        toast.success('Archivo subido', resultado.name);
+      } else {
+        toast.error('Error', 'No se pudo subir el archivo.');
+      }
+    } finally {
+      setSubiendoArchivo(false);
     }
-    setSubiendoArchivo(false);
   };
 
   const handleEliminarArchivo = async (archivo) => {
@@ -793,6 +769,7 @@ export default function PacienteDetalle() {
   }
 
   return (
+    <>
     <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in">
       <ConfirmModal />
 
@@ -1655,12 +1632,16 @@ export default function PacienteDetalle() {
       )}
 
     </div>
+
+    {archivoPendiente && (
+      <FolderPickerDialog
+        onSelect={handleFolderSelectedArchivo}
+        onCancel={() => setArchivoPendiente(null)}
+      />
+    )}
+    </>
   );
 }
-
-
-
-
 
 
 
