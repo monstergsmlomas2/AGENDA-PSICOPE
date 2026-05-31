@@ -16,6 +16,7 @@ import EntrevistaPage from './pages/EntrevistaPage';
 import EvaluacionDetalle from './pages/EvaluacionDetalle';
 import EvaluacionForm from './pages/EvaluacionForm';
 import Configuracion from './pages/Configuracion';
+import HerramientasEstandarizadas from './pages/HerramientasEstandarizadas';
 import Login from './pages/Login';
 import { ToastProvider, useToast } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -139,6 +140,7 @@ function AppRoutes() {
                 <Route path="/informes" element={<Informes />} />
                 <Route path="/pagos" element={<Pagos />} />
                 <Route path="/configuracion" element={<Configuracion />} />
+                <Route path="/herramientas" element={<HerramientasEstandarizadas />} />
               </Routes>
             </ProtectedLayout>
           </ProtectedRoute>

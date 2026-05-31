@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X, Search,
+  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X, Search, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -189,6 +189,19 @@ export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
               {gestionItems.map((item) => (
                 <NavItem key={item.to} item={item} onClick={handleNavClick} />
               ))}
+            </div>
+          </div>
+
+          {/* Separador antes de Herramientas */}
+          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+
+          {/* Herramientas Clínicas */}
+          <div>
+            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
+              Herramientas
+            </p>
+            <div className="space-y-0.5">
+              <NavItem item={{ label: 'Tests Estandarizados', to: '/herramientas', icon: BookOpen }} onClick={handleNavClick} />
             </div>
           </div>
 
