@@ -564,8 +564,42 @@ export default function PacienteDetalle() {
       toast.error('Error', 'El archivo supera los 10 MB.');
       return;
     }
+
+    // Abrir folder picker para elegir destino
+    const tokenData = await getDriveToken();
+    if (!tokenData?.access_token) {
+      toast.error('Error', 'No se pudo obtener el token de Drive.');
+      return;
+    }
+
+    const elegirCarpetaYSubir = () => new Promise((resolve) => {
+      window.gapi.load('picker', () => {
+        const folderView = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
+          .setIncludeFolders(true)
+          .setSelectFolderEnabled(true)
+          .setMimeTypes('application/vnd.google-apps.folder');
+
+        const picker = new window.google.picker.PickerBuilder()
+          .addView(folderView)
+          .setOAuthToken(tokenData.access_token)
+          .setTitle('Elegí la carpeta de destino')
+          .setCallback((pickerData) => {
+            if (pickerData.action === window.google.picker.Action.PICKED) {
+              resolve(pickerData.docs[0].id);
+            } else if (pickerData.action === window.google.picker.Action.CANCEL) {
+              resolve(null);
+            }
+          })
+          .build();
+        picker.setVisible(true);
+      });
+    });
+
+    const folderId = await elegirCarpetaYSubir();
+    if (!folderId) return; // usuario canceló
+
     setSubiendoArchivo(true);
-    const resultado = await subirArchivo(id, file);
+    const resultado = await subirArchivo(id, file, folderId);
     if (resultado) {
       const data = await getArchivos(id);
       setArchivos(Array.isArray(data) ? data : []);

@@ -42,11 +42,12 @@ export const getArchivos = async (pacienteId) => {
   }
 };
 
-export const subirArchivo = async (pacienteId, file) => {
+export const subirArchivo = async (pacienteId, file, folderId = null) => {
   try {
     const token = getToken();
     const formData = new FormData();
     formData.append('file', file);
+    if (folderId) formData.append('folderId', folderId);
 
     const res = await fetch(`${API_URL}/drive/archivos/${pacienteId}`, {
       method: 'POST',

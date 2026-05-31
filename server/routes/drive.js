@@ -133,11 +133,11 @@ router.post('/archivos/:pacienteId', upload.single('file'), async (req, res) => 
     }
 
     const drive = getAuthenticatedDrive(tokens);
-    const folderId = await getOrCreateFolder(drive, req.params.pacienteId);
+    const targetFolderId = req.body.folderId || await getOrCreateFolder(drive, req.params.pacienteId);
 
     const fileName = req.file.originalname;
     const result = await drive.files.create({
-      requestBody: { name: fileName, parents: [folderId] },
+      requestBody: { name: fileName, parents: [targetFolderId] },
       media: { mimeType: req.file.mimetype, body: bufferToStream(req.file.buffer) },
       fields: 'id,name,webViewLink',
     });
