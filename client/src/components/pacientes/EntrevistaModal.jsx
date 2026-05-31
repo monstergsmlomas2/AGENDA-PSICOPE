@@ -1,12 +1,12 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { FileText, Printer, Upload, Loader2 } from 'lucide-react';
 import { subirArchivo, getDriveToken } from '../../services/driveService';
+import { abrirVentanaImpresion, generarHtmlEntrevista } from '../../utils/entrevistaDocument';
 
 export default function EntrevistaModal({ paciente, onClose, onSave }) {
   if (!paciente) return null;
 
   const entrevista = paciente?.entrevista;
-  const printRef = useRef(null);
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
 
@@ -19,55 +19,55 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
     onSave(entrevistaData);
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => abrirVentanaImpresion(paciente, entrevista);
 
   const generarPdfBlob = async () => {
     const { default: jsPDF } = await import('jspdf');
     const { default: html2canvas } = await import('html2canvas');
 
-    const el = printRef.current;
-    if (!el) return null;
+    // Renderizar el HTML limpio en un iframe oculto para capturarlo
+    const html = generarHtmlEntrevista(paciente, entrevista);
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:900px;height:1px;border:none;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(html);
+    iframe.contentDocument.close();
 
+    await new Promise(r => setTimeout(r, 600));
+
+    const el = iframe.contentDocument.querySelector('.page');
     const canvas = await html2canvas(el, {
-      scale: 1.5,
+      scale: 2,
       useCORS: true,
       backgroundColor: '#ffffff',
       windowWidth: 900,
+      scrollY: 0,
     });
+    document.body.removeChild(iframe);
 
-    const imgData = canvas.toDataURL('image/jpeg', 0.85);
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 10;
+    const margin = 0;
     const usableW = pageW - margin * 2;
     const imgH = (canvas.height * usableW) / canvas.width;
 
     let yOffset = 0;
     let remaining = imgH;
-
     while (remaining > 0) {
       const sliceH = Math.min(remaining, pageH - margin * 2);
       const srcY = (yOffset / imgH) * canvas.height;
       const srcH = (sliceH / imgH) * canvas.height;
-
       const sliceCanvas = document.createElement('canvas');
       sliceCanvas.width = canvas.width;
-      sliceCanvas.height = srcH;
-      const ctx = sliceCanvas.getContext('2d');
-      ctx.drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
-
-      const sliceData = sliceCanvas.toDataURL('image/jpeg', 0.85);
+      sliceCanvas.height = Math.ceil(srcH);
+      sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
       if (yOffset > 0) pdf.addPage();
-      pdf.addImage(sliceData, 'JPEG', margin, margin, usableW, sliceH);
-
+      pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', margin, margin, usableW, sliceH);
       yOffset += sliceH;
       remaining -= sliceH;
     }
-
     return pdf.output('blob');
   };
 
@@ -124,8 +124,8 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm print:relative print:inset-auto print:bg-transparent print:p-0 print:block">
-      <div className="bg-white dark:bg-slate-950 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-300 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden print:max-h-none print:shadow-none print:border-none print:rounded-none">
+    <div className="fixed inset-0 bg-slate-900/50 dark:bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+      <div className="bg-white dark:bg-slate-950 w-full max-w-5xl max-h-[90vh] rounded-2xl border border-purple-300 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden">
 
         <div className="bg-purple-100/50 dark:bg-slate-900 border-b border-purple-300 dark:border-slate-800 px-8 py-5 flex items-center justify-between shrink-0 print:hidden">
           <div>
@@ -141,17 +141,9 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
           </button>
         </div>
 
-        {/* Cabecera visible solo al imprimir */}
-        <div className="hidden print:block px-8 pt-6 pb-2">
-          <h2 className="text-2xl font-bold text-slate-900 text-center">Entrevista de Admisión</h2>
-          <p className="text-center text-slate-600 mt-1 capitalize">{paciente.nombre} {paciente.apellido}</p>
-          <hr className="mt-3 border-slate-300" />
-        </div>
-
         {/* FORMULARIO */}
-        <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 overflow-y-auto custom-scrollbar flex-1 text-sm text-slate-900 dark:text-slate-300 space-y-10 print:overflow-visible">
-          {/* Contenido capturado para PDF */}
-          <div ref={printRef}>
+        <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 overflow-y-auto custom-scrollbar flex-1 text-sm text-slate-900 dark:text-slate-300 space-y-10">
+          <div>
 
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Datos Escolares</h3>

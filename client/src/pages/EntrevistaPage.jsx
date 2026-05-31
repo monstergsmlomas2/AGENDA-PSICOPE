@@ -1,7 +1,8 @@
-﻿import { useState, useEffect, useRef } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPacienteById, guardarEntrevista } from '../services/pacientesService';
 import { subirArchivo, getDriveToken } from '../services/driveService';
+import { abrirVentanaImpresion, generarHtmlEntrevista } from '../utils/entrevistaDocument';
 import { ArrowLeft, FileText, Printer, Upload, Loader2 } from 'lucide-react';
 import { useToast } from '../components/ui';
 
@@ -15,7 +16,6 @@ export default function EntrevistaPage() {
   const [submitting, setSubmitting] = useState(false);
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
-  const printRef = useRef(null);
 
   useEffect(() => {
     getPacienteById(id)
@@ -62,33 +62,43 @@ export default function EntrevistaPage() {
 
   const entrevista = paciente?.entrevista;
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => abrirVentanaImpresion(paciente, entrevista);
 
   const generarPdfBlob = async () => {
     const { default: jsPDF } = await import('jspdf');
     const { default: html2canvas } = await import('html2canvas');
-    const el = printRef.current;
-    if (!el) return null;
-    const canvas = await html2canvas(el, { scale: 1.5, useCORS: true, backgroundColor: '#ffffff', windowWidth: 900 });
-    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+
+    const html = generarHtmlEntrevista(paciente, entrevista);
+    const iframe = document.createElement('iframe');
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:900px;height:1px;border:none;';
+    document.body.appendChild(iframe);
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(html);
+    iframe.contentDocument.close();
+
+    await new Promise(r => setTimeout(r, 600));
+
+    const el = iframe.contentDocument.querySelector('.page');
+    const canvas = await html2canvas(el, { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 900, scrollY: 0 });
+    document.body.removeChild(iframe);
+
     const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
-    const margin = 10;
-    const usableW = pageW - margin * 2;
+    const usableW = pageW;
     const imgH = (canvas.height * usableW) / canvas.width;
     let yOffset = 0;
     let remaining = imgH;
     while (remaining > 0) {
-      const sliceH = Math.min(remaining, pageH - margin * 2);
+      const sliceH = Math.min(remaining, pageH);
       const srcY = (yOffset / imgH) * canvas.height;
       const srcH = (sliceH / imgH) * canvas.height;
       const sliceCanvas = document.createElement('canvas');
       sliceCanvas.width = canvas.width;
-      sliceCanvas.height = srcH;
+      sliceCanvas.height = Math.ceil(srcH);
       sliceCanvas.getContext('2d').drawImage(canvas, 0, srcY, canvas.width, srcH, 0, 0, canvas.width, srcH);
       if (yOffset > 0) pdf.addPage();
-      pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.85), 'JPEG', margin, margin, usableW, sliceH);
+      pdf.addImage(sliceCanvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, usableW, sliceH);
       yOffset += sliceH;
       remaining -= sliceH;
     }
@@ -164,7 +174,7 @@ export default function EntrevistaPage() {
         </div>
 
         <form id="entrevistaForm" onSubmit={handleSubmit} className="p-8 text-sm text-slate-900 dark:text-slate-300 space-y-10 overflow-y-auto">
-          <div ref={printRef}>
+          <div>
 
           <section className="space-y-4">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white border-b border-purple-300 dark:border-slate-800 pb-2">Datos Escolares</h3>
