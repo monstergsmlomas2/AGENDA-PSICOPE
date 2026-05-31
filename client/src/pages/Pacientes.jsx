@@ -7,7 +7,7 @@ import { getTurnos, actualizarTurno, eliminarTurno } from '../services/turnosSer
 import { getConsultorios } from '../services/consultoriosService';
 import {
   Search, Plus, Phone, MapPin, Trash2, User, Users, ShieldCheck, Mail, Calendar,
-  AlertTriangle, Clock, SearchX, AlertCircle, Pencil, Check, X, ChevronDown, ChevronUp
+  AlertTriangle, Clock, SearchX, AlertCircle, Pencil, Check, X, ChevronDown, ChevronUp, Printer
 } from 'lucide-react';
 import { useToast, SkeletonCard, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
@@ -20,6 +20,105 @@ const calcularEdad = (fechaNac) => {
   const m = hoy.getMonth() - nac.getMonth();
   if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
   return edad >= 0 ? edad : null;
+};
+
+const imprimirConsentimiento = ({ nombre, apellido, dni, fechaNacimiento }) => {
+  const hoy = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const edad = calcularEdad(fechaNacimiento);
+  const pacienteTexto = [apellido, nombre].filter(Boolean).join(', ') || '___________________________';
+  const dniTexto = dni || '_______________';
+  const edadTexto = edad != null ? `${edad} años` : '______';
+
+  const html = `<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Consentimiento Informado</title>
+  <style>
+    @page { size: A4; margin: 2.5cm 2cm; }
+    body { font-family: Arial, sans-serif; font-size: 12pt; color: #111; line-height: 1.6; }
+    h1 { font-size: 16pt; text-align: center; margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 10pt; color: #555; margin-bottom: 24px; }
+    .section { margin-bottom: 18px; }
+    .section h2 { font-size: 13pt; border-bottom: 1px solid #aaa; padding-bottom: 4px; margin-bottom: 8px; }
+    p { margin: 6px 0; text-align: justify; }
+    .field { display: inline-block; border-bottom: 1px solid #333; min-width: 180px; }
+    .firma-area { margin-top: 60px; display: flex; gap: 60px; justify-content: space-around; }
+    .firma-box { text-align: center; width: 200px; }
+    .firma-line { border-top: 1px solid #333; margin-bottom: 6px; }
+    .firma-label { font-size: 10pt; color: #444; }
+    @media print { body { -webkit-print-color-adjust: exact; } }
+  </style>
+</head>
+<body>
+  <h1>Consentimiento Informado y Confidencialidad</h1>
+  <p class="subtitle">Ley 26.529 — Derechos del Paciente en su Relación con los Profesionales e Instituciones de la Salud</p>
+
+  <div class="section">
+    <h2>Datos del Paciente</h2>
+    <p><strong>Apellido y Nombre:</strong> <span class="field">${pacienteTexto}</span></p>
+    <p><strong>DNI:</strong> <span class="field">${dniTexto}</span> &nbsp;&nbsp;&nbsp; <strong>Edad:</strong> <span class="field">${edadTexto}</span></p>
+  </div>
+
+  <div class="section">
+    <h2>Información y Consentimiento</h2>
+    <p>
+      En cumplimiento de la Ley 26.529 de Derechos del Paciente, el presente documento certifica que el
+      paciente o su representante legal ha sido debidamente informado/a sobre:
+    </p>
+    <ul>
+      <li>El diagnóstico, los procedimientos terapéuticos propuestos y sus objetivos.</li>
+      <li>Los beneficios esperados del tratamiento psicopedagógico.</li>
+      <li>Los alcances y limitaciones del proceso de evaluación e intervención.</li>
+      <li>El derecho a revocar este consentimiento en cualquier momento sin que ello genere perjuicio alguno.</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>Confidencialidad</h2>
+    <p>
+      Toda la información obtenida en el marco del tratamiento — incluyendo datos personales, resultados de
+      evaluaciones, registros de sesiones e informes — será tratada con estricta confidencialidad, en
+      conformidad con la Ley 26.529 y la Ley 25.326 de Protección de Datos Personales.
+    </p>
+    <p>
+      La información únicamente podrá ser compartida con terceros mediando autorización expresa del paciente
+      o su representante legal, o por requerimiento judicial.
+    </p>
+  </div>
+
+  <div class="section">
+    <h2>Declaración de Consentimiento</h2>
+    <p>
+      Habiendo leído y comprendido la información precedente, el/la firmante presta libre y voluntariamente
+      su consentimiento para el inicio y desarrollo del tratamiento psicopedagógico del menor indicado.
+    </p>
+    <p><strong>Lugar y fecha:</strong> <span class="field">___________________, ${hoy}</span></p>
+  </div>
+
+  <div class="firma-area">
+    <div class="firma-box">
+      <div style="height:70px;"></div>
+      <div class="firma-line"></div>
+      <div class="firma-label">Firma del Padre / Madre / Tutor Legal</div>
+      <div class="firma-label" style="margin-top:4px;">Aclaración: ___________________________</div>
+      <div class="firma-label" style="margin-top:4px;">DNI: _______________</div>
+      <div class="firma-label" style="margin-top:4px;">Vínculo: _______________</div>
+    </div>
+    <div class="firma-box">
+      <div style="height:70px;"></div>
+      <div class="firma-line"></div>
+      <div class="firma-label">Firma del Profesional</div>
+      <div class="firma-label" style="margin-top:4px;">Sello / Matrícula: ___________________</div>
+    </div>
+  </div>
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=800,height=700');
+  win.document.write(html);
+  win.document.close();
+  win.onload = () => win.print();
 };
 
 export default function Pacientes() {
@@ -648,6 +747,15 @@ export default function Pacientes() {
                         </p>
                       </div>
                     </label>
+                    <div className="mt-4 pt-4 border-t border-purple-200 dark:border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => imprimirConsentimiento({ nombre, apellido, dni, fechaNacimiento })}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-pink-500 hover:bg-pink-600 text-white transition-colors"
+                      >
+                        <Printer size={16} /> Imprimir Consentimiento
+                      </button>
+                    </div>
                   </div>
                 </section>
 
