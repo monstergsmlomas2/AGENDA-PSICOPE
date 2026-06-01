@@ -13,7 +13,7 @@ import {
   Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle, BookOpen
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
-import { getTestsParaEdad, CATEGORIAS_TESTS } from '../data/testsEstandarizados';
+import { getTestsFiltrados, CATEGORIAS_TESTS } from '../data/testsEstandarizados';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -343,6 +343,7 @@ export default function PacienteDetalle() {
   const [showInformes, setShowInformes] = useState(false);
   const [showTests, setShowTests] = useState(false);
   const [testsFiltroEdad, setTestsFiltroEdad] = useState(true);
+  const [testsFiltroMotivo, setTestsFiltroMotivo] = useState(true);
   const [informesPaciente, setInformesPaciente] = useState([]);
   const [loadingInformes, setLoadingInformes] = useState(false);
   const [showInformeModal, setShowInformeModal] = useState(false);
@@ -984,13 +985,13 @@ export default function PacienteDetalle() {
       <div className="grid grid-cols-3 gap-3">
 
         <button onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="group relative overflow-hidden rounded-2xl border border-amber-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-amber-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-amber-500/10 shadow-sm hover:shadow-lg hover:border-amber-400 transition-all duration-200 flex items-center justify-center text-center py-6">
+          className="group relative overflow-hidden rounded-2xl border-2 border-amber-400 dark:border-amber-500/70 bg-gradient-to-br from-white via-white to-amber-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-amber-500/10 shadow-sm hover:shadow-lg hover:border-amber-500 transition-all duration-200 flex items-center justify-center text-center py-6">
           <div className="absolute right-0 bottom-0 p-1 text-amber-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><FileText size={72} /></div>
           <span className="relative text-lg font-black text-amber-600 dark:text-amber-400">Entrevista de Admisión</span>
         </button>
 
         <button onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'sesiones' ? 'border-blue-400 bg-gradient-to-br from-blue-50 to-blue-200/60 dark:from-blue-500/20 dark:to-blue-500/20' : 'border-blue-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-blue-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-blue-500/10 hover:border-blue-400'}`}>
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'sesiones' ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-200/60 dark:from-blue-500/20 dark:to-blue-500/20' : 'border-blue-400 dark:border-blue-500/70 bg-gradient-to-br from-white via-white to-blue-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-blue-500/10 hover:border-blue-500'}`}>
           <div className="absolute right-0 bottom-0 p-1 text-blue-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><ClipboardList size={72} /></div>
           <span className="relative text-lg font-black text-blue-600 dark:text-blue-400">
             Sesiones{sesiones.length > 0 && <span className="ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-black">{sesiones.length}</span>}
@@ -998,7 +999,7 @@ export default function PacienteDetalle() {
         </button>
 
         <button onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'evaluaciones' ? 'border-teal-400 bg-gradient-to-br from-teal-50 to-teal-200/60 dark:from-teal-500/20 dark:to-teal-500/20' : 'border-teal-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-teal-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-teal-500/10 hover:border-teal-400'}`}>
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'evaluaciones' ? 'border-teal-500 bg-gradient-to-br from-teal-50 to-teal-200/60 dark:from-teal-500/20 dark:to-teal-500/20' : 'border-teal-400 dark:border-teal-500/70 bg-gradient-to-br from-white via-white to-teal-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-teal-500/10 hover:border-teal-500'}`}>
           <div className="absolute right-0 bottom-0 p-1 text-teal-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><ClipboardCheck size={72} /></div>
           <span className="relative text-lg font-black text-teal-600 dark:text-teal-400">
             Evaluaciones{evaluaciones.length > 0 && <span className="ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-teal-500 text-white text-xs font-black">{evaluaciones.length}</span>}
@@ -1006,19 +1007,19 @@ export default function PacienteDetalle() {
         </button>
 
         <button onClick={handleAbrirAdjuntos}
-          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showAdjuntos ? 'border-purple-400 bg-gradient-to-br from-purple-50 to-purple-200/60 dark:from-purple-500/20 dark:to-purple-500/20' : 'border-purple-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-purple-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-purple-500/10 hover:border-purple-400'}`}>
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showAdjuntos ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-purple-200/60 dark:from-purple-500/20 dark:to-purple-500/20' : 'border-purple-400 dark:border-purple-500/70 bg-gradient-to-br from-white via-white to-purple-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-purple-500/10 hover:border-purple-500'}`}>
           <div className="absolute right-0 bottom-0 p-1 text-purple-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><Paperclip size={72} /></div>
           <span className="relative text-lg font-black text-purple-600 dark:text-purple-400">Archivos</span>
         </button>
 
         <button onClick={() => setShowInformes(v => !v)}
-          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showInformes ? 'border-pink-400 bg-gradient-to-br from-pink-50 to-pink-200/60 dark:from-pink-500/20 dark:to-pink-500/20' : 'border-pink-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-pink-500/10 hover:border-pink-400'}`}>
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showInformes ? 'border-pink-500 bg-gradient-to-br from-pink-50 to-pink-200/60 dark:from-pink-500/20 dark:to-pink-500/20' : 'border-pink-400 dark:border-pink-500/70 bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-pink-500/10 hover:border-pink-500'}`}>
           <div className="absolute right-0 bottom-0 p-1 text-pink-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><FileText size={72} /></div>
           <span className="relative text-lg font-black text-pink-600 dark:text-pink-400">Informes</span>
         </button>
 
         <button onClick={() => setShowTests(v => !v)}
-          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showTests ? 'border-indigo-400 bg-gradient-to-br from-indigo-50 to-indigo-200/60 dark:from-indigo-500/20 dark:to-indigo-500/20' : 'border-indigo-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-indigo-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-indigo-500/10 hover:border-indigo-400'}`}>
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${showTests ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-indigo-200/60 dark:from-indigo-500/20 dark:to-indigo-500/20' : 'border-indigo-400 dark:border-indigo-500/70 bg-gradient-to-br from-white via-white to-indigo-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-indigo-500/10 hover:border-indigo-500'}`}>
           <div className="absolute right-0 bottom-0 p-1 text-indigo-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><BookOpen size={72} /></div>
           <span className="relative text-lg font-black text-indigo-600 dark:text-indigo-400">Tests</span>
         </button>
