@@ -984,88 +984,88 @@ export default function PacienteDetalle() {
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="group relative flex items-center justify-between overflow-hidden rounded-xl border border-amber-300/60 bg-amber-100 dark:bg-amber-950/60 p-4 shadow-md hover:bg-amber-200/80 dark:hover:bg-amber-950/80 transition-all"
+          className="group relative flex items-center justify-between overflow-hidden rounded-xl bg-amber-800/80 dark:bg-amber-950 border border-amber-700/50 p-4 shadow-lg hover:bg-amber-800/90 transition-all min-h-[72px]"
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-amber-500 dark:text-amber-400">Entrevista</span>
-            <span className="text-base font-bold text-amber-700 dark:text-amber-300">de Admisión</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-amber-400">Entrevista</span>
+            <span className="text-lg font-black text-amber-200">de Admisión</span>
           </div>
-          <FileText size={48} className="text-amber-300/60 dark:text-amber-600/40 transition-all group-hover:text-amber-400 dark:group-hover:text-amber-500/80" />
+          <FileText size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-amber-200" />
         </button>
 
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-md transition-all ${
+          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-lg transition-all min-h-[72px] ${
             tabActivo === 'sesiones'
-              ? 'border-blue-400/80 bg-blue-200/80 dark:bg-blue-950/80'
-              : 'border-blue-300/60 bg-blue-100 dark:bg-blue-950/60 hover:bg-blue-200/80 dark:hover:bg-blue-950/80'
+              ? 'bg-blue-700/90 border-blue-500/70'
+              : 'bg-blue-800/80 dark:bg-blue-950 border-blue-700/50 hover:bg-blue-800/90'
           }`}
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-blue-500 dark:text-blue-400">Sesiones</span>
-            <span className="text-2xl font-black text-blue-700 dark:text-blue-300">{sesiones.length}</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-blue-400">Sesiones</span>
+            <span className="text-3xl font-black text-blue-200">{sesiones.length}</span>
           </div>
-          <ClipboardList size={48} className="text-blue-300/60 dark:text-blue-600/40 transition-all group-hover:text-blue-400 dark:group-hover:text-blue-500/80" />
+          <ClipboardList size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-blue-200" />
         </button>
 
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-md transition-all ${
+          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-lg transition-all min-h-[72px] ${
             tabActivo === 'evaluaciones'
-              ? 'border-teal-400/80 bg-teal-200/80 dark:bg-teal-950/80'
-              : 'border-teal-300/60 bg-teal-100 dark:bg-teal-950/60 hover:bg-teal-200/80 dark:hover:bg-teal-950/80'
+              ? 'bg-teal-700/90 border-teal-500/70'
+              : 'bg-teal-800/80 dark:bg-teal-950 border-teal-700/50 hover:bg-teal-800/90'
           }`}
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-teal-500 dark:text-teal-400">Evaluaciones</span>
-            <span className="text-base font-bold text-teal-700 dark:text-teal-300">Ver todas</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-teal-400">Evaluaciones</span>
+            <span className="text-lg font-black text-teal-200">Ver todas</span>
           </div>
-          <ClipboardCheck size={48} className="text-teal-300/60 dark:text-teal-600/40 transition-all group-hover:text-teal-400 dark:group-hover:text-teal-500/80" />
+          <ClipboardCheck size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-teal-200" />
         </button>
 
         <button
           onClick={handleAbrirAdjuntos}
-          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-md transition-all ${
+          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-lg transition-all min-h-[72px] ${
             showAdjuntos
-              ? 'border-purple-400/80 bg-purple-200/80 dark:bg-purple-950/80'
-              : 'border-purple-300/60 bg-purple-100 dark:bg-purple-950/60 hover:bg-purple-200/80 dark:hover:bg-purple-950/80'
+              ? 'bg-purple-700/90 border-purple-500/70'
+              : 'bg-purple-800/80 dark:bg-purple-950 border-purple-700/50 hover:bg-purple-800/90'
           }`}
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-purple-500 dark:text-purple-400">Archivos</span>
-            <span className="text-base font-bold text-purple-700 dark:text-purple-300">Adjuntos</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-purple-400">Archivos</span>
+            <span className="text-lg font-black text-purple-200">Adjuntos</span>
           </div>
-          <Paperclip size={48} className="text-purple-300/60 dark:text-purple-600/40 transition-all group-hover:text-purple-400 dark:group-hover:text-purple-500/80" />
+          <Paperclip size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-purple-200" />
         </button>
 
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-md transition-all ${
+          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-lg transition-all min-h-[72px] ${
             showInformes
-              ? 'border-pink-400/80 bg-pink-200/80 dark:bg-pink-950/80'
-              : 'border-pink-300/60 bg-pink-100 dark:bg-pink-950/60 hover:bg-pink-200/80 dark:hover:bg-pink-950/80'
+              ? 'bg-pink-700/90 border-pink-500/70'
+              : 'bg-pink-800/80 dark:bg-pink-950 border-pink-700/50 hover:bg-pink-800/90'
           }`}
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-pink-500 dark:text-pink-400">Informes</span>
-            <span className="text-base font-bold text-pink-700 dark:text-pink-300">Ver todos</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-pink-400">Informes</span>
+            <span className="text-lg font-black text-pink-200">Ver todos</span>
           </div>
-          <FileText size={48} className="text-pink-300/60 dark:text-pink-600/40 transition-all group-hover:text-pink-400 dark:group-hover:text-pink-500/80" />
+          <FileText size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-pink-200" />
         </button>
 
         <button
           onClick={() => setShowTests(v => !v)}
-          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-md transition-all ${
+          className={`group relative flex items-center justify-between overflow-hidden rounded-xl border p-4 shadow-lg transition-all min-h-[72px] ${
             showTests
-              ? 'border-indigo-400/80 bg-indigo-200/80 dark:bg-indigo-950/80'
-              : 'border-indigo-300/60 bg-indigo-100 dark:bg-indigo-950/60 hover:bg-indigo-200/80 dark:hover:bg-indigo-950/80'
+              ? 'bg-indigo-700/90 border-indigo-500/70'
+              : 'bg-indigo-800/80 dark:bg-indigo-950 border-indigo-700/50 hover:bg-indigo-800/90'
           }`}
         >
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-xs font-semibold uppercase tracking-widest text-indigo-500 dark:text-indigo-400">Tests</span>
-            <span className="text-base font-bold text-indigo-700 dark:text-indigo-300">Estandarizados</span>
+          <div className="flex flex-col items-start gap-0.5 z-10">
+            <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400">Tests</span>
+            <span className="text-lg font-black text-indigo-200">Estandarizados</span>
           </div>
-          <BookOpen size={48} className="text-indigo-300/60 dark:text-indigo-600/40 transition-all group-hover:text-indigo-400 dark:group-hover:text-indigo-500/80" />
+          <BookOpen size={64} className="absolute right-2 opacity-10 group-hover:opacity-25 transition-all text-indigo-200" />
         </button>
       </div>
 
