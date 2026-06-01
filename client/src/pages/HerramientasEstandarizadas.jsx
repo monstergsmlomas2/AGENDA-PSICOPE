@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BookOpen, ChevronDown, ChevronRight, Search, Users } from 'lucide-react';
 import { CATEGORIAS_TESTS } from '../data/testsEstandarizados';
+import TestModal from '../components/TestModal';
 
 const COLOR_MAP = {
   blue:   { bg: 'bg-blue-50 dark:bg-blue-900/10',   border: 'border-blue-200 dark:border-blue-800/40',   badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',   title: 'text-blue-700 dark:text-blue-300',   dot: 'bg-blue-500' },
@@ -10,6 +11,8 @@ const COLOR_MAP = {
   red:    { bg: 'bg-red-50 dark:bg-red-900/10',     border: 'border-red-200 dark:border-red-800/40',     badge: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300',     title: 'text-red-700 dark:text-red-300',     dot: 'bg-red-500' },
   pink:   { bg: 'bg-pink-50 dark:bg-pink-900/10',   border: 'border-pink-200 dark:border-pink-800/40',   badge: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',   title: 'text-pink-700 dark:text-pink-300',   dot: 'bg-pink-500' },
   teal:   { bg: 'bg-teal-50 dark:bg-teal-900/10',   border: 'border-teal-200 dark:border-teal-800/40',   badge: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',   title: 'text-teal-700 dark:text-teal-300',   dot: 'bg-teal-500' },
+  yellow: { bg: 'bg-yellow-50 dark:bg-yellow-900/10', border: 'border-yellow-200 dark:border-yellow-800/40', badge: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300', title: 'text-yellow-700 dark:text-yellow-300', dot: 'bg-yellow-500' },
+  indigo: { bg: 'bg-indigo-50 dark:bg-indigo-900/10', border: 'border-indigo-200 dark:border-indigo-800/40', badge: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300', title: 'text-indigo-700 dark:text-indigo-300', dot: 'bg-indigo-500' },
 };
 
 function edadLabel(min, max) {
@@ -22,10 +25,13 @@ function edadLabel(min, max) {
   return `${fmt(min)} – ${fmt(max)} a`;
 }
 
-function TestCard({ test, colorKey }) {
+function TestCard({ test, colorKey, onOpen }) {
   const c = COLOR_MAP[colorKey];
   return (
-    <div className={`rounded-xl border ${c.border} ${c.bg} p-4 space-y-2`}>
+    <button
+      onClick={() => onOpen(test, colorKey)}
+      className={`w-full text-left rounded-xl border ${c.border} ${c.bg} p-4 space-y-2 hover:shadow-md hover:scale-[1.01] transition-all duration-150 cursor-pointer`}
+    >
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className={`font-bold text-sm ${c.title}`}>{test.nombre}</p>
@@ -36,12 +42,13 @@ function TestCard({ test, colorKey }) {
           {edadLabel(test.edadMin, test.edadMax)}
         </span>
       </div>
-      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{test.descripcion}</p>
-    </div>
+      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">{test.descripcion}</p>
+      <p className={`text-xs font-semibold ${c.title} opacity-70`}>Ver detalle →</p>
+    </button>
   );
 }
 
-function CategoriaSection({ categoria, defaultOpen = false }) {
+function CategoriaSection({ categoria, defaultOpen, onOpen }) {
   const [open, setOpen] = useState(defaultOpen);
   const c = COLOR_MAP[categoria.color];
 
@@ -63,7 +70,7 @@ function CategoriaSection({ categoria, defaultOpen = false }) {
       {open && (
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-950/50">
           {categoria.tests.map(t => (
-            <TestCard key={t.id} test={t} colorKey={categoria.color} />
+            <TestCard key={t.id} test={t} colorKey={categoria.color} onOpen={onOpen} />
           ))}
         </div>
       )}
@@ -73,6 +80,8 @@ function CategoriaSection({ categoria, defaultOpen = false }) {
 
 export default function HerramientasEstandarizadas() {
   const [query, setQuery] = useState('');
+  const [modalTest, setModalTest] = useState(null);
+  const [modalColor, setModalColor] = useState('blue');
 
   const totalTests = CATEGORIAS_TESTS.reduce((acc, c) => acc + c.tests.length, 0);
 
@@ -86,6 +95,11 @@ export default function HerramientasEstandarizadas() {
         ),
       })).filter(cat => cat.tests.length > 0)
     : CATEGORIAS_TESTS;
+
+  function handleOpen(test, colorKey) {
+    setModalTest(test);
+    setModalColor(colorKey);
+  }
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -122,9 +136,23 @@ export default function HerramientasEstandarizadas() {
       ) : (
         <div className="space-y-3">
           {categoriasFiltradas.map((cat, i) => (
-            <CategoriaSection key={cat.id} categoria={cat} defaultOpen={i === 0 || !!query.trim()} />
+            <CategoriaSection
+              key={cat.id}
+              categoria={cat}
+              defaultOpen={i === 0 || !!query.trim()}
+              onOpen={handleOpen}
+            />
           ))}
         </div>
+      )}
+
+      {/* Modal */}
+      {modalTest && (
+        <TestModal
+          test={modalTest}
+          colorKey={modalColor}
+          onClose={() => setModalTest(null)}
+        />
       )}
     </div>
   );

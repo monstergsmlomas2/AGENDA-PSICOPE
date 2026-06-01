@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
 import { getTestsFiltrados } from '../data/testsEstandarizados';
+import TestModal from '../components/TestModal';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -344,6 +345,8 @@ export default function PacienteDetalle() {
   const [showTests, setShowTests] = useState(false);
   const [testsFiltroEdad, setTestsFiltroEdad] = useState(true);
   const [testsFiltroMotivo, setTestsFiltroMotivo] = useState(true);
+  const [testModal, setTestModal] = useState(null);
+  const [testModalColor, setTestModalColor] = useState('blue');
   const [informesPaciente, setInformesPaciente] = useState([]);
   const [loadingInformes, setLoadingInformes] = useState(false);
   const [showInformeModal, setShowInformeModal] = useState(false);
@@ -1444,7 +1447,11 @@ export default function PacienteDetalle() {
                       </div>
                       <div className="p-3 grid grid-cols-1 md:grid-cols-2 gap-3 bg-white dark:bg-slate-950/40">
                         {cat.tests.map(test => (
-                          <div key={test.id} className={`rounded-xl border ${c.border} ${c.bg} p-3 space-y-1.5`}>
+                          <button
+                            key={test.id}
+                            onClick={() => { setTestModal(test); setTestModalColor(cat.color); }}
+                            className={`w-full text-left rounded-xl border ${c.border} ${c.bg} p-3 space-y-1.5 hover:shadow-md hover:scale-[1.01] transition-all duration-150`}
+                          >
                             <div className="flex items-start justify-between gap-2">
                               <div>
                                 <p className={`font-bold text-sm ${c.title}`}>{test.nombre}</p>
@@ -1454,8 +1461,9 @@ export default function PacienteDetalle() {
                                 {test.edadMax >= 80 ? `${test.edadMin}a+` : `${test.edadMin}–${test.edadMax}a`}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{test.descripcion}</p>
-                          </div>
+                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">{test.descripcion}</p>
+                            <p className={`text-xs font-semibold ${c.title} opacity-60`}>Ver detalle →</p>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -1466,6 +1474,14 @@ export default function PacienteDetalle() {
           </div>
         );
       })()}
+
+      {testModal && (
+        <TestModal
+          test={testModal}
+          colorKey={testModalColor}
+          onClose={() => setTestModal(null)}
+        />
+      )}
 
       {/* Editar paciente modal */}
       <EditarPacienteModal
