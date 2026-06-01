@@ -225,6 +225,11 @@ function DonutChartSVG({ data, nameKey, valueKey, height = 220 }) {
   }
 
   const total = data.reduce((s, d) => s + (Number(d[valueKey]) || 0), 0);
+  if (total === 0) return (
+    <div className="flex items-center justify-center text-slate-900 text-sm font-medium" style={{ height }}>
+      Sin datos disponibles
+    </div>
+  );
   const cx = 90, cy = 90, R = 70, r = 44;
   let angle = -Math.PI / 2;
 

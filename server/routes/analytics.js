@@ -71,7 +71,7 @@ router.get("/pacientes-por-obra-social", async (req, res) => {
         COUNT(*)::int AS cantidad
       FROM pacientes
       WHERE usuario_id = $1
-      GROUP BY nombre
+      GROUP BY COALESCE(NULLIF(TRIM(obra_social), ''), 'Sin obra social')
       ORDER BY cantidad DESC
       LIMIT 5
     `, [req.userId]);
