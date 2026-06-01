@@ -362,19 +362,28 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <KpiCard icon={<Users size={22} />} label="Pacientes" value={stats.totalPacientes}
-              bgColor="bg-indigo-50 dark:bg-indigo-500/10" textColor="text-indigo-600 dark:text-indigo-400" />
-            <KpiCard icon={<CalendarIcon size={22} />} label="Turnos Totales" value={stats.totalTurnos}
-              bgColor="bg-teal-50 dark:bg-teal-500/10" textColor="text-teal-600 dark:text-teal-400" />
-            <KpiCard icon={<Clock size={22} />} label="Turnos Hoy" value={stats.turnosHoy.length}
+            <KpiCard icon={<Users size={56} />} label="Pacientes" value={stats.totalPacientes}
+              textColor="text-indigo-500 dark:text-indigo-400"
+              gradient="from-indigo-400/30 dark:from-indigo-500/40" />
+            <KpiCard icon={<CalendarIcon size={56} />} label="Turnos Totales" value={stats.totalTurnos}
+              textColor="text-teal-500 dark:text-teal-400"
+              gradient="from-teal-400/30 dark:from-teal-500/40" />
+            <KpiCard icon={<Clock size={56} />} label="Turnos Hoy" value={stats.turnosHoy.length}
               sub={`${stats.turnosMes} este mes`} accent
-              bgColor="bg-emerald-50 dark:bg-emerald-500/10" textColor="text-emerald-600 dark:text-emerald-400" />
-            <KpiCard icon={<BarChart3 size={22} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
-              change={sesPct} bgColor="bg-blue-50 dark:bg-blue-500/10" textColor="text-blue-600 dark:text-blue-400" />
-            <KpiCard icon={<DollarSign size={22} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
-              change={ingPct} bgColor="bg-amber-50 dark:bg-amber-500/10" textColor="text-amber-600 dark:text-amber-400" />
-            <KpiCard icon={<AlertTriangle size={22} />} label="Ausentes" value={stats.ausentesMes}
-              sub="este mes" bgColor="bg-orange-50 dark:bg-orange-500/10" textColor="text-orange-600 dark:text-orange-400" />
+              textColor="text-emerald-500 dark:text-emerald-400"
+              gradient="from-emerald-400/30 dark:from-emerald-500/40" />
+            <KpiCard icon={<BarChart3 size={56} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
+              change={sesPct}
+              textColor="text-blue-500 dark:text-blue-400"
+              gradient="from-blue-400/30 dark:from-blue-500/40" />
+            <KpiCard icon={<DollarSign size={56} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
+              change={ingPct}
+              textColor="text-amber-500 dark:text-amber-400"
+              gradient="from-amber-400/30 dark:from-amber-500/40" />
+            <KpiCard icon={<AlertTriangle size={56} />} label="Ausentes" value={stats.ausentesMes}
+              sub="este mes"
+              textColor="text-orange-500 dark:text-orange-400"
+              gradient="from-orange-400/30 dark:from-orange-500/40" />
           </div>
         )}
       </section>
@@ -653,25 +662,33 @@ function HeaderSection() {
   );
 }
 
-function KpiCard({ icon, label, value, sub, change, bgColor, textColor, accent }) {
+function KpiCard({ icon, label, value, sub, change, textColor, gradient, accent }) {
   return (
-    <div className={`group relative bg-white dark:bg-[#141414] border border-purple-200 dark:border-[#333] rounded-2xl p-4 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-pink-300 dark:hover:border-slate-600 ${accent ? 'border-l-4 border-l-emerald-500 dark:border-l-emerald-500' : ''}`}>
-      <div className="flex items-start justify-between gap-2">
-        <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate">{label}</p>
-          <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">{value}</h3>
-          {sub && <p className="text-[11px] text-slate-500 dark:text-slate-500 font-medium mt-1">{sub}</p>}
-          {change && (
-            <div className="flex items-center gap-1 mt-1.5">
-              {change.up ? <TrendingUp size={13} className="text-emerald-500" /> : <TrendingDown size={13} className="text-red-500" />}
-              <span className={`text-xs font-bold ${change.up ? 'text-emerald-500' : 'text-red-500'}`}>{change.pct}%</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500">vs mes ant.</span>
-            </div>
-          )}
-        </div>
-        <div className={`${bgColor} ${textColor} p-3 rounded-xl shrink-0 transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg`}>
-          {icon}
-        </div>
+    <div className={`group relative bg-white dark:bg-[#141414] border border-purple-200 dark:border-[#2a2a2a] rounded-2xl p-5 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${accent ? 'ring-2 ring-emerald-400/40' : ''}`}>
+      {/* Degradé diagonal desde esquina inferior derecha */}
+      <div className={`absolute inset-0 bg-gradient-to-tl ${gradient} to-transparent pointer-events-none transition-opacity duration-300 opacity-60 group-hover:opacity-100`} />
+
+      {/* Icono gigante semitransparente de fondo */}
+      <div className={`absolute -bottom-3 -right-3 ${textColor} opacity-10 group-hover:opacity-20 transition-all duration-300 group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-1`}>
+        {icon}
+      </div>
+
+      {/* Contenido */}
+      <div className="relative z-10">
+        <p className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">{label}</p>
+        <h3 className="text-3xl font-black text-slate-800 dark:text-white leading-none">{value}</h3>
+        {sub && (
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-2">{sub}</p>
+        )}
+        {change && (
+          <div className="flex items-center gap-1.5 mt-2">
+            {change.up
+              ? <TrendingUp size={14} className="text-emerald-500" />
+              : <TrendingDown size={14} className="text-red-400" />}
+            <span className={`text-sm font-bold ${change.up ? 'text-emerald-500' : 'text-red-400'}`}>{change.pct}%</span>
+            <span className="text-[10px] text-slate-400">vs mes ant.</span>
+          </div>
+        )}
       </div>
     </div>
   );
