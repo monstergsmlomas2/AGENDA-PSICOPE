@@ -981,67 +981,79 @@ export default function PacienteDetalle() {
       </div>
 
       {/* Botones de acción */}
-      <div className="flex flex-wrap gap-3 justify-center">
+      <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md"
+          className="flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md overflow-hidden relative"
         >
-          <FileText size={18} /> Entrevista de Admisión
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 dark:bg-amber-500 rounded-l-xl" />
+          <FileText size={20} className="shrink-0 ml-1" />
+          <span>Entrevista de Admisión</span>
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
             tabActivo === 'sesiones'
               ? 'bg-blue-200 text-blue-800 border border-blue-500 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40'
               : 'bg-blue-100 text-blue-700 border border-blue-400 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/20'
           }`}
         >
-          <ClipboardList size={18} /> Sesiones
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 dark:bg-blue-500 rounded-l-xl" />
+          <ClipboardList size={20} className="shrink-0 ml-1" />
+          <span className="flex-1 text-left">Sesiones</span>
           {sesiones.length > 0 && (
-            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
               {sesiones.length}
             </span>
           )}
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
             tabActivo === 'evaluaciones'
               ? 'bg-teal-200 text-teal-800 border border-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/40'
               : 'bg-teal-100 text-teal-700 border border-teal-400 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30 hover:bg-teal-200 dark:hover:bg-teal-500/20'
           }`}
         >
-          <ClipboardCheck size={18} /> Evaluaciones
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 dark:bg-teal-500 rounded-l-xl" />
+          <ClipboardCheck size={20} className="shrink-0 ml-1" />
+          <span>Evaluaciones</span>
         </button>
         <button
           onClick={handleAbrirAdjuntos}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
             showAdjuntos
               ? 'bg-purple-200 text-purple-800 border border-purple-500 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40'
               : 'bg-purple-100 text-purple-700 border border-purple-400 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/20'
           }`}
         >
-          <Paperclip size={18} /> Archivos
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-purple-400 dark:bg-purple-500 rounded-l-xl" />
+          <Paperclip size={20} className="shrink-0 ml-1" />
+          <span>Archivos</span>
         </button>
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
             showInformes
               ? 'bg-pink-200 text-pink-800 border border-pink-500 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40'
               : 'bg-pink-100 text-pink-700 border border-pink-400 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/20'
           }`}
         >
-          <FileText size={18} /> Informes
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-pink-400 dark:bg-pink-500 rounded-l-xl" />
+          <FileText size={20} className="shrink-0 ml-1" />
+          <span>Informes</span>
         </button>
         <button
           onClick={() => setShowTests(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
             showTests
               ? 'bg-indigo-200 text-indigo-800 border border-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
               : 'bg-indigo-100 text-indigo-700 border border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/20'
           }`}
         >
-          <BookOpen size={18} /> Tests
+          <span className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-400 dark:bg-indigo-500 rounded-l-xl" />
+          <BookOpen size={20} className="shrink-0 ml-1" />
+          <span>Tests</span>
         </button>
       </div>
 
