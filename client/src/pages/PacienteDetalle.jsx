@@ -984,76 +984,77 @@ export default function PacienteDetalle() {
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md overflow-hidden relative"
+          className="group relative flex flex-col justify-between overflow-hidden rounded-xl border border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 p-4 shadow-md hover:border-amber-400 dark:hover:border-amber-500/50 hover:bg-amber-100 dark:hover:bg-amber-500/20 transition-all min-h-[80px]"
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400 dark:bg-amber-500 rounded-l-xl" />
-          <FileText size={20} className="shrink-0 ml-1" />
-          <span>Entrevista de Admisión</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Entrevista de Admisión</span>
+          <FileText size={42} className="absolute bottom-2 right-3 text-amber-300 dark:text-amber-500/30 transition-all group-hover:text-amber-400 dark:group-hover:text-amber-400/60" />
         </button>
+
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 shadow-md transition-all min-h-[80px] ${
             tabActivo === 'sesiones'
-              ? 'bg-blue-200 text-blue-800 border border-blue-500 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40'
-              : 'bg-blue-100 text-blue-700 border border-blue-400 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/20'
+              ? 'border border-blue-500 bg-blue-100 dark:bg-blue-500/20 dark:border-blue-500/40'
+              : 'border border-blue-300 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 hover:border-blue-400 dark:hover:border-blue-500/50 hover:bg-blue-100 dark:hover:bg-blue-500/20'
           }`}
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-blue-400 dark:bg-blue-500 rounded-l-xl" />
-          <ClipboardList size={20} className="shrink-0 ml-1" />
-          <span className="flex-1 text-left">Sesiones</span>
-          {sesiones.length > 0 && (
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
-              {sesiones.length}
-            </span>
-          )}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Sesiones</span>
+            {sesiones.length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-[22px] h-5 px-1.5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
+                {sesiones.length}
+              </span>
+            )}
+          </div>
+          <ClipboardList size={42} className="absolute bottom-2 right-3 text-blue-300 dark:text-blue-500/30 transition-all group-hover:text-blue-400 dark:group-hover:text-blue-400/60" />
         </button>
+
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 shadow-md transition-all min-h-[80px] ${
             tabActivo === 'evaluaciones'
-              ? 'bg-teal-200 text-teal-800 border border-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/40'
-              : 'bg-teal-100 text-teal-700 border border-teal-400 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30 hover:bg-teal-200 dark:hover:bg-teal-500/20'
+              ? 'border border-teal-500 bg-teal-100 dark:bg-teal-500/20 dark:border-teal-500/40'
+              : 'border border-teal-300 dark:border-teal-500/30 bg-teal-50 dark:bg-teal-500/10 hover:border-teal-400 dark:hover:border-teal-500/50 hover:bg-teal-100 dark:hover:bg-teal-500/20'
           }`}
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-teal-400 dark:bg-teal-500 rounded-l-xl" />
-          <ClipboardCheck size={20} className="shrink-0 ml-1" />
-          <span>Evaluaciones</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400">Evaluaciones</span>
+          <ClipboardCheck size={42} className="absolute bottom-2 right-3 text-teal-300 dark:text-teal-500/30 transition-all group-hover:text-teal-400 dark:group-hover:text-teal-400/60" />
         </button>
+
         <button
           onClick={handleAbrirAdjuntos}
-          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 shadow-md transition-all min-h-[80px] ${
             showAdjuntos
-              ? 'bg-purple-200 text-purple-800 border border-purple-500 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40'
-              : 'bg-purple-100 text-purple-700 border border-purple-400 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/20'
+              ? 'border border-purple-500 bg-purple-100 dark:bg-purple-500/20 dark:border-purple-500/40'
+              : 'border border-purple-300 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10 hover:border-purple-400 dark:hover:border-purple-500/50 hover:bg-purple-100 dark:hover:bg-purple-500/20'
           }`}
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-purple-400 dark:bg-purple-500 rounded-l-xl" />
-          <Paperclip size={20} className="shrink-0 ml-1" />
-          <span>Archivos</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">Archivos</span>
+          <Paperclip size={42} className="absolute bottom-2 right-3 text-purple-300 dark:text-purple-500/30 transition-all group-hover:text-purple-400 dark:group-hover:text-purple-400/60" />
         </button>
+
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 shadow-md transition-all min-h-[80px] ${
             showInformes
-              ? 'bg-pink-200 text-pink-800 border border-pink-500 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40'
-              : 'bg-pink-100 text-pink-700 border border-pink-400 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/20'
+              ? 'border border-pink-500 bg-pink-100 dark:bg-pink-500/20 dark:border-pink-500/40'
+              : 'border border-pink-300 dark:border-pink-500/30 bg-pink-50 dark:bg-pink-500/10 hover:border-pink-400 dark:hover:border-pink-500/50 hover:bg-pink-100 dark:hover:bg-pink-500/20'
           }`}
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-pink-400 dark:bg-pink-500 rounded-l-xl" />
-          <FileText size={20} className="shrink-0 ml-1" />
-          <span>Informes</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-pink-600 dark:text-pink-400">Informes</span>
+          <FileText size={42} className="absolute bottom-2 right-3 text-pink-300 dark:text-pink-500/30 transition-all group-hover:text-pink-400 dark:group-hover:text-pink-400/60" />
         </button>
+
         <button
           onClick={() => setShowTests(v => !v)}
-          className={`flex items-center gap-3 px-4 py-4 text-sm font-bold rounded-xl transition-colors shadow-md overflow-hidden relative ${
+          className={`group relative flex flex-col justify-between overflow-hidden rounded-xl p-4 shadow-md transition-all min-h-[80px] ${
             showTests
-              ? 'bg-indigo-200 text-indigo-800 border border-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
-              : 'bg-indigo-100 text-indigo-700 border border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/20'
+              ? 'border border-indigo-500 bg-indigo-100 dark:bg-indigo-500/20 dark:border-indigo-500/40'
+              : 'border border-indigo-300 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:bg-indigo-100 dark:hover:bg-indigo-500/20'
           }`}
         >
-          <span className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-400 dark:bg-indigo-500 rounded-l-xl" />
-          <BookOpen size={20} className="shrink-0 ml-1" />
-          <span>Tests</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">Tests</span>
+          <BookOpen size={42} className="absolute bottom-2 right-3 text-indigo-300 dark:text-indigo-500/30 transition-all group-hover:text-indigo-400 dark:group-hover:text-indigo-400/60" />
         </button>
       </div>
 
