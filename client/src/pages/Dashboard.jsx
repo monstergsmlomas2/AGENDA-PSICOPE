@@ -386,7 +386,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* Ingresos Mensuales — Área (2/3) */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-slate-900 dark:via-slate-900 dark:to-pink-500/5 border border-pink-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
             <TrendingUp size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
             Ingresos Últimos 6 Meses
@@ -404,7 +404,7 @@ export default function Dashboard() {
         </div>
 
         {/* Sesiones Semanales — Barras (1/3) */}
-        <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div className="bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-slate-900 dark:via-slate-900 dark:to-pink-500/5 border border-pink-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
             <Activity size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
             Sesiones (7 días)
@@ -424,7 +424,7 @@ export default function Dashboard() {
       {/* ────────── 3. OBRA SOCIAL + RESUMEN ────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div className="bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-slate-900 dark:via-slate-900 dark:to-pink-500/5 border border-pink-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <div className="flex items-center gap-2 mb-3">
             <PieChartIcon size={18} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
             <h2 className="text-base font-bold text-slate-900 dark:text-white">Obra Social</h2>
@@ -439,7 +439,7 @@ export default function Dashboard() {
           )}
         </div>
 
-        <div className="lg:col-span-2 bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+        <div className="lg:col-span-2 bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-slate-900 dark:via-slate-900 dark:to-pink-500/5 border border-pink-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
           <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
             <CreditCard size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
             Resumen del Mes
@@ -714,7 +714,7 @@ function SummaryBox({ label, value, sub, change, icon, color, bg }) {
 
 function SectionCard({ title, icon, children, linkTo, linkLabel }) {
   return (
-    <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+    <div className="bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-slate-900 dark:via-slate-900 dark:to-pink-500/5 border border-pink-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
       <div className="flex items-center justify-between mb-4 border-b border-pink-100 dark:border-slate-800 pb-3">
         <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <span className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400">{icon}</span>
