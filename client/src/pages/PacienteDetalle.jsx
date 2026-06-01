@@ -980,69 +980,123 @@ export default function PacienteDetalle() {
         )}
       </div>
 
-      {/* Botones de acción */}
-      <div className="flex flex-wrap gap-3 justify-center">
+      {/* Botones de acción — grilla 3×2 estilo KpiCard */}
+      <div className="grid grid-cols-3 gap-3">
+
+        {/* Entrevista de Admisión */}
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md"
+          className="group relative overflow-hidden rounded-2xl border border-amber-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-amber-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-amber-500/10 shadow-sm hover:shadow-lg hover:border-amber-400 dark:hover:border-amber-500/40 transition-all duration-200 p-4 text-left"
         >
-          <FileText size={18} /> Entrevista de Admisión
+          <div className="absolute right-0 top-0 p-2 text-amber-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <FileText size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <FileText size={18} className="text-amber-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Entrevista</span>
+          </div>
+          <p className="relative text-base font-black text-slate-800 dark:text-white leading-tight">de Admisión</p>
         </button>
+
+        {/* Sesiones */}
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 p-4 text-left ${
             tabActivo === 'sesiones'
-              ? 'bg-blue-200 text-blue-800 border border-blue-500 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40'
-              : 'bg-blue-100 text-blue-700 border border-blue-400 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/20'
+              ? 'border-blue-400 dark:border-blue-500/50 bg-gradient-to-br from-blue-50 via-blue-50 to-blue-200/60 dark:from-blue-500/20 dark:via-blue-500/10 dark:to-blue-500/20'
+              : 'border-blue-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-blue-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-blue-500/10 hover:border-blue-400 dark:hover:border-blue-500/40'
           }`}
         >
-          <ClipboardList size={18} /> Sesiones
-          {sesiones.length > 0 && (
-            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
-              {sesiones.length}
-            </span>
-          )}
+          <div className="absolute right-0 top-0 p-2 text-blue-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <ClipboardList size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <ClipboardList size={18} className="text-blue-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Sesiones</span>
+          </div>
+          <p className="relative text-2xl font-black text-blue-600 dark:text-blue-400 leading-none">
+            {sesiones.length > 0 ? sesiones.length : '—'}
+          </p>
         </button>
+
+        {/* Evaluaciones */}
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 p-4 text-left ${
             tabActivo === 'evaluaciones'
-              ? 'bg-teal-200 text-teal-800 border border-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/40'
-              : 'bg-teal-100 text-teal-700 border border-teal-400 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30 hover:bg-teal-200 dark:hover:bg-teal-500/20'
+              ? 'border-teal-400 dark:border-teal-500/50 bg-gradient-to-br from-teal-50 via-teal-50 to-teal-200/60 dark:from-teal-500/20 dark:via-teal-500/10 dark:to-teal-500/20'
+              : 'border-teal-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-teal-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-teal-500/10 hover:border-teal-400 dark:hover:border-teal-500/40'
           }`}
         >
-          <ClipboardCheck size={18} /> Evaluaciones
+          <div className="absolute right-0 top-0 p-2 text-teal-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <ClipboardCheck size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <ClipboardCheck size={18} className="text-teal-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Evaluaciones</span>
+          </div>
+          <p className="relative text-2xl font-black text-teal-600 dark:text-teal-400 leading-none">
+            {evaluaciones.length > 0 ? evaluaciones.length : '—'}
+          </p>
         </button>
+
+        {/* Archivos */}
         <button
           onClick={handleAbrirAdjuntos}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 p-4 text-left ${
             showAdjuntos
-              ? 'bg-purple-200 text-purple-800 border border-purple-500 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40'
-              : 'bg-purple-100 text-purple-700 border border-purple-400 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/20'
+              ? 'border-purple-400 dark:border-purple-500/50 bg-gradient-to-br from-purple-50 via-purple-50 to-purple-200/60 dark:from-purple-500/20 dark:via-purple-500/10 dark:to-purple-500/20'
+              : 'border-purple-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-purple-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-purple-500/10 hover:border-purple-400 dark:hover:border-purple-500/40'
           }`}
         >
-          <Paperclip size={18} /> Archivos
+          <div className="absolute right-0 top-0 p-2 text-purple-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <Paperclip size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <Paperclip size={18} className="text-purple-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Archivos</span>
+          </div>
+          <p className="relative text-base font-black text-slate-800 dark:text-white leading-tight">Adjuntos</p>
         </button>
+
+        {/* Informes */}
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 p-4 text-left ${
             showInformes
-              ? 'bg-pink-200 text-pink-800 border border-pink-500 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40'
-              : 'bg-pink-100 text-pink-700 border border-pink-400 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/20'
+              ? 'border-pink-400 dark:border-pink-500/50 bg-gradient-to-br from-pink-50 via-pink-50 to-pink-200/60 dark:from-pink-500/20 dark:via-pink-500/10 dark:to-pink-500/20'
+              : 'border-pink-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-pink-500/10 hover:border-pink-400 dark:hover:border-pink-500/40'
           }`}
         >
-          <FileText size={18} /> Informes
+          <div className="absolute right-0 top-0 p-2 text-pink-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <FileText size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <FileText size={18} className="text-pink-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Informes</span>
+          </div>
+          <p className="relative text-base font-black text-slate-800 dark:text-white leading-tight">Clínicos</p>
         </button>
+
+        {/* Tests */}
         <button
           onClick={() => setShowTests(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-200 p-4 text-left ${
             showTests
-              ? 'bg-indigo-200 text-indigo-800 border border-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
-              : 'bg-indigo-100 text-indigo-700 border border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/20'
+              ? 'border-indigo-400 dark:border-indigo-500/50 bg-gradient-to-br from-indigo-50 via-indigo-50 to-indigo-200/60 dark:from-indigo-500/20 dark:via-indigo-500/10 dark:to-indigo-500/20'
+              : 'border-indigo-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white to-indigo-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-indigo-500/10 hover:border-indigo-400 dark:hover:border-indigo-500/40'
           }`}
         >
-          <BookOpen size={18} /> Tests
+          <div className="absolute right-0 top-0 p-2 text-indigo-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200">
+            <BookOpen size={64} />
+          </div>
+          <div className="relative flex items-center gap-2 mb-2">
+            <BookOpen size={18} className="text-indigo-500 shrink-0" />
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tests</span>
+          </div>
+          <p className="relative text-base font-black text-slate-800 dark:text-white leading-tight">Estandarizados</p>
         </button>
+
       </div>
 
       {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
