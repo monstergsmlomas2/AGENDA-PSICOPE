@@ -36,7 +36,7 @@ export default function RecordatoriosWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#262626] rounded-2xl p-6 shadow-sm">
+      <div className="bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-pink-500/5 border border-pink-200 dark:border-[#262626] rounded-2xl p-6 shadow-sm">
         <div className="animate-pulse space-y-4">
           <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
           <div className="h-20 bg-slate-200 dark:bg-slate-700 rounded"></div>
@@ -90,7 +90,7 @@ export default function RecordatoriosWidget() {
   };
 
   return (
-    <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#262626] rounded-2xl p-6 shadow-sm">
+    <div className="bg-gradient-to-br from-white via-white to-pink-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-pink-500/5 border border-pink-200 dark:border-[#262626] rounded-2xl p-6 shadow-sm">
       {/* Cabecera */}
       <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-[#262626] pb-4">
         <h2 className="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
