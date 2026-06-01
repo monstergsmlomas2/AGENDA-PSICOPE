@@ -7,6 +7,7 @@ import {
   getSesionesSemanales,
   getPacientesPorObraSocial,
   getResumenMesActual,
+  getTotalesGlobales,
 } from '../services/analyticsService';
 
 // Caché simple en módulo — sobrevive entre renders pero no entre recargas de página
@@ -82,6 +83,7 @@ export function useDashboardData() {
         obrasSociales,
         resumen,
         sinSesionData,
+        totales,
       ] = await Promise.all([
         getPacientes(),
         getTurnos({ desde, hasta }),
@@ -92,6 +94,7 @@ export function useDashboardData() {
         getPacientesPorObraSocial(),
         getResumenMesActual(),
         getPacientesSinSesionReciente(),
+        getTotalesGlobales(),
       ]);
 
       const turnos = Array.isArray(dataTurnos) ? dataTurnos : [];
@@ -123,10 +126,10 @@ export function useDashboardData() {
 
       const newStats = {
         totalPacientes: Array.isArray(dataPacientes) ? dataPacientes.length : 0,
-        totalTurnos: turnos.length,
+        totalTurnos: totales?.total_turnos ?? turnos.length,
         turnosHoy,
         turnosMes,
-        ausentesMes,
+        ausentesMes: totales?.ausentes_mes ?? ausentesMes,
         proximos7Dias,
       };
 
@@ -144,7 +147,11 @@ export function useDashboardData() {
       const newIngresos = Array.isArray(ingresos) ? ingresos : [];
       const newSesiones = Array.isArray(sesiones) ? sesiones : [];
       const newObrasSociales = Array.isArray(obrasSociales) ? obrasSociales : [];
-      const newResumen = resumen || defaultStats;
+      const newResumen = resumen || {
+        sesiones_este_mes: 0, sesiones_mes_anterior: 0,
+        ingresos_este_mes: 0, ingresos_mes_anterior: 0,
+        pacientes_activos: 0, turnos_pendientes: 0,
+      };
 
       setIngresosMensuales(newIngresos);
       setSesionesSemanales(newSesiones);

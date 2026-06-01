@@ -27,3 +27,10 @@ export const getResumenMesActual = async () => {
     pacientes_activos: 0, turnos_pendientes: 0,
   });
 };
+
+export const getTotalesGlobales = async () => {
+  return safeData(apiGet('/analytics/totales'), {
+    total_turnos: 0,
+    ausentes_mes: 0,
+  });
+};

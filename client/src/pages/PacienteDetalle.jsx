@@ -13,7 +13,7 @@ import {
   Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle, BookOpen
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
-import { getTestsFiltrados, CATEGORIAS_TESTS } from '../data/testsEstandarizados';
+import { getTestsFiltrados } from '../data/testsEstandarizados';
 import { useToast, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
@@ -1356,9 +1356,13 @@ export default function PacienteDetalle() {
       {/* ─────────────────────────────────────── */}
       {showTests && (() => {
         const edadPaciente = calcularEdad(paciente.fecha_nacimiento);
-        const categorias = testsFiltroEdad && edadPaciente !== null
-          ? getTestsParaEdad(edadPaciente)
-          : CATEGORIAS_TESTS;
+        const motivoPaciente = paciente.motivo || '';
+        const categorias = getTestsFiltrados({
+          edad: edadPaciente,
+          motivo: motivoPaciente,
+          filtroEdad: testsFiltroEdad,
+          filtroMotivo: testsFiltroMotivo,
+        });
 
         const colorMap = {
           blue:   { bg: 'bg-blue-50 dark:bg-blue-900/10', border: 'border-blue-200 dark:border-blue-800/40', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300', title: 'text-blue-700 dark:text-blue-300', dot: 'bg-blue-500' },
@@ -1377,7 +1381,18 @@ export default function PacienteDetalle() {
               <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                 <BookOpen size={22} className="text-indigo-500 dark:text-indigo-400" /> Tests Estandarizados Aplicables
               </h3>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                {motivoPaciente && (
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={testsFiltroMotivo}
+                      onChange={e => setTestsFiltroMotivo(e.target.checked)}
+                      className="accent-indigo-500 w-4 h-4"
+                    />
+                    Por motivo de consulta
+                  </label>
+                )}
                 {edadPaciente !== null && (
                   <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
                     <input
@@ -1386,22 +1401,33 @@ export default function PacienteDetalle() {
                       onChange={e => setTestsFiltroEdad(e.target.checked)}
                       className="accent-indigo-500 w-4 h-4"
                     />
-                    Solo para {edadPaciente} años
+                    Por edad ({edadPaciente} años)
                   </label>
                 )}
               </div>
             </div>
 
-            {edadPaciente !== null && testsFiltroEdad && (
-              <p className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-xl px-4 py-2">
-                Mostrando tests cuyo rango de edad incluye <strong>{edadPaciente} años</strong>. Desactivá el filtro para ver todos.
-              </p>
+            {/* Info banners */}
+            {((testsFiltroMotivo && motivoPaciente) || (testsFiltroEdad && edadPaciente !== null)) && (
+              <div className="flex flex-col gap-2">
+                {testsFiltroMotivo && motivoPaciente && (
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-xl px-4 py-2">
+                    Filtrando por motivo de consulta: <strong className="italic">"{motivoPaciente.length > 80 ? motivoPaciente.slice(0, 80) + '…' : motivoPaciente}"</strong>
+                  </p>
+                )}
+                {testsFiltroEdad && edadPaciente !== null && (
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 rounded-xl px-4 py-2">
+                    Filtrando por edad: tests aplicables a <strong>{edadPaciente} años</strong>.
+                  </p>
+                )}
+              </div>
             )}
 
             {(!categorias || categorias.length === 0) ? (
               <div className="text-center py-10 text-slate-400 dark:text-slate-600">
                 <BookOpen size={36} className="mx-auto mb-2 opacity-40" />
-                <p className="font-medium text-sm">No hay tests estandarizados para esta edad.</p>
+                <p className="font-medium text-sm">No hay tests que coincidan con los filtros aplicados.</p>
+                <p className="text-xs mt-1">Desactivá algún filtro para ver más opciones.</p>
               </div>
             ) : (
               <div className="space-y-4">

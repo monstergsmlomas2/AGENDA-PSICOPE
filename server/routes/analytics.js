@@ -29,20 +29,29 @@ router.get("/ingresos-mensuales", async (req, res) => {
 
 // ──────────────────────────────────────────────
 // 2. SESIONES SEMANALES (últimos 7 días)
+//    Cuenta turnos realizados (excluye inasistencia y cancelado)
+//    Genera una fila por día incluso si no hay turnos
 // ──────────────────────────────────────────────
 router.get("/sesiones-semanales", async (req, res) => {
   try {
     const result = await pool.query(`
+      WITH dias AS (
+        SELECT generate_series(
+          CURRENT_DATE - INTERVAL '6 days',
+          CURRENT_DATE,
+          '1 day'::interval
+        )::date AS dia
+      )
       SELECT
-        to_char(t.fecha, 'YYYY-MM-DD') AS dia,
-        COUNT(*)::int AS sesiones
-      FROM turnos t
-      JOIN pacientes p ON t.paciente_id = p.id
-      WHERE t.fecha >= CURRENT_DATE - INTERVAL '6 days'
-        AND t.estado != 'inasistencia'
-        AND p.usuario_id = $1
-      GROUP BY dia
-      ORDER BY dia ASC
+        to_char(d.dia, 'YYYY-MM-DD') AS dia,
+        COUNT(t.id)::int AS sesiones
+      FROM dias d
+      LEFT JOIN turnos t
+        ON t.fecha = d.dia
+        AND t.estado NOT IN ('inasistencia', 'cancelado')
+        AND t.usuario_id = $1
+      GROUP BY d.dia
+      ORDER BY d.dia ASC
     `, [req.userId]);
     res.json(result.rows);
   } catch (error) {
@@ -58,7 +67,7 @@ router.get("/pacientes-por-obra-social", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
-        COALESCE(NULLIF(obra_social, ''), 'Sin obra social') AS nombre,
+        COALESCE(NULLIF(TRIM(obra_social), ''), 'Sin obra social') AS nombre,
         COUNT(*)::int AS cantidad
       FROM pacientes
       WHERE usuario_id = $1
@@ -75,6 +84,10 @@ router.get("/pacientes-por-obra-social", async (req, res) => {
 
 // ──────────────────────────────────────────────
 // 4. RESUMEN DEL MES ACTUAL
+//    - sesiones_este_mes / sesiones_mes_anterior: turnos realizados (no cancelado/inasistencia)
+//    - ingresos: desde tabla pagos
+//    - pacientes_activos: pacientes con al menos un turno este mes
+//    - turnos_pendientes: turnos con estado 'pendiente' desde hoy en adelante
 // ──────────────────────────────────────────────
 router.get("/resumen-mes-actual", async (req, res) => {
   try {
@@ -82,19 +95,27 @@ router.get("/resumen-mes-actual", async (req, res) => {
       WITH
         resumen_sesiones AS (
           SELECT
-            COALESCE(SUM(CASE WHEN s.fecha >= date_trunc('month', NOW()) THEN 1 ELSE 0 END), 0)::int AS sesiones_este_mes,
-            COALESCE(SUM(CASE WHEN s.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
-                               AND s.fecha <  date_trunc('month', NOW()) THEN 1 ELSE 0 END), 0)::int AS sesiones_mes_anterior
-          FROM sesiones s
-          JOIN pacientes p ON s.paciente_id = p.id
-          WHERE s.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
+            COALESCE(SUM(CASE
+              WHEN t.fecha >= date_trunc('month', NOW())
+              AND t.estado NOT IN ('inasistencia', 'cancelado')
+              THEN 1 ELSE 0 END), 0)::int AS sesiones_este_mes,
+            COALESCE(SUM(CASE
+              WHEN t.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
+              AND t.fecha <  date_trunc('month', NOW())
+              AND t.estado NOT IN ('inasistencia', 'cancelado')
+              THEN 1 ELSE 0 END), 0)::int AS sesiones_mes_anterior
+          FROM turnos t
+          JOIN pacientes p ON t.paciente_id = p.id
+          WHERE t.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
             AND p.usuario_id = $1
         ),
         resumen_pagos AS (
           SELECT
             COALESCE(SUM(CASE WHEN p.fecha >= date_trunc('month', NOW()) THEN p.monto ELSE 0 END), 0)::float AS ingresos_este_mes,
-            COALESCE(SUM(CASE WHEN p.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
-                               AND p.fecha <  date_trunc('month', NOW()) THEN p.monto ELSE 0 END), 0)::float AS ingresos_mes_anterior
+            COALESCE(SUM(CASE
+              WHEN p.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
+              AND p.fecha <  date_trunc('month', NOW())
+              THEN p.monto ELSE 0 END), 0)::float AS ingresos_mes_anterior
           FROM pagos p
           JOIN pacientes pa ON p.paciente_id = pa.id
           WHERE p.fecha >= date_trunc('month', NOW()) - INTERVAL '1 month'
@@ -102,12 +123,18 @@ router.get("/resumen-mes-actual", async (req, res) => {
         ),
         resumen_turnos AS (
           SELECT
-            COUNT(DISTINCT CASE WHEN t.fecha >= date_trunc('month', NOW()) THEN t.paciente_id END)::int AS pacientes_activos,
-            COALESCE(SUM(CASE WHEN t.fecha >= CURRENT_DATE AND t.estado = 'pendiente' THEN 1 ELSE 0 END), 0)::int AS turnos_pendientes
+            COUNT(DISTINCT CASE
+              WHEN t.fecha >= date_trunc('month', NOW())
+              AND t.fecha <= CURRENT_DATE
+              THEN t.paciente_id END)::int AS pacientes_activos,
+            COALESCE(SUM(CASE
+              WHEN t.fecha >= CURRENT_DATE
+              AND t.estado = 'pendiente'
+              THEN 1 ELSE 0 END), 0)::int AS turnos_pendientes
           FROM turnos t
           JOIN pacientes p ON t.paciente_id = p.id
-          WHERE t.fecha >= date_trunc('month', NOW())
-            AND p.usuario_id = $1
+          WHERE p.usuario_id = $1
+            AND t.fecha >= date_trunc('month', NOW())
         )
       SELECT
         rs.sesiones_este_mes,
@@ -123,6 +150,28 @@ router.get("/resumen-mes-actual", async (req, res) => {
   } catch (error) {
     console.error("Error al obtener resumen del mes:", error);
     res.status(500).json({ error: "Error al obtener resumen del mes" });
+  }
+});
+
+// ──────────────────────────────────────────────
+// 5. TOTALES GLOBALES (para KPI cards)
+// ──────────────────────────────────────────────
+router.get("/totales", async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        (SELECT COUNT(*)::int FROM turnos t
+          JOIN pacientes p ON t.paciente_id = p.id
+          WHERE p.usuario_id = $1) AS total_turnos,
+        (SELECT COUNT(*)::int FROM turnos t
+          JOIN pacientes p ON t.paciente_id = p.id
+          WHERE p.usuario_id = $1 AND t.estado = 'inasistencia'
+            AND t.fecha >= date_trunc('month', NOW())) AS ausentes_mes
+    `, [req.userId]);
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error("Error al obtener totales:", error);
+    res.status(500).json({ error: "Error al obtener totales" });
   }
 });
 

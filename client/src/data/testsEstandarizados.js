@@ -11,6 +11,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 16,
         descripcion: 'Evalúa la inteligencia general y cinco índices primarios: comprensión verbal, visoespacial, razonamiento fluido, memoria de trabajo y velocidad de procesamiento.',
+        keywords: ['inteligencia', 'cognitivo', 'coeficiente', 'ci', 'capacidad intelectual', 'rendimiento escolar', 'aprendizaje', 'dificultad escolar', 'bajo rendimiento', 'razonamiento'],
       },
       {
         id: 'wppsi4',
@@ -19,6 +20,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 2.5,
         edadMax: 7.5,
         descripcion: 'Versión preescolar de la escala Wechsler. Mide inteligencia verbal, visoespacial, fluidez y velocidad de procesamiento en niños pequeños.',
+        keywords: ['inteligencia', 'cognitivo', 'preescolar', 'jardín', 'desarrollo', 'retraso', 'capacidad intelectual'],
       },
       {
         id: 'wais4',
@@ -27,6 +29,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 16,
         edadMax: 90,
         descripcion: 'Escala de inteligencia para adultos. Evalúa comprensión verbal, razonamiento perceptivo, memoria de trabajo y velocidad de procesamiento.',
+        keywords: ['inteligencia', 'cognitivo', 'adulto', 'capacidad intelectual', 'razonamiento', 'memoria'],
       },
       {
         id: 'raven',
@@ -35,6 +38,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 5,
         edadMax: 90,
         descripcion: 'Mide la capacidad de razonamiento abstracto y no verbal. Existen tres versiones: coloreadas (CPM, 5-11 años), estándar (SPM, desde 6 años) y avanzadas (APM, adultos).',
+        keywords: ['inteligencia', 'razonamiento', 'cognitivo', 'no verbal', 'abstracto', 'capacidad intelectual'],
       },
       {
         id: 'kaufman',
@@ -43,6 +47,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 3,
         edadMax: 18,
         descripcion: 'Evalúa el procesamiento cognitivo y el conocimiento adquirido desde perspectivas simultánea, secuencial y planificación.',
+        keywords: ['cognitivo', 'inteligencia', 'aprendizaje', 'procesamiento', 'capacidad intelectual'],
       },
     ],
   },
@@ -58,6 +63,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 12,
         descripcion: 'Evalúa los procesos cognitivos que intervienen en la lectura: identificación de letras, reconocimiento de palabras, procesos sintácticos y semánticos.',
+        keywords: ['lectura', 'lecto', 'dislexia', 'escritura', 'aprendizaje', 'rendimiento escolar', 'dificultad lectora', 'dificultad escolar', 'comprensión lectora', 'leer'],
       },
       {
         id: 'proesc',
@@ -66,6 +72,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 8,
         edadMax: 15,
         descripcion: 'Evalúa los principales procesos implicados en la escritura: dictado de sílabas, palabras, pseudopalabras, frases y textos, reglas ortográficas y acentuación.',
+        keywords: ['escritura', 'disgrafia', 'ortografía', 'aprendizaje', 'rendimiento escolar', 'dificultad escolar', 'escribir'],
       },
       {
         id: 'tale',
@@ -74,6 +81,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 10,
         descripcion: 'Analiza el nivel y las características de la lectura y escritura en niños de primaria: lectura en voz alta, comprensión lectora y dictado.',
+        keywords: ['lectura', 'escritura', 'lecto', 'dislexia', 'aprendizaje', 'dificultad escolar', 'rendimiento escolar'],
       },
       {
         id: 'tedi-math',
@@ -82,6 +90,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 4,
         edadMax: 8,
         descripcion: 'Evalúa las competencias numéricas básicas: conteo, conocimiento numérico conceptual, cálculo, estimación y resolución de problemas.',
+        keywords: ['matemáticas', 'cálculo', 'discalculia', 'números', 'aprendizaje', 'rendimiento escolar', 'dificultad escolar'],
       },
       {
         id: 'enfen',
@@ -90,6 +99,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 12,
         descripcion: 'Valora las funciones ejecutivas: fluidez verbal y gráfica, senderos, anillas y resistencia a la interferencia (Stroop).',
+        keywords: ['funciones ejecutivas', 'atención', 'planificación', 'tdah', 'organización', 'aprendizaje', 'rendimiento escolar'],
       },
     ],
   },
@@ -105,6 +115,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 5,
         edadMax: 21,
         descripcion: 'Evalúa habilidades lingüísticas fundamentales: comprensión y expresión morfosintáctica, semántica y memoria de trabajo verbal.',
+        keywords: ['lenguaje', 'habla', 'comunicación', 'dislalia', 'vocabulario', 'expresión', 'comprensión', 'morfosintaxis', 'retraso de lenguaje'],
       },
       {
         id: 'peabody',
@@ -113,6 +124,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 2.5,
         edadMax: 90,
         descripcion: 'Mide el vocabulario receptivo mediante la señalización de imágenes. Rápido de administrar, útil como screening cognitivo y lingüístico.',
+        keywords: ['vocabulario', 'lenguaje', 'comprensión', 'receptivo', 'comunicación', 'cognitivo'],
       },
       {
         id: 'plon-r',
@@ -121,6 +133,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 3,
         edadMax: 6,
         descripcion: 'Screening del desarrollo del lenguaje oral en preescolar: forma, contenido y uso del lenguaje.',
+        keywords: ['lenguaje', 'habla', 'preescolar', 'comunicación', 'retraso de lenguaje', 'desarrollo'],
       },
       {
         id: 'boehm',
@@ -129,6 +142,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 5,
         edadMax: 7,
         descripcion: 'Evalúa el dominio de conceptos básicos relacionales (espacio, tiempo, cantidad) necesarios para el aprendizaje escolar temprano.',
+        keywords: ['lenguaje', 'conceptos', 'aprendizaje', 'preescolar', 'comprensión'],
       },
     ],
   },
@@ -144,6 +158,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 3,
         edadMax: 16,
         descripcion: 'Batería neuropsicológica amplia que evalúa seis dominios: atención/funciones ejecutivas, lenguaje, memoria, sensoriomotor, procesamiento visoespacial y percepción social.',
+        keywords: ['neuropsicología', 'funciones ejecutivas', 'atención', 'memoria', 'lenguaje', 'aprendizaje', 'tea', 'autismo', 'tdah', 'desarrollo'],
       },
       {
         id: 'bn2',
@@ -152,6 +167,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 5,
         edadMax: 12,
         descripcion: 'Evalúa memoria, atención, funciones ejecutivas, lenguaje y habilidades visoespaciales en contexto escolar.',
+        keywords: ['neuropsicología', 'memoria', 'atención', 'funciones ejecutivas', 'aprendizaje', 'rendimiento escolar'],
       },
       {
         id: 'stroop',
@@ -160,6 +176,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 7,
         edadMax: 90,
         descripcion: 'Mide la resistencia a la interferencia, la atención selectiva y la velocidad de procesamiento mediante la incongruencia color-palabra.',
+        keywords: ['atención', 'tdah', 'funciones ejecutivas', 'inhibición', 'concentración', 'impulsividad'],
       },
       {
         id: 'tmt',
@@ -168,6 +185,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 8,
         edadMax: 90,
         descripcion: 'Evalúa velocidad visomotora, atención y flexibilidad cognitiva. La parte B añade alternancia entre números y letras.',
+        keywords: ['atención', 'funciones ejecutivas', 'velocidad', 'cognitivo', 'tdah', 'flexibilidad cognitiva'],
       },
       {
         id: 'frostig',
@@ -176,6 +194,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 4,
         edadMax: 8,
         descripcion: 'Evalúa la percepción visual y la integración visomotora: coordinación ojo-mano, figura-fondo, constancia de formas y posición en el espacio.',
+        keywords: ['percepción visual', 'visomotor', 'escritura', 'coordinación', 'aprendizaje', 'dificultad escolar'],
       },
     ],
   },
@@ -191,6 +210,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 18,
         descripcion: 'Escalas de valoración (padres, docentes, autoinforme) para TDAH y problemas de conducta asociados: inatención, hiperactividad, impulsividad.',
+        keywords: ['tdah', 'atención', 'hiperactividad', 'impulsividad', 'conducta', 'inatención', 'déficit de atención', 'concentración'],
       },
       {
         id: 'snap4',
@@ -199,6 +219,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 6,
         edadMax: 18,
         descripcion: 'Escala breve para padres y docentes que evalúa síntomas de TDAH (inatención e hiperactividad-impulsividad) y trastorno oposicionista desafiante.',
+        keywords: ['tdah', 'atención', 'hiperactividad', 'impulsividad', 'conducta', 'inatención', 'déficit de atención'],
       },
       {
         id: 'd2',
@@ -207,6 +228,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 8,
         edadMax: 60,
         descripcion: 'Mide la atención selectiva y la concentración mediante una tarea de tachado. Ofrece velocidad, precisión, control inhibitorio y fluctuación del rendimiento.',
+        keywords: ['atención', 'concentración', 'tdah', 'inatención', 'déficit de atención'],
       },
       {
         id: 'tova',
@@ -215,6 +237,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 4,
         edadMax: 80,
         descripcion: 'Test de ejecución continua computarizado que mide tiempo de reacción, variabilidad, comisiones y omisiones como indicadores de TDAH.',
+        keywords: ['tdah', 'atención', 'hiperactividad', 'impulsividad', 'déficit de atención', 'concentración'],
       },
     ],
   },
@@ -230,6 +253,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 2,
         edadMax: 21,
         descripcion: 'Sistema multidimensional (padres, docentes, autoinforme) que evalúa conductas adaptativas y problemáticas: ansiedad, depresión, hiperactividad, habilidades sociales.',
+        keywords: ['conducta', 'ansiedad', 'depresión', 'emocional', 'socioemocional', 'habilidades sociales', 'comportamiento', 'agresión', 'hiperactividad'],
       },
       {
         id: 'cbcl',
@@ -238,6 +262,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 1.5,
         edadMax: 18,
         descripcion: 'Inventario para padres y docentes que evalúa problemas internalizantes (ansiedad, depresión) y externalizantes (agresión, conducta antisocial).',
+        keywords: ['conducta', 'ansiedad', 'depresión', 'comportamiento', 'emocional', 'agresión', 'socioemocional'],
       },
       {
         id: 'vineland3',
@@ -246,6 +271,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 0,
         edadMax: 90,
         descripcion: 'Evalúa conducta adaptativa en cuatro dominios: comunicación, habilidades de la vida diaria, socialización y habilidades motoras.',
+        keywords: ['conducta adaptativa', 'tea', 'autismo', 'discapacidad', 'socialización', 'desarrollo', 'vida diaria'],
       },
     ],
   },
@@ -261,6 +287,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 0,
         edadMax: 3.5,
         descripcion: 'Evalúa el desarrollo cognitivo, lingüístico (receptivo y expresivo), motor (grueso y fino) y socioemocional en bebés y niños pequeños.',
+        keywords: ['desarrollo', 'retraso madurativo', 'bebé', 'primera infancia', 'motor', 'cognitivo', 'lenguaje'],
       },
       {
         id: 'denver2',
@@ -269,6 +296,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 0,
         edadMax: 6,
         descripcion: 'Screening del desarrollo en cuatro áreas: personal-social, motricidad fina-adaptativa, lenguaje y motricidad gruesa.',
+        keywords: ['desarrollo', 'screening', 'retraso madurativo', 'motor', 'lenguaje', 'primera infancia'],
       },
       {
         id: 'adi-r',
@@ -277,6 +305,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 2,
         edadMax: 90,
         descripcion: 'Entrevista semiestructurada para cuidadores que evalúa síntomas de TEA en tres áreas: interacción social, comunicación y comportamientos repetitivos.',
+        keywords: ['tea', 'autismo', 'espectro autista', 'comunicación', 'socialización', 'conducta repetitiva', 'desarrollo'],
       },
       {
         id: 'ados2',
@@ -285,6 +314,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 1,
         edadMax: 90,
         descripcion: 'Observación estandarizada para el diagnóstico de TEA. Cinco módulos según nivel de lenguaje y edad, que evalúan comunicación, interacción social e imaginación.',
+        keywords: ['tea', 'autismo', 'espectro autista', 'comunicación', 'socialización', 'desarrollo'],
       },
       {
         id: 'm-chat',
@@ -293,6 +323,7 @@ export const CATEGORIAS_TESTS = [
         edadMin: 1.5,
         edadMax: 2.5,
         descripcion: 'Screening de TEA en niños pequeños mediante 20 ítems para padres, con seguimiento clínico ante resultados positivos.',
+        keywords: ['tea', 'autismo', 'espectro autista', 'screening', 'desarrollo', 'primera infancia'],
       },
     ],
   },
@@ -304,4 +335,44 @@ export function getTestsParaEdad(edadAnios) {
     ...cat,
     tests: cat.tests.filter(t => edadAnios >= t.edadMin && edadAnios <= t.edadMax),
   })).filter(cat => cat.tests.length > 0);
+}
+
+export function getTestsParaMotivo(motivo) {
+  if (!motivo || !motivo.trim()) return null;
+  const texto = motivo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return CATEGORIAS_TESTS.map(cat => ({
+    ...cat,
+    tests: cat.tests.filter(t =>
+      t.keywords.some(kw => {
+        const kwNorm = kw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+        return texto.includes(kwNorm);
+      })
+    ),
+  })).filter(cat => cat.tests.length > 0);
+}
+
+export function getTestsFiltrados({ edad, motivo, filtroEdad, filtroMotivo }) {
+  let base = CATEGORIAS_TESTS;
+
+  if (filtroEdad && edad !== null && edad !== undefined) {
+    base = base.map(cat => ({
+      ...cat,
+      tests: cat.tests.filter(t => edad >= t.edadMin && edad <= t.edadMax),
+    })).filter(cat => cat.tests.length > 0);
+  }
+
+  if (filtroMotivo && motivo && motivo.trim()) {
+    const texto = motivo.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    base = base.map(cat => ({
+      ...cat,
+      tests: cat.tests.filter(t =>
+        t.keywords.some(kw => {
+          const kwNorm = kw.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+          return texto.includes(kwNorm);
+        })
+      ),
+    })).filter(cat => cat.tests.length > 0);
+  }
+
+  return base;
 }
