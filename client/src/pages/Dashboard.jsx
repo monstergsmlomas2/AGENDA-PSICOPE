@@ -362,18 +362,18 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <KpiCard icon={<Users size={20} />} label="Pacientes" value={stats.totalPacientes}
+            <KpiCard icon={<Users size={22} />} label="Pacientes" value={stats.totalPacientes}
               bgColor="bg-indigo-50 dark:bg-indigo-500/10" textColor="text-indigo-600 dark:text-indigo-400" />
-            <KpiCard icon={<CalendarIcon size={20} />} label="Turnos Totales" value={stats.totalTurnos}
-              bgColor="bg-white dark:bg-teal-500/10" textColor="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
-            <KpiCard icon={<Clock size={20} />} label="Turnos Hoy" value={stats.turnosHoy.length}
+            <KpiCard icon={<CalendarIcon size={22} />} label="Turnos Totales" value={stats.totalTurnos}
+              bgColor="bg-teal-50 dark:bg-teal-500/10" textColor="text-teal-600 dark:text-teal-400" />
+            <KpiCard icon={<Clock size={22} />} label="Turnos Hoy" value={stats.turnosHoy.length}
               sub={`${stats.turnosMes} este mes`} accent
-              bgColor="bg-white dark:bg-emerald-500/10" textColor="text-slate-900 font-bold dark:text-pink-600 dark:text-emerald-400" />
-            <KpiCard icon={<BarChart3 size={20} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
-              change={sesPct} bgColor="bg-white dark:bg-blue-500/10" textColor="text-purple-600 dark:text-blue-400" />
-            <KpiCard icon={<DollarSign size={20} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
+              bgColor="bg-emerald-50 dark:bg-emerald-500/10" textColor="text-emerald-600 dark:text-emerald-400" />
+            <KpiCard icon={<BarChart3 size={22} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
+              change={sesPct} bgColor="bg-blue-50 dark:bg-blue-500/10" textColor="text-blue-600 dark:text-blue-400" />
+            <KpiCard icon={<DollarSign size={22} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
               change={ingPct} bgColor="bg-amber-50 dark:bg-amber-500/10" textColor="text-amber-600 dark:text-amber-400" />
-            <KpiCard icon={<AlertTriangle size={20} />} label="Ausentes" value={stats.ausentesMes}
+            <KpiCard icon={<AlertTriangle size={22} />} label="Ausentes" value={stats.ausentesMes}
               sub="este mes" bgColor="bg-orange-50 dark:bg-orange-500/10" textColor="text-orange-600 dark:text-orange-400" />
           </div>
         )}
@@ -655,19 +655,23 @@ function HeaderSection() {
 
 function KpiCard({ icon, label, value, sub, change, bgColor, textColor, accent }) {
   return (
-    <div className={`bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center gap-3 ${accent ? 'border-l-4 border-l-emerald-500' : ''}`}>
-      <div className={`${bgColor} ${textColor} p-3 rounded-xl shrink-0`}>{icon}</div>
-      <div className="min-w-0 flex-1">
-        <p className="text-xs font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider truncate">{label}</p>
-        <h3 className="text-xl font-black text-slate-900 dark:text-white mt-0.5 truncate">{value}</h3>
-        {sub && <p className="text-[11px] text-slate-900 dark:text-slate-500 font-medium mt-0.5">{sub}</p>}
-        {change && (
-          <div className="flex items-center gap-1 mt-1">
-            {change.up ? <TrendingUp size={14} className="text-emerald-500" /> : <TrendingDown size={14} className="text-red-500" />}
-            <span className={`text-xs font-bold ${change.up ? 'text-emerald-500' : 'text-red-500'}`}>{change.pct}%</span>
-            <span className="text-[10px] text-slate-900 dark:text-slate-500">vs mes ant.</span>
-          </div>
-        )}
+    <div className={`group relative bg-white dark:bg-[#141414] border border-purple-200 dark:border-[#333] rounded-2xl p-4 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md hover:border-pink-300 dark:hover:border-slate-600 ${accent ? 'border-l-4 border-l-emerald-500 dark:border-l-emerald-500' : ''}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest truncate">{label}</p>
+          <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-1 truncate leading-tight">{value}</h3>
+          {sub && <p className="text-[11px] text-slate-500 dark:text-slate-500 font-medium mt-1">{sub}</p>}
+          {change && (
+            <div className="flex items-center gap-1 mt-1.5">
+              {change.up ? <TrendingUp size={13} className="text-emerald-500" /> : <TrendingDown size={13} className="text-red-500" />}
+              <span className={`text-xs font-bold ${change.up ? 'text-emerald-500' : 'text-red-500'}`}>{change.pct}%</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500">vs mes ant.</span>
+            </div>
+          )}
+        </div>
+        <div className={`${bgColor} ${textColor} p-3 rounded-xl shrink-0 transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg`}>
+          {icon}
+        </div>
       </div>
     </div>
   );
