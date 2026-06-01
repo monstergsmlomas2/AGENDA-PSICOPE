@@ -705,20 +705,13 @@ export default function Pacientes() {
 
                     <div>
                       <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
-                      <input
-                        type="text"
-                        list="os-list-nuevo"
-                        value={obraSocial}
-                        onChange={(e)=>setObraSocial(e.target.value)}
-                        placeholder="Particular"
-                        className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500"
-                      />
-                      <datalist id="os-list-nuevo">
-                        <option value="Particular" />
-                        {obrasSocialesList.map(os => (
-                          <option key={os.id} value={os.nombre} />
+                      <select value={obraSocial} onChange={(e)=>setObraSocial(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500">
+                        <option value="">Particular</option>
+                        <option value="Obra Social">Obra Social</option>
+                        {obrasSocialesList.filter(os => os.nombre !== 'Obra Social').map(os => (
+                          <option key={os.id} value={os.nombre}>{os.nombre}</option>
                         ))}
-                      </datalist>
+                      </select>
                     </div>
 
                     <div>
