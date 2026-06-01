@@ -985,73 +985,73 @@ export default function PacienteDetalle() {
         {/* Entrevista */}
         <button onClick={() => navigate(`/pacientes/${id}/entrevista`)}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: '#111', border: '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <FileText size={15} style={{ color: '#f59e0b' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Entrevista de Admisión</span>
+          style={{ background: 'linear-gradient(135deg, #2d0a1a 0%, #1a0010 100%)', border: '1px solid rgba(236,72,153,0.25)' }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <FileText size={14} style={{ color: '#f472b6' }} />
+            <span className="text-xs font-semibold" style={{ color: '#f472b6' }}>Entrevista de Admisión</span>
           </div>
-          <span className="text-2xl font-black z-10" style={{ color: '#f59e0b' }}>Admisión</span>
-          <FileText size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#f59e0b' }} />
+          <span className="text-2xl font-black z-10 relative" style={{ color: '#fbcfe8' }}>Admisión</span>
+          <FileText size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#f472b6' }} />
         </button>
 
         {/* Sesiones */}
         <button onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: tabActivo === 'sesiones' ? '#0f1a2e' : '#111', border: tabActivo === 'sesiones' ? '1px solid #3b82f6' : '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <ClipboardList size={15} style={{ color: '#60a5fa' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Sesiones</span>
+          style={{ background: tabActivo === 'sesiones' ? 'linear-gradient(135deg, #3b0764 0%, #1e0438 100%)' : 'linear-gradient(135deg, #2e0a4a 0%, #1a0030 100%)', border: `1px solid ${tabActivo === 'sesiones' ? 'rgba(167,139,250,0.5)' : 'rgba(167,139,250,0.25)'}` }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <ClipboardList size={14} style={{ color: '#a78bfa' }} />
+            <span className="text-xs font-semibold" style={{ color: '#a78bfa' }}>Sesiones</span>
           </div>
-          <span className="text-3xl font-black z-10" style={{ color: '#60a5fa' }}>{sesiones.length}</span>
-          <ClipboardList size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#60a5fa' }} />
+          <span className="text-3xl font-black z-10 relative" style={{ color: '#ede9fe' }}>{sesiones.length}</span>
+          <ClipboardList size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#a78bfa' }} />
         </button>
 
         {/* Evaluaciones */}
         <button onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: tabActivo === 'evaluaciones' ? '#0a1e1a' : '#111', border: tabActivo === 'evaluaciones' ? '1px solid #2dd4bf' : '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <ClipboardCheck size={15} style={{ color: '#2dd4bf' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Evaluaciones</span>
+          style={{ background: tabActivo === 'evaluaciones' ? 'linear-gradient(135deg, #3b0764 0%, #1e0438 100%)' : 'linear-gradient(135deg, #2e0a4a 0%, #1a0030 100%)', border: `1px solid ${tabActivo === 'evaluaciones' ? 'rgba(216,180,254,0.5)' : 'rgba(216,180,254,0.2)'}` }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <ClipboardCheck size={14} style={{ color: '#d8b4fe' }} />
+            <span className="text-xs font-semibold" style={{ color: '#d8b4fe' }}>Evaluaciones</span>
           </div>
-          <span className="text-2xl font-black z-10" style={{ color: '#2dd4bf' }}>Ver todas</span>
-          <ClipboardCheck size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#2dd4bf' }} />
+          <span className="text-2xl font-black z-10 relative" style={{ color: '#f3e8ff' }}>Ver todas</span>
+          <ClipboardCheck size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#d8b4fe' }} />
         </button>
 
         {/* Archivos */}
         <button onClick={handleAbrirAdjuntos}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: showAdjuntos ? '#160e20' : '#111', border: showAdjuntos ? '1px solid #a855f7' : '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <Paperclip size={15} style={{ color: '#c084fc' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Archivos</span>
+          style={{ background: showAdjuntos ? 'linear-gradient(135deg, #2d0a1a 0%, #1a0010 100%)' : 'linear-gradient(135deg, #250818 0%, #150008 100%)', border: `1px solid ${showAdjuntos ? 'rgba(251,113,133,0.5)' : 'rgba(251,113,133,0.2)'}` }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <Paperclip size={14} style={{ color: '#fb7185' }} />
+            <span className="text-xs font-semibold" style={{ color: '#fb7185' }}>Archivos</span>
           </div>
-          <span className="text-2xl font-black z-10" style={{ color: '#c084fc' }}>Adjuntos</span>
-          <Paperclip size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#c084fc' }} />
+          <span className="text-2xl font-black z-10 relative" style={{ color: '#ffe4e6' }}>Adjuntos</span>
+          <Paperclip size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#fb7185' }} />
         </button>
 
         {/* Informes */}
         <button onClick={() => setShowInformes(v => !v)}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: showInformes ? '#1e0a14' : '#111', border: showInformes ? '1px solid #ec4899' : '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <FileText size={15} style={{ color: '#f472b6' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Informes</span>
+          style={{ background: showInformes ? 'linear-gradient(135deg, #3b0764 0%, #1e0438 100%)' : 'linear-gradient(135deg, #2e0a4a 0%, #1a0030 100%)', border: `1px solid ${showInformes ? 'rgba(240,171,252,0.5)' : 'rgba(240,171,252,0.2)'}` }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <FileText size={14} style={{ color: '#f0abfc' }} />
+            <span className="text-xs font-semibold" style={{ color: '#f0abfc' }}>Informes</span>
           </div>
-          <span className="text-2xl font-black z-10" style={{ color: '#f472b6' }}>Ver todos</span>
-          <FileText size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#f472b6' }} />
+          <span className="text-2xl font-black z-10 relative" style={{ color: '#fae8ff' }}>Ver todos</span>
+          <FileText size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#f0abfc' }} />
         </button>
 
         {/* Tests */}
         <button onClick={() => setShowTests(v => !v)}
           className="group relative overflow-hidden rounded-xl p-4 shadow-lg transition-all min-h-[90px] flex flex-col justify-between"
-          style={{ background: showTests ? '#0e0c1e' : '#111', border: showTests ? '1px solid #818cf8' : '1px solid #222' }}>
-          <div className="flex items-center gap-2 z-10">
-            <BookOpen size={15} style={{ color: '#818cf8' }} />
-            <span className="text-xs font-semibold" style={{ color: '#9ca3af' }}>Tests</span>
+          style={{ background: showTests ? 'linear-gradient(135deg, #2d0a1a 0%, #1a0010 100%)' : 'linear-gradient(135deg, #200816 0%, #120008 100%)', border: `1px solid ${showTests ? 'rgba(249,168,212,0.5)' : 'rgba(249,168,212,0.2)'}` }}>
+          <div className="flex items-center gap-2 z-10 relative">
+            <BookOpen size={14} style={{ color: '#f9a8d4' }} />
+            <span className="text-xs font-semibold" style={{ color: '#f9a8d4' }}>Tests</span>
           </div>
-          <span className="text-2xl font-black z-10" style={{ color: '#818cf8' }}>Estandarizados</span>
-          <BookOpen size={80} className="absolute -right-3 -bottom-3 transition-all opacity-[0.06] group-hover:opacity-[0.18]" style={{ color: '#818cf8' }} />
+          <span className="text-2xl font-black z-10 relative" style={{ color: '#fce7f3' }}>Estandarizados</span>
+          <BookOpen size={80} className="absolute -right-2 -bottom-2 transition-all opacity-[0.08] group-hover:opacity-25" style={{ color: '#f9a8d4' }} />
         </button>
       </div>
 
