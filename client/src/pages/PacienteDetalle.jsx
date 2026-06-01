@@ -984,64 +984,64 @@ export default function PacienteDetalle() {
       <div className="flex flex-wrap gap-3 justify-center">
         <button
           onClick={() => navigate(`/pacientes/${id}/entrevista`)}
-          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-400 dark:border-amber-500/30 hover:bg-amber-200 dark:hover:bg-amber-500/20 transition-colors shadow-md"
+          className="inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl bg-gradient-to-br from-amber-300 to-amber-500 text-white shadow-lg shadow-amber-200 dark:shadow-amber-900/30 hover:scale-105 hover:shadow-xl hover:shadow-amber-200 dark:hover:shadow-amber-900/40 active:scale-95 transition-all duration-150"
         >
-          <FileText size={18} /> Entrevista de Admisión
+          <FileText size={17} /> Entrevista de Admisión
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-lg transition-all duration-150 hover:scale-105 hover:shadow-xl active:scale-95 ${
             tabActivo === 'sesiones'
-              ? 'bg-blue-200 text-blue-800 border border-blue-500 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/40'
-              : 'bg-blue-100 text-blue-700 border border-blue-400 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/20'
+              ? 'bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-blue-300 dark:shadow-blue-900/40 ring-2 ring-blue-400/50'
+              : 'bg-gradient-to-br from-blue-300 to-blue-500 text-white shadow-blue-200 dark:shadow-blue-900/30 hover:shadow-blue-300'
           }`}
         >
-          <ClipboardList size={18} /> Sesiones
+          <ClipboardList size={17} /> Sesiones
           {sesiones.length > 0 && (
-            <span className="ml-1 inline-flex items-center justify-center w-5 h-5 rounded-full bg-blue-600 dark:bg-blue-400 text-white dark:text-blue-900 text-xs font-black leading-none">
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/30 text-white text-xs font-black leading-none">
               {sesiones.length}
             </span>
           )}
         </button>
         <button
           onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-lg transition-all duration-150 hover:scale-105 hover:shadow-xl active:scale-95 ${
             tabActivo === 'evaluaciones'
-              ? 'bg-teal-200 text-teal-800 border border-teal-500 dark:bg-teal-500/20 dark:text-teal-300 dark:border-teal-500/40'
-              : 'bg-teal-100 text-teal-700 border border-teal-400 dark:bg-teal-500/10 dark:text-teal-400 dark:border-teal-500/30 hover:bg-teal-200 dark:hover:bg-teal-500/20'
+              ? 'bg-gradient-to-br from-teal-500 to-teal-700 text-white shadow-teal-300 dark:shadow-teal-900/40 ring-2 ring-teal-400/50'
+              : 'bg-gradient-to-br from-teal-300 to-teal-500 text-white shadow-teal-200 dark:shadow-teal-900/30 hover:shadow-teal-300'
           }`}
         >
-          <ClipboardCheck size={18} /> Evaluaciones
+          <ClipboardCheck size={17} /> Evaluaciones
         </button>
         <button
           onClick={handleAbrirAdjuntos}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-lg transition-all duration-150 hover:scale-105 hover:shadow-xl active:scale-95 ${
             showAdjuntos
-              ? 'bg-purple-200 text-purple-800 border border-purple-500 dark:bg-purple-500/20 dark:text-purple-300 dark:border-purple-500/40'
-              : 'bg-purple-100 text-purple-700 border border-purple-400 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/30 hover:bg-purple-200 dark:hover:bg-purple-500/20'
+              ? 'bg-gradient-to-br from-purple-500 to-purple-700 text-white shadow-purple-300 dark:shadow-purple-900/40 ring-2 ring-purple-400/50'
+              : 'bg-gradient-to-br from-purple-300 to-purple-500 text-white shadow-purple-200 dark:shadow-purple-900/30 hover:shadow-purple-300'
           }`}
         >
-          <Paperclip size={18} /> Archivos
+          <Paperclip size={17} /> Archivos
         </button>
         <button
           onClick={() => setShowInformes(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-lg transition-all duration-150 hover:scale-105 hover:shadow-xl active:scale-95 ${
             showInformes
-              ? 'bg-pink-200 text-pink-800 border border-pink-500 dark:bg-pink-500/20 dark:text-pink-300 dark:border-pink-500/40'
-              : 'bg-pink-100 text-pink-700 border border-pink-400 dark:bg-pink-500/10 dark:text-pink-400 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/20'
+              ? 'bg-gradient-to-br from-pink-500 to-rose-600 text-white shadow-pink-300 dark:shadow-pink-900/40 ring-2 ring-pink-400/50'
+              : 'bg-gradient-to-br from-pink-300 to-rose-500 text-white shadow-pink-200 dark:shadow-pink-900/30 hover:shadow-pink-300'
           }`}
         >
-          <FileText size={18} /> Informes
+          <FileText size={17} /> Informes
         </button>
         <button
           onClick={() => setShowTests(v => !v)}
-          className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors shadow-md ${
+          className={`inline-flex items-center gap-2.5 px-5 py-2.5 text-sm font-bold rounded-2xl shadow-lg transition-all duration-150 hover:scale-105 hover:shadow-xl active:scale-95 ${
             showTests
-              ? 'bg-indigo-200 text-indigo-800 border border-indigo-500 dark:bg-indigo-500/20 dark:text-indigo-300 dark:border-indigo-500/40'
-              : 'bg-indigo-100 text-indigo-700 border border-indigo-400 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/30 hover:bg-indigo-200 dark:hover:bg-indigo-500/20'
+              ? 'bg-gradient-to-br from-indigo-500 to-indigo-700 text-white shadow-indigo-300 dark:shadow-indigo-900/40 ring-2 ring-indigo-400/50'
+              : 'bg-gradient-to-br from-indigo-300 to-indigo-500 text-white shadow-indigo-200 dark:shadow-indigo-900/30 hover:shadow-indigo-300'
           }`}
         >
-          <BookOpen size={18} /> Tests
+          <BookOpen size={17} /> Tests
         </button>
       </div>
 
