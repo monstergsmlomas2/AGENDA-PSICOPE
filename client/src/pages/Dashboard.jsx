@@ -362,22 +362,22 @@ export default function Dashboard() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-            <KpiCard icon={<Users size={90} />} label="Pacientes" value={stats.totalPacientes}
-              iconColor="text-indigo-600" gradientFrom="rgba(99,102,241,0.35)" />
-            <KpiCard icon={<CalendarIcon size={90} />} label="Turnos Totales" value={stats.totalTurnos}
-              iconColor="text-pink-600" gradientFrom="rgba(236,72,153,0.35)" />
-            <KpiCard icon={<Clock size={90} />} label="Turnos Hoy" value={stats.turnosHoy.length}
-              sub={`${stats.turnosMes} este mes`} accent
-              iconColor="text-emerald-600" gradientFrom="rgba(16,185,129,0.35)" />
-            <KpiCard icon={<BarChart3 size={90} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
+            <KpiCard icon={<Users size={24} />} label="Pacientes" value={stats.totalPacientes}
+              iconClass="text-indigo-500" gradientTo="to-indigo-500/10" hoverBorder="hover:border-indigo-500/20" />
+            <KpiCard icon={<CalendarIcon size={24} />} label="Turnos Totales" value={stats.totalTurnos}
+              iconClass="text-pink-500" gradientTo="to-pink-500/10" hoverBorder="hover:border-pink-500/20" />
+            <KpiCard icon={<Clock size={24} />} label="Turnos Hoy" value={stats.turnosHoy.length}
+              sub={`${stats.turnosMes} este mes`}
+              iconClass="text-emerald-500" gradientTo="to-emerald-500/10" hoverBorder="hover:border-emerald-500/20" />
+            <KpiCard icon={<BarChart3 size={24} />} label="Sesiones Mes" value={resumenMes.sesiones_este_mes}
               change={sesPct}
-              iconColor="text-blue-600" gradientFrom="rgba(59,130,246,0.35)" />
-            <KpiCard icon={<DollarSign size={90} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
+              iconClass="text-blue-500" gradientTo="to-blue-500/10" hoverBorder="hover:border-blue-500/20" />
+            <KpiCard icon={<DollarSign size={24} />} label="Ingresos Mes" value={formatCurrency(resumenMes.ingresos_este_mes)}
               change={ingPct}
-              iconColor="text-amber-500" gradientFrom="rgba(245,158,11,0.35)" />
-            <KpiCard icon={<AlertTriangle size={90} />} label="Ausentes" value={stats.ausentesMes}
+              iconClass="text-amber-500" gradientTo="to-amber-500/10" hoverBorder="hover:border-amber-500/20" />
+            <KpiCard icon={<AlertTriangle size={24} />} label="Ausentes" value={stats.ausentesMes}
               sub="este mes"
-              iconColor="text-orange-600" gradientFrom="rgba(234,88,12,0.35)" />
+              iconClass="text-orange-500" gradientTo="to-orange-500/10" hoverBorder="hover:border-orange-500/20" />
           </div>
         )}
       </section>
@@ -656,31 +656,36 @@ function HeaderSection() {
   );
 }
 
-function KpiCard({ icon, label, value, sub, change, iconColor, gradientFrom, accent }) {
+function KpiCard({ icon, label, value, sub, change, iconClass, gradientTo, hoverBorder }) {
+  // Clonar el icono en tamaño grande para el fondo decorativo
+  const bigIcon = icon && icon.type
+    ? <icon.type size={96} className={iconClass} />
+    : icon;
+
   return (
-    <div
-      className={`group relative bg-white dark:bg-[#141414] border border-purple-200 dark:border-[#2a2a2a] rounded-2xl p-5 shadow-sm overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 ${accent ? 'ring-2 ring-emerald-400/50' : ''}`}
-      style={{ background: `radial-gradient(ellipse at bottom right, ${gradientFrom} 0%, white 65%)` }}
-    >
-      {/* Icono decorativo de fondo — esquina inferior derecha */}
-      <div className={`absolute -bottom-2 -right-2 ${iconColor} opacity-20 group-hover:opacity-40 transition-all duration-300 group-hover:scale-110`}>
-        {icon}
+    <div className={`group relative border border-purple-200 dark:border-[#2a2a2a] bg-gradient-to-br from-white via-white/95 ${gradientTo} dark:from-[#141414] dark:via-[#141414]/95 rounded-2xl shadow-sm overflow-hidden transition-all duration-200 hover:shadow-lg ${hoverBorder}`}>
+      {/* Icono gigante decorativo — esquina superior derecha, semitransparente */}
+      <div className={`absolute right-0 top-0 p-3 ${iconClass} opacity-10 group-hover:opacity-20 transition-opacity duration-200`}>
+        {bigIcon}
       </div>
 
-      {/* Contenido principal */}
-      <div className="relative z-10">
-        <p className="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest mb-3">{label}</p>
-        <h3 className={`text-4xl font-black leading-none ${iconColor}`}>{value}</h3>
-        {sub && (
-          <p className="text-xs text-slate-500 font-semibold mt-2">{sub}</p>
-        )}
+      {/* Header: icono chico + label */}
+      <div className="relative px-5 pt-5 pb-2 flex items-center gap-2">
+        <span className={iconClass}>{icon}</span>
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</span>
+      </div>
+
+      {/* Valor principal */}
+      <div className="relative px-5 pb-5">
+        <p className="text-3xl font-bold text-slate-800 dark:text-white">{value}</p>
+        {sub && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{sub}</p>}
         {change && (
           <div className="flex items-center gap-1.5 mt-2">
             {change.up
-              ? <TrendingUp size={14} className="text-emerald-600" />
+              ? <TrendingUp size={14} className="text-emerald-500" />
               : <TrendingDown size={14} className="text-red-500" />}
-            <span className={`text-sm font-bold ${change.up ? 'text-emerald-600' : 'text-red-500'}`}>{change.pct}%</span>
-            <span className="text-[10px] text-slate-400 font-medium">vs mes ant.</span>
+            <span className={`text-sm font-bold ${change.up ? 'text-emerald-500' : 'text-red-500'}`}>{change.pct}%</span>
+            <span className="text-[10px] text-slate-400">vs mes ant.</span>
           </div>
         )}
       </div>
