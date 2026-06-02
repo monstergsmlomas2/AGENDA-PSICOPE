@@ -18,7 +18,7 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'prompt',
+      registerType: 'autoUpdate',
       includeAssets: [
         'favicon.svg',
         'icons.svg',
@@ -66,7 +66,7 @@ export default defineConfig({
         ],
       },
       workbox: {
-        skipWaiting: false,
+        skipWaiting: true,
         clientsClaim: true,
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         runtimeCaching: [
