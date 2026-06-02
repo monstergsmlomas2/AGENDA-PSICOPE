@@ -1013,10 +1013,13 @@ export default function PacienteDetalle() {
 
         <button onClick={() => setTabActivo(tabActivo === 'sesiones' ? null : 'sesiones')}
           className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'sesiones' ? 'border-blue-500 bg-gradient-to-br from-blue-50 to-blue-200/60 dark:from-blue-500/20 dark:to-blue-500/20' : 'border-blue-400 dark:border-blue-500/70 bg-gradient-to-br from-white via-white to-blue-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-blue-500/10 hover:border-blue-500'}`}>
+          {sesiones.length > 0 && (
+            <span className="absolute top-2 right-2 min-w-[22px] h-[22px] px-1.5 rounded-full bg-blue-500 text-white text-xs font-black flex items-center justify-center shadow-md z-10">
+              {sesiones.length}
+            </span>
+          )}
           <div className="absolute right-0 bottom-0 p-1 text-blue-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><ClipboardList size={72} /></div>
-          <span className="relative text-lg font-black text-blue-600 dark:text-blue-400">
-            Sesiones{sesiones.length > 0 && <span className="ml-2 inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-500 text-white text-xs font-black">{sesiones.length}</span>}
-          </span>
+          <span className="relative text-lg font-black text-blue-600 dark:text-blue-400">Sesiones</span>
         </button>
 
         <button onClick={() => setTabActivo(tabActivo === 'evaluaciones' ? null : 'evaluaciones')}
