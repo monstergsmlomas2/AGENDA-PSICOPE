@@ -523,16 +523,29 @@ export default function Pacientes() {
             <div
               key={p.id}
               onClick={() => navigate(`/pacientes/${p.id}`)}
-              className={`border rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg shadow-sm group relative stagger-${Math.min(idx + 1, 12)} animate-fade-in-up cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
-                p.sexo === 'F'
-                  ? 'bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50 border-pink-200'
-                  : p.sexo === 'M'
-                  ? 'bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 border-sky-200'
-                  : 'bg-white border-purple-300'
+              className={`border rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg shadow-sm group relative overflow-hidden stagger-${Math.min(idx + 1, 12)} animate-fade-in-up cursor-pointer bg-white dark:bg-slate-900 dark:border-slate-800 ${
+                p.sexo === 'F' ? 'border-pink-200' : p.sexo === 'M' ? 'border-sky-200' : 'border-purple-300'
               }`}
             >
+              {/* Gradiente decorativo diagonal desde esquina inferior derecha */}
+              {p.sexo === 'F' && (
+                <div className="absolute inset-0 bg-gradient-to-tl from-pink-200/60 via-pink-100/30 to-transparent pointer-events-none rounded-2xl" />
+              )}
+              {p.sexo === 'M' && (
+                <div className="absolute inset-0 bg-gradient-to-tl from-sky-200/60 via-sky-100/30 to-transparent pointer-events-none rounded-2xl" />
+              )}
+
+              {/* Icono decorativo grande en esquina inferior derecha */}
+              {(p.sexo === 'F' || p.sexo === 'M') && (
+                <div className={`absolute bottom-3 right-3 pointer-events-none ${
+                  p.sexo === 'F' ? 'text-pink-300/50' : 'text-sky-300/50'
+                }`}>
+                  {p.sexo === 'F' ? <IconaNina size={80} /> : <IconaNino size={80} />}
+                </div>
+              )}
+
               {/* Hover actions */}
-              <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+              <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200 z-10">
                 <span
                   onClick={(e) => { e.stopPropagation(); openEditPaciente(p); }}
                   title="Editar ficha"
@@ -550,12 +563,12 @@ export default function Pacientes() {
               </div>
 
               {/* Avatar + Nombre */}
-              <div className="flex items-center gap-4 mb-4">
+              <div className="flex items-center gap-4 mb-4 relative z-10">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
                   p.sexo === 'F'
-                    ? 'bg-pink-200 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400'
+                    ? 'bg-pink-100 text-pink-500 dark:bg-pink-500/20 dark:text-pink-400'
                     : p.sexo === 'M'
-                    ? 'bg-sky-200 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400'
+                    ? 'bg-sky-100 text-sky-500 dark:bg-sky-500/20 dark:text-sky-400'
                     : `${getAvatarColor(p.nombre + p.apellido)} text-lg font-black uppercase`
                 }`}>
                   {p.sexo === 'F' ? (
@@ -580,7 +593,7 @@ export default function Pacientes() {
               </div>
 
               {/* Info */}
-              <div className="space-y-2.5 text-sm text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+              <div className="space-y-2.5 text-sm text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 relative z-10">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={15} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shrink-0" />
                   <span className="capitalize truncate font-medium">{p.obra_social || 'Particular'}</span>
@@ -599,7 +612,7 @@ export default function Pacientes() {
 
               {/* Badges de alerta */}
               {(!p.entrevista || idsSinSesion.has(p.id)) && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
+                <div className="flex flex-wrap gap-1.5 mt-2 relative z-10">
                   {!p.entrevista && (
                     <span className="inline-flex items-center gap-1 bg-orange-100 text-orange-700 border border-orange-400 dark:bg-yellow-500/10 dark:text-yellow-400 dark:border-yellow-500/30 text-[10px] px-2 py-0.5 rounded-full font-bold">
                       <AlertTriangle size={10} />
