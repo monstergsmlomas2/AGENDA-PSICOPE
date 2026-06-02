@@ -2,51 +2,59 @@ import { useState, useEffect } from 'react'
 import { RefreshCw, X } from 'lucide-react'
 
 export default function UpdatePrompt() {
-  const [waiting, setWaiting] = useState(null) // SW en espera
+  const [waitingSW, setWaitingSW] = useState(null)
   const [dismissed, setDismissed] = useState(false)
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
-    const checkForWaiting = (reg) => {
+    const detectWaiting = async () => {
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (!reg) return
+
+      // Ya hay uno esperando al montar
       if (reg.waiting) {
-        setWaiting(reg.waiting)
+        setWaitingSW(reg.waiting)
         return
       }
+
+      // Escuchar nuevas instalaciones
       reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing
-        if (!newSW) return
-        newSW.addEventListener('statechange', () => {
-          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            setWaiting(newSW)
+        const sw = reg.installing
+        if (!sw) return
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+            setWaitingSW(sw)
           }
         })
       })
     }
 
-    navigator.serviceWorker.getRegistration().then(reg => {
-      if (reg) checkForWaiting(reg)
-    })
+    detectWaiting()
 
-    // Chequeo periódico cada 60s
-    const interval = setInterval(() => {
-      navigator.serviceWorker.getRegistration().then(reg => {
-        if (reg) reg.update()
-      })
-    }, 60_000)
+    // Forzar chequeo de actualización cada 30s
+    const poll = setInterval(async () => {
+      const reg = await navigator.serviceWorker.getRegistration()
+      if (reg) {
+        await reg.update()
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          setWaitingSW(reg.waiting)
+        }
+      }
+    }, 30_000)
 
-    return () => clearInterval(interval)
+    return () => clearInterval(poll)
   }, [])
 
   const handleUpdate = () => {
-    if (!waiting) return
+    if (!waitingSW) return
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload()
     }, { once: true })
-    waiting.postMessage({ type: 'SKIP_WAITING' })
+    waitingSW.postMessage({ type: 'SKIP_WAITING' })
   }
 
-  if (!waiting || dismissed) return null
+  if (!waitingSW || dismissed) return null
 
   return (
     <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[70] animate-fade-in w-[calc(100%-2rem)] max-w-sm">
