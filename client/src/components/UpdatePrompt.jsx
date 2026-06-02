@@ -40,11 +40,10 @@ export default function UpdatePrompt() {
 
   const handleUpdate = () => {
     if (!waiting) return
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload()
+    }, { once: true })
     waiting.postMessage({ type: 'SKIP_WAITING' })
-    waiting.addEventListener('statechange', () => {
-      if (waiting.state === 'activated') window.location.reload()
-    })
-    window.location.reload()
   }
 
   if (!waiting || dismissed) return null
