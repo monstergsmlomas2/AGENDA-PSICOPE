@@ -1,20 +1,53 @@
-import { useState } from 'react'
-import { useRegisterSW } from 'virtual:pwa-register/react'
+import { useState, useEffect } from 'react'
 import { RefreshCw, X } from 'lucide-react'
 
 export default function UpdatePrompt() {
+  const [waiting, setWaiting] = useState(null) // SW en espera
   const [dismissed, setDismissed] = useState(false)
 
-  const {
-    needRefresh: [needRefresh],
-    updateServiceWorker,
-  } = useRegisterSW({
-    onRegistered(r) {
-      if (r) setInterval(() => r.update(), 60_000)
-    },
-  })
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return
 
-  if (!needRefresh || dismissed) return null
+    const checkForWaiting = (reg) => {
+      if (reg.waiting) {
+        setWaiting(reg.waiting)
+        return
+      }
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing
+        if (!newSW) return
+        newSW.addEventListener('statechange', () => {
+          if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+            setWaiting(newSW)
+          }
+        })
+      })
+    }
+
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (reg) checkForWaiting(reg)
+    })
+
+    // Chequeo periódico cada 60s
+    const interval = setInterval(() => {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) reg.update()
+      })
+    }, 60_000)
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const handleUpdate = () => {
+    if (!waiting) return
+    waiting.postMessage({ type: 'SKIP_WAITING' })
+    waiting.addEventListener('statechange', () => {
+      if (waiting.state === 'activated') window.location.reload()
+    })
+    window.location.reload()
+  }
+
+  if (!waiting || dismissed) return null
 
   return (
     <div className="fixed bottom-24 md:bottom-6 left-1/2 -translate-x-1/2 z-[70] animate-fade-in w-[calc(100%-2rem)] max-w-sm">
@@ -29,7 +62,7 @@ export default function UpdatePrompt() {
         </div>
 
         <button
-          onClick={() => updateServiceWorker(true)}
+          onClick={handleUpdate}
           className="shrink-0 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors shadow-md shadow-pink-400/30"
         >
           Actualizar
