@@ -12,22 +12,42 @@ import {
 import { useToast, SkeletonCard, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
-const IconaNina = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="5" r="3" />
-    <path d="M6 21v-4a6 6 0 0 1 12 0v4" />
-    <path d="M9 14c0 1.5 1.5 3 3 3s3-1.5 3-3" />
-    <path d="M9 11l-1.5 3" />
-    <path d="M15 11l1.5 3" />
+/* Niña: silueta con colitas y vestido, brazos abiertos, fill sólido */
+const IconaNina = ({ size = 20, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 100 120" fill={color} xmlns="http://www.w3.org/2000/svg">
+    {/* Colitas */}
+    <ellipse cx="36" cy="8" rx="9" ry="6" transform="rotate(-30 36 8)" />
+    <ellipse cx="64" cy="8" rx="9" ry="6" transform="rotate(30 64 8)" />
+    {/* Cabeza */}
+    <circle cx="50" cy="22" r="16" />
+    {/* Cuerpo / vestido triángulo */}
+    <path d="M34 42 Q50 38 66 42 L74 80 Q50 88 26 80 Z" />
+    {/* Brazo izquierdo */}
+    <path d="M34 48 Q18 44 8 52" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Brazo derecho */}
+    <path d="M66 48 Q82 44 92 52" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Pierna izquierda */}
+    <path d="M40 79 Q37 95 34 112" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Pierna derecha */}
+    <path d="M60 79 Q63 95 66 112" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
   </svg>
 );
 
-const IconaNino = ({ size = 20 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="5" r="3" />
-    <path d="M6 21v-6a6 6 0 0 1 12 0v6" />
-    <path d="M9 12l-2 4" />
-    <path d="M15 12l2 4" />
+/* Niño: silueta simple con brazos abiertos, fill sólido */
+const IconaNino = ({ size = 20, color = 'currentColor' }) => (
+  <svg width={size} height={size} viewBox="0 0 100 120" fill={color} xmlns="http://www.w3.org/2000/svg">
+    {/* Cabeza */}
+    <circle cx="50" cy="20" r="16" />
+    {/* Cuerpo */}
+    <rect x="36" y="40" width="28" height="34" rx="8" />
+    {/* Brazo izquierdo */}
+    <path d="M36 46 Q20 42 8 50" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Brazo derecho */}
+    <path d="M64 46 Q80 42 92 50" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Pierna izquierda */}
+    <path d="M42 74 Q39 93 36 112" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
+    {/* Pierna derecha */}
+    <path d="M58 74 Q61 93 64 112" stroke={color} strokeWidth="9" strokeLinecap="round" fill="none" />
   </svg>
 );
 
@@ -536,11 +556,14 @@ export default function Pacientes() {
               )}
 
               {/* Icono decorativo grande en esquina inferior derecha */}
-              {(p.sexo === 'F' || p.sexo === 'M') && (
-                <div className={`absolute bottom-3 right-3 pointer-events-none ${
-                  p.sexo === 'F' ? 'text-pink-300/50' : 'text-sky-300/50'
-                }`}>
-                  {p.sexo === 'F' ? <IconaNina size={80} /> : <IconaNino size={80} />}
+              {p.sexo === 'F' && (
+                <div className="absolute bottom-2 right-2 pointer-events-none opacity-20">
+                  <IconaNina size={90} color="#ec4899" />
+                </div>
+              )}
+              {p.sexo === 'M' && (
+                <div className="absolute bottom-2 right-2 pointer-events-none opacity-20">
+                  <IconaNino size={90} color="#0ea5e9" />
                 </div>
               )}
 
@@ -572,9 +595,9 @@ export default function Pacientes() {
                     : `${getAvatarColor(p.nombre + p.apellido)} text-lg font-black uppercase`
                 }`}>
                   {p.sexo === 'F' ? (
-                    <IconaNina size={24} />
+                    <IconaNina size={26} color="#ec4899" />
                   ) : p.sexo === 'M' ? (
-                    <IconaNino size={24} />
+                    <IconaNino size={26} color="#0ea5e9" />
                   ) : (
                     <span className="text-lg font-black uppercase">{getIniciales(p.nombre, p.apellido)}</span>
                   )}
