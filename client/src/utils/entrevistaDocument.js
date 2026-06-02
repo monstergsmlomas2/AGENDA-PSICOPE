@@ -324,6 +324,7 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
           <span class="check-item"><span class="check-symbol">${check(e.conducta_inquieto)}</span> Inquieto/a</span>
           <span class="check-item"><span class="check-symbol">${check(e.conducta_desobediente)}</span> Desobediente</span>
           <span class="check-item"><span class="check-symbol">${check(e.conducta_ansioso)}</span> Ansioso/a</span>
+          <span class="check-item"><span class="check-symbol">${check(e.conducta_impulsivo)}</span> Impulsivo/a</span>
           <span class="check-item"><span class="check-symbol">${check(e.conducta_autolesiona)}</span> Se auto lesiona</span>
         </div>
       </div>

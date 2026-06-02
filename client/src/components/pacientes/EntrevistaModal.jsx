@@ -255,6 +255,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
                     ['conducta_inquieto', 'Inquieto/a'],
                     ['conducta_desobediente', 'Desobediente'],
                     ['conducta_ansioso', 'Ansioso/a'],
+                    ['conducta_impulsivo', 'Impulsivo/a'],
                     ['conducta_autolesiona', 'Se auto lesiona'],
                   ].map(([name, label]) => (
                     <label key={name} className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-300">
