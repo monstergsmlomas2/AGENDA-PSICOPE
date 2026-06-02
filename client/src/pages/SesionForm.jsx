@@ -115,7 +115,7 @@ export default function SesionForm() {
       <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden shadow-lg">
         <div className="bg-purple-100/50 dark:bg-slate-950 border-b border-purple-300 dark:border-slate-800 px-8 py-6">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex items-center gap-2 text-blue-400">
+            <div className="flex items-center gap-2 text-pink-500 dark:text-blue-400">
               <ClipboardList size={18} />
               <span className="text-xs font-bold uppercase tracking-wider">
                 {sesionId ? 'Editar Sesión' : 'Nueva Sesión'}
@@ -149,7 +149,7 @@ export default function SesionForm() {
               value={fecha}
               onChange={(e) => setFecha(e.target.value)}
               required
-              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-blue-500 dark:[&::-webkit-calendar-picker-indicator]:invert"
+              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent dark:[&::-webkit-calendar-picker-indicator]:invert"
             />
           </div>
 
@@ -161,7 +161,7 @@ export default function SesionForm() {
               rows="5"
               required
               placeholder="Juegos, tests administrados, técnicas utilizadas..."
-              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-blue-500"
+              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent"
             />
           </div>
 
@@ -172,23 +172,23 @@ export default function SesionForm() {
               onChange={(e) => setObservaciones(e.target.value)}
               rows="5"
               placeholder="Comportamiento, logros, cosas a reforzar..."
-              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-blue-500"
+              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2 border-t border-slate-800">
+          <div className="flex justify-end gap-3 pt-2 border-t border-pink-200 dark:border-slate-800">
             <button
               type="button"
               onClick={() => navigate(volverPath)}
               disabled={submitting}
-              className="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-900 hover:text-slate-700 dark:text-white hover:bg-slate-800 transition-colors disabled:opacity-50"
+              className="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-900 hover:text-slate-700 dark:text-white hover:bg-pink-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl bg-pink-500 dark:bg-blue-600 hover:bg-blue-500 text-slate-900 dark:text-white transition-colors disabled:opacity-50 shadow-lg shadow-blue-500/20"
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl bg-pink-500 dark:bg-blue-600 hover:bg-pink-600 dark:hover:bg-blue-500 text-white transition-colors disabled:opacity-50 shadow-lg shadow-pink-500/20 dark:shadow-blue-500/20"
             >
               {submitting && <Loader2 size={14} className="animate-spin" />}
               <Save size={14} />

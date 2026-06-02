@@ -165,7 +165,7 @@ export default function EvaluacionForm() {
           <div>
             <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Tipo de Test *</label>
             <select value={tipoTest} onChange={(e) => setTipoTest(e.target.value)} required
-              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500 font-medium">
+              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent font-medium">
               {tiposTest.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
@@ -173,37 +173,37 @@ export default function EvaluacionForm() {
           <div>
             <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Fecha de Administración</label>
             <input type="date" value={fechaAdmin} onChange={(e) => setFechaAdmin(e.target.value)}
-              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
+              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent dark:[&::-webkit-calendar-picker-indicator]:invert" />
           </div>
 
           <div>
             <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Resultados (descripción cualitativa)</label>
             <textarea value={resultados} onChange={(e) => setResultados(e.target.value)} rows="5"
               placeholder="Describí los resultados obtenidos..."
-              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500" />
+              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent" />
           </div>
 
           <div>
             <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Puntaje Obtenido</label>
             <input type="text" value={puntaje} onChange={(e) => setPuntaje(e.target.value)}
               placeholder="Ej: CI: 95, Percentil 37"
-              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500" />
+              className="w-full rounded-xl p-3.5 outline-none transition-colors border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent" />
           </div>
 
           <div>
             <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones</label>
             <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} rows="4"
               placeholder="Notas adicionales..."
-              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-800 bg-slate-950 text-slate-900 dark:text-white focus:border-pink-500 dark:focus:border-teal-500" />
+              className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent" />
           </div>
 
-          <div className="flex justify-end gap-3 pt-2 border-t border-slate-800">
+          <div className="flex justify-end gap-3 pt-2 border-t border-pink-200 dark:border-slate-800">
             <button type="button" onClick={() => navigate(volverPath)} disabled={submitting}
-              className="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-900 hover:text-slate-700 dark:text-white hover:bg-slate-800 transition-colors disabled:opacity-50">
+              className="px-5 py-2.5 text-sm font-bold rounded-xl text-slate-900 hover:text-slate-700 dark:text-white hover:bg-pink-200 dark:hover:bg-slate-800 transition-colors disabled:opacity-50">
               Cancelar
             </button>
             <button type="submit" disabled={submitting}
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl bg-pink-500 dark:bg-teal-600 hover:bg-pink-400 dark:hover:bg-teal-500 text-slate-900 dark:text-white transition-colors disabled:opacity-50 shadow-lg shadow-pink-500/20 dark:shadow-teal-500/20">
+              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-bold rounded-xl bg-pink-500 dark:bg-teal-600 hover:bg-pink-600 dark:hover:bg-teal-500 text-white transition-colors disabled:opacity-50 shadow-lg shadow-pink-500/20 dark:shadow-teal-500/20">
               {submitting && <Loader2 size={14} className="animate-spin" />}
               <Save size={14} />
               {evalId ? 'Guardar Cambios' : 'Crear Evaluación'}
