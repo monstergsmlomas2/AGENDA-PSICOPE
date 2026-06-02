@@ -3,51 +3,23 @@ import { RefreshCw, X } from 'lucide-react'
 
 export default function UpdatePrompt() {
   const [show, setShow] = useState(false)
-  const [waitingWorker, setWaitingWorker] = useState(null)
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
 
-    const checkForWaiting = (reg) => {
-      if (reg.waiting) {
-        setWaitingWorker(reg.waiting)
-        setShow(true)
-      }
+    // Con autoUpdate+skipWaiting el SW nunca queda en "waiting":
+    // se activa solo. controllerchange es el único evento confiable.
+    // Solo mostramos el aviso si YA había un SW controlando la página
+    // (o sea, no es la primera instalación).
+    const hadController = !!navigator.serviceWorker.controller
+
+    const onControllerChange = () => {
+      if (hadController) setShow(true)
     }
 
-    navigator.serviceWorker.getRegistration().then((reg) => {
-      if (!reg) return
-
-      // Ya hay un SW esperando al cargar (común en PWA instalada)
-      checkForWaiting(reg)
-
-      // Un nuevo SW terminó de instalarse y está esperando
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing
-        if (!newWorker) return
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            setWaitingWorker(newWorker)
-            setShow(true)
-          }
-        })
-      })
-    })
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
+    return () => navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
   }, [])
-
-  const handleUpdate = () => {
-    if (waitingWorker) {
-      // Le decimos al SW en espera que tome el control ahora
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' })
-    }
-    // Recargamos cuando el nuevo SW toma el control
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload()
-    }, { once: true })
-
-    // Fallback: si controllerchange no dispara en 1s, recargar igual
-    setTimeout(() => window.location.reload(), 1000)
-  }
 
   if (!show) return null
 
@@ -60,14 +32,14 @@ export default function UpdatePrompt() {
 
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold text-slate-900 dark:text-white leading-tight">Nueva versión disponible</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Actualizá para ver los últimos cambios</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Recargá para ver los últimos cambios</p>
         </div>
 
         <button
-          onClick={handleUpdate}
+          onClick={() => window.location.reload()}
           className="shrink-0 bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold px-4 py-2 rounded-xl transition-colors shadow-md shadow-pink-400/30"
         >
-          Actualizar
+          Recargar
         </button>
 
         <button
