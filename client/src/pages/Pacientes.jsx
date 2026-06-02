@@ -12,6 +12,25 @@ import {
 import { useToast, SkeletonCard, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
+const IconaNina = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="3" />
+    <path d="M6 21v-4a6 6 0 0 1 12 0v4" />
+    <path d="M9 14c0 1.5 1.5 3 3 3s3-1.5 3-3" />
+    <path d="M9 11l-1.5 3" />
+    <path d="M15 11l1.5 3" />
+  </svg>
+);
+
+const IconaNino = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="5" r="3" />
+    <path d="M6 21v-6a6 6 0 0 1 12 0v6" />
+    <path d="M9 12l-2 4" />
+    <path d="M15 12l2 4" />
+  </svg>
+);
+
 const calcularEdad = (fechaNac) => {
   if (!fechaNac) return null;
   const hoy = new Date();
@@ -504,7 +523,13 @@ export default function Pacientes() {
             <div
               key={p.id}
               onClick={() => navigate(`/pacientes/${p.id}`)}
-              className={`bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg shadow-sm group relative stagger-${Math.min(idx + 1, 12)} animate-fade-in-up cursor-pointer`}
+              className={`border rounded-2xl p-6 transition-all duration-200 hover:-translate-y-1 hover:shadow-lg shadow-sm group relative stagger-${Math.min(idx + 1, 12)} animate-fade-in-up cursor-pointer dark:bg-slate-900 dark:border-slate-800 ${
+                p.sexo === 'F'
+                  ? 'bg-gradient-to-br from-pink-50 via-rose-50 to-fuchsia-50 border-pink-200'
+                  : p.sexo === 'M'
+                  ? 'bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 border-sky-200'
+                  : 'bg-white border-purple-300'
+              }`}
             >
               {/* Hover actions */}
               <div className="absolute top-3 right-3 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
@@ -526,8 +551,20 @@ export default function Pacientes() {
 
               {/* Avatar + Nombre */}
               <div className="flex items-center gap-4 mb-4">
-                <div className={`w-12 h-12 rounded-full ${getAvatarColor(p.nombre + p.apellido)} flex items-center justify-center shrink-0 text-lg font-black uppercase`}>
-                  {getIniciales(p.nombre, p.apellido)}
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                  p.sexo === 'F'
+                    ? 'bg-pink-200 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400'
+                    : p.sexo === 'M'
+                    ? 'bg-sky-200 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400'
+                    : `${getAvatarColor(p.nombre + p.apellido)} text-lg font-black uppercase`
+                }`}>
+                  {p.sexo === 'F' ? (
+                    <IconaNina size={24} />
+                  ) : p.sexo === 'M' ? (
+                    <IconaNino size={24} />
+                  ) : (
+                    <span className="text-lg font-black uppercase">{getIniciales(p.nombre, p.apellido)}</span>
+                  )}
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-bold text-base capitalize truncate text-slate-900 dark:text-white leading-tight">
