@@ -137,7 +137,16 @@ select::placeholder {
   }
 }
 
+@keyframes spinSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 /* Clases utilitarias de animación */
+.animate-spin-slow {
+  animation: spinSlow 2s linear infinite;
+}
+
 .animate-fade-in-up {
   animation: fadeInUp 300ms ease-out forwards;
   animation-delay: var(--delay, 0ms);

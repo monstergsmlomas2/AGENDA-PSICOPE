@@ -22,7 +22,8 @@ import { ToastProvider, useToast } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { Loader2 } from 'lucide-react';
 import GlobalSearch from './components/GlobalSearch';
-import InstallPrompt from './components/InstallPrompt';
+import InstallPrompt from './components/InstallPrompt'
+import UpdatePrompt from './components/UpdatePrompt';
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -109,6 +110,9 @@ function ProtectedLayout({ children }) {
 
       {/* PWA Install Prompt */}
       <InstallPrompt />
+
+      {/* Banner de nueva versión disponible */}
+      <UpdatePrompt />
     </div>
   );
 }
