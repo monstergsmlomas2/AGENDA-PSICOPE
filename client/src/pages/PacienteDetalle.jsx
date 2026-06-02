@@ -334,6 +334,8 @@ export default function PacienteDetalle() {
   const [recurrenciaTurno, setRecurrenciaTurno] = useState('');
   const [submittingTurno, setSubmittingTurno] = useState(false);
   const [turnoFormErrors, setTurnoFormErrors] = useState({});
+  const [modoSeleccionTurnos, setModoSeleccionTurnos] = useState(false);
+  const [turnosSeleccionados, setTurnosSeleccionados] = useState(new Set());
 
   // Turno rápido (Próximo turno)
   const [showTurnoRapido, setShowTurnoRapido] = useState(false);
@@ -512,6 +514,22 @@ export default function PacienteDetalle() {
     await eliminarTurno(turno.id);
     await cargarTurnos();
     toast.success('Turno eliminado', '');
+  };
+
+  const handleEliminarTurnosSeleccionados = async () => {
+    const cantidad = turnosSeleccionados.size;
+    const ok = await confirm({
+      title: 'Eliminar turnos',
+      message: `¿Estás segura de que querés eliminar ${cantidad} turno${cantidad > 1 ? 's' : ''}? Esta acción no se puede deshacer.`,
+      confirmLabel: `Eliminar ${cantidad} turno${cantidad > 1 ? 's' : ''}`,
+      variant: 'danger',
+    });
+    if (!ok) return;
+    await Promise.all([...turnosSeleccionados].map(tid => eliminarTurno(tid)));
+    setTurnosSeleccionados(new Set());
+    setModoSeleccionTurnos(false);
+    await cargarTurnos();
+    toast.success('Turnos eliminados', `Se eliminaron ${cantidad} turno${cantidad > 1 ? 's' : ''}.`);
   };
 
   const handleCrearTurno = async () => {
@@ -1038,12 +1056,43 @@ export default function PacienteDetalle() {
             <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
               <Calendar size={22} className="text-teal-400" /> Turnos
             </h3>
-            <button
-              onClick={() => { setShowNuevoTurno(v => !v); setTurnoFormErrors({}); }}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-teal-600 hover:bg-teal-700 text-slate-900 dark:text-white transition-colors"
-            >
-              <Plus size={16} /> Nuevo Turno
-            </button>
+            <div className="flex items-center gap-2">
+              {turnos.length > 0 && (
+                modoSeleccionTurnos ? (
+                  <>
+                    {turnosSeleccionados.size > 0 && (
+                      <button
+                        onClick={handleEliminarTurnosSeleccionados}
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-red-500 hover:bg-red-600 text-white transition-colors"
+                      >
+                        <Trash2 size={15} /> Eliminar ({turnosSeleccionados.size})
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setModoSeleccionTurnos(false); setTurnosSeleccionados(new Set()); }}
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <X size={15} /> Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => { setModoSeleccionTurnos(true); setShowNuevoTurno(false); }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <CheckCircle size={15} /> Seleccionar
+                  </button>
+                )
+              )}
+              {!modoSeleccionTurnos && (
+                <button
+                  onClick={() => { setShowNuevoTurno(v => !v); setTurnoFormErrors({}); }}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl bg-teal-600 hover:bg-teal-700 text-slate-900 dark:text-white transition-colors"
+                >
+                  <Plus size={16} /> Nuevo Turno
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Formulario nuevo turno */}
@@ -1172,7 +1221,22 @@ export default function PacienteDetalle() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between gap-3 px-4 py-3">
+                    <div
+                      className={`flex items-center justify-between gap-3 px-4 py-3 transition-colors ${modoSeleccionTurnos ? 'cursor-pointer hover:bg-pink-50 dark:hover:bg-slate-800/50' : ''} ${turnosSeleccionados.has(t.id) ? 'bg-pink-50 dark:bg-slate-800/50' : ''}`}
+                      onClick={modoSeleccionTurnos ? () => setTurnosSeleccionados(prev => {
+                        const next = new Set(prev);
+                        next.has(t.id) ? next.delete(t.id) : next.add(t.id);
+                        return next;
+                      }) : undefined}
+                    >
+                      {modoSeleccionTurnos && (
+                        <input
+                          type="checkbox"
+                          readOnly
+                          checked={turnosSeleccionados.has(t.id)}
+                          className="w-4 h-4 accent-pink-500 shrink-0 pointer-events-none"
+                        />
+                      )}
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <Clock size={15} className="text-teal-400 shrink-0" />
                         <div className="min-w-0">
@@ -1180,20 +1244,27 @@ export default function PacienteDetalle() {
                             {new Date(t.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                             <span className="ml-2 text-teal-400 font-bold">{t.hora?.slice(0, 5)}</span>
                           </p>
-                          <p className="text-xs text-slate-900 truncate">{t.consultorio}{t.observaciones ? ` Â· ${t.observaciones}` : ''}</p>
+                          <p className="text-xs text-slate-900 truncate">{t.consultorio}{t.observaciones ? ` · ${t.observaciones}` : ''}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).color}`}>
+                      {!modoSeleccionTurnos && (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).color}`}>
+                            {(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).label}
+                          </span>
+                          <button type="button" onClick={() => { setEditandoTurno(t); setTurnoForm({ fecha: t.fecha?.slice(0, 10), hora: t.hora?.slice(0, 5), consultorio: t.consultorio, observaciones: t.observaciones || '', estado: t.estado }); }} className="p-1.5 rounded-lg hover:bg-pink-200 dark:bg-slate-800 text-slate-900 hover:text-slate-700 dark:text-white transition-colors">
+                            <Edit size={14} />
+                          </button>
+                          <button type="button" onClick={() => handleEliminarTurno(t)} className="p-1.5 rounded-lg hover:bg-red-900/30 text-slate-900 hover:text-red-400 transition-colors">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
+                      )}
+                      {modoSeleccionTurnos && (
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border shrink-0 ${(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).color}`}>
                           {(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).label}
                         </span>
-                        <button type="button" onClick={() => { setEditandoTurno(t); setTurnoForm({ fecha: t.fecha?.slice(0, 10), hora: t.hora?.slice(0, 5), consultorio: t.consultorio, observaciones: t.observaciones || '', estado: t.estado }); }} className="p-1.5 rounded-lg hover:bg-pink-200 dark:bg-slate-800 text-slate-900 hover:text-slate-700 dark:text-white transition-colors">
-                          <Edit size={14} />
-                        </button>
-                        <button type="button" onClick={() => handleEliminarTurno(t)} className="p-1.5 rounded-lg hover:bg-red-900/30 text-slate-900 hover:text-red-400 transition-colors">
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
