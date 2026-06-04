@@ -23,7 +23,7 @@ function reemplazarVariables(texto, variables) {
   return result;
 }
 
-export async function ejecutarJob({ forzar = false } = {}) {
+export async function ejecutarJob({ forzar = false, soloPacientes = true, soloProf = true } = {}) {
   console.log("[Recordatorios] Verificando turnos para mañana...");
 
   // Verificar estado WhatsApp antes de continuar
@@ -41,8 +41,8 @@ export async function ejecutarJob({ forzar = false } = {}) {
     const config = configResult.rows[0] || {};
     console.log(`[Recordatorios] Config: notif_pacientes=${config.notificaciones_pacientes}, notif_profesional=${config.notificaciones_profesional}, tel=${config.telefono_profesional}`);
 
-    const notificacionesPacientes = forzar || config.notificaciones_pacientes !== false;
-    const notificacionesProfesional = forzar || config.notificaciones_profesional !== false;
+    const notificacionesPacientes = soloPacientes && (forzar || config.notificaciones_pacientes !== false);
+    const notificacionesProfesional = soloProf && (forzar || config.notificaciones_profesional !== false);
     const telefonoProfesional = config.telefono_profesional || "";
     const mensajePacienteTexto = config.mensaje_paciente ||
 `👋 ¡Hola {nombre}!

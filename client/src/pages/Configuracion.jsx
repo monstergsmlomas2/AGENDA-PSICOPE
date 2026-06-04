@@ -234,7 +234,7 @@ export default function Configuracion() {
     try {
       const data = await apiPost('/whatsapp/enviar-recordatorios');
       if (!data.waConectado) {
-        toast.error('WhatsApp no conectado', `Conectá WhatsApp primero (estado: ${data.mensaje})`);
+        toast.error('WhatsApp no conectado', `Conectá WhatsApp primero`);
       } else if (data.turnos === 0) {
         toast.success('Sin turnos', 'No hay turnos pendientes para mañana.');
       } else {
@@ -242,6 +242,24 @@ export default function Configuracion() {
       }
     } catch (err) {
       toast.error('Error', err.message || 'No se pudieron enviar los recordatorios.');
+    } finally {
+      setEnviandoRecordatorios(false);
+    }
+  };
+
+  const handleEnviarResumenProfesional = async () => {
+    setEnviandoRecordatorios(true);
+    try {
+      const data = await apiPost('/whatsapp/enviar-resumen-profesional');
+      if (!data.waConectado) {
+        toast.error('WhatsApp no conectado', 'Conectá WhatsApp primero');
+      } else if (data.turnos === 0) {
+        toast.success('Sin turnos', 'No hay turnos para mañana.');
+      } else {
+        toast.success('Resumen enviado', `Resumen enviado a ${telefonoProfesional}`);
+      }
+    } catch (err) {
+      toast.error('Error', err.message || 'No se pudo enviar el resumen.');
     } finally {
       setEnviandoRecordatorios(false);
     }
@@ -566,13 +584,13 @@ export default function Configuracion() {
         <div className="px-6 py-4 bg-purple-100/50 dark:bg-gray-950/50 border-t border-purple-300 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-2">
             <button
-              onClick={handleEnviarRecordatorios}
+              onClick={handleEnviarResumenProfesional}
               disabled={enviandoRecordatorios}
-              title="Enviar recordatorios para los turnos de mañana"
+              title="Enviar resumen de turnos de mañana al profesional"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {enviandoRecordatorios ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-              {enviandoRecordatorios ? 'Enviando...' : 'Enviar recordatorios ahora'}
+              {enviandoRecordatorios ? 'Enviando...' : 'Enviar resumen ahora'}
             </button>
           </div>
           <button

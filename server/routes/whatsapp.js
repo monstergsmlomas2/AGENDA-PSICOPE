@@ -42,10 +42,20 @@ router.post("/desconectar", async (req, res) => {
   }
 });
 
-// POST /whatsapp/enviar-recordatorios — dispara el job manualmente
+// POST /whatsapp/enviar-recordatorios — envía solo a pacientes
 router.post("/enviar-recordatorios", async (req, res) => {
   try {
-    const resultado = await ejecutarJob({ forzar: true });
+    const resultado = await ejecutarJob({ forzar: true, soloProf: false });
+    res.json({ ok: true, ...resultado });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /whatsapp/enviar-resumen-profesional — envía solo al profesional
+router.post("/enviar-resumen-profesional", async (req, res) => {
+  try {
+    const resultado = await ejecutarJob({ forzar: true, soloPacientes: false });
     res.json({ ok: true, ...resultado });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
