@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useRef } from 'react';
 import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
+import apiFetch from '../services/api';
 import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
 import {
@@ -170,12 +171,11 @@ export default function Configuracion() {
     // Cargar estado WhatsApp inicial
     const cargarEstadoWA = async () => {
       try {
-        const token = localStorage.getItem('psicope_token');
-        const res = await fetch('/whatsapp/status', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await apiFetch('/whatsapp/status');
         const data = await res.json();
         setWaEstado(data.estado || 'DISCONNECTED');
       } catch {
-        setWaEstado('desconectado');
+        setWaEstado('DISCONNECTED');
       } finally {
         setWaLoading(false);
       }
@@ -188,14 +188,13 @@ export default function Configuracion() {
     if (waEstado !== 'QR_READY' && waEstado !== 'CONNECTING') return;
     const interval = setInterval(async () => {
       try {
-        const token = localStorage.getItem('psicope_token');
         const [statusRes, qrRes] = await Promise.all([
-          fetch('/whatsapp/status', { headers: { Authorization: `Bearer ${token}` } }),
-          fetch('/whatsapp/qr', { headers: { Authorization: `Bearer ${token}` } }),
+          apiFetch('/whatsapp/status'),
+          apiFetch('/whatsapp/qr'),
         ]);
-        const status = await statusRes.json();
+        const statusData = await statusRes.json();
         const qrData = await qrRes.json();
-        setWaEstado(status.estado || 'desconectado');
+        setWaEstado(statusData.estado || 'DISCONNECTED');
         setWaQR(qrData.qr || null);
       } catch {}
     }, 3000);
@@ -208,8 +207,7 @@ export default function Configuracion() {
     setWaConectando(true);
     setWaEstado('CONNECTING');
     try {
-      const token = localStorage.getItem('psicope_token');
-      await fetch('/whatsapp/conectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      await apiFetch('/whatsapp/conectar', { method: 'POST' });
       setWaEstado('QR_READY');
     } catch {
       toast.error('Error', 'No se pudo iniciar la conexión con WhatsApp.');
@@ -229,8 +227,7 @@ export default function Configuracion() {
     if (!ok) return;
     setWaDesconectando(true);
     try {
-      const token = localStorage.getItem('psicope_token');
-      await fetch('/whatsapp/desconectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      await apiFetch('/whatsapp/desconectar', { method: 'POST' });
       setWaEstado('DISCONNECTED');
       setWaQR(null);
       toast.success('Sesión cerrada', 'WhatsApp desconectado correctamente.');
@@ -244,8 +241,7 @@ export default function Configuracion() {
   const handleEnviarRecordatorios = async () => {
     setEnviandoRecordatorios(true);
     try {
-      const token = localStorage.getItem('psicope_token');
-      const res = await fetch('/whatsapp/enviar-recordatorios', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch('/whatsapp/enviar-recordatorios', { method: 'POST' });
       const data = await res.json();
       if (data.ok) {
         toast.success('Recordatorios enviados', 'Se procesaron los recordatorios para los turnos de mañana.');
