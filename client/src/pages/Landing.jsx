@@ -110,7 +110,7 @@ export default function Landing() {
             lineHeight: 1.02, letterSpacing: '-0.03em',
             color: c.dark, marginBottom: 26,
           }}>
-            Tu práctica,{' '}
+            Tu agenda,{' '}
             <span style={{ background: grad, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               organizada
             </span>
@@ -118,7 +118,7 @@ export default function Landing() {
           </h1>
 
           <p style={{ fontFamily: F.body, fontSize: 18, color: c.mid, maxWidth: 480, margin: '0 auto 44px', lineHeight: 1.75, opacity: 0.85 }}>
-            Gestioná pacientes, turnos, sesiones y pagos desde un solo lugar. Pensado para la práctica psicopedagógica argentina.
+            Gestioná pacientes, turnos, sesiones y pagos desde un solo lugar. Pensado para la agenda psicopedagógica argentina.
           </p>
 
           <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -235,7 +235,7 @@ export default function Landing() {
               </span>
             </h2>
             <p style={{ fontFamily: F.body, fontSize: 16, color: c.mid, lineHeight: 1.8, marginBottom: 36, opacity: 0.85 }}>
-              No es un sistema genérico adaptado. Fue construido desde cero para las necesidades reales de una práctica psicopedagógica en Argentina.
+              No es un sistema genérico adaptado. Fue construido desde cero para las necesidades reales de una agenda psicopedagógica en Argentina.
             </p>
             <Link to="/login"
               style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: grad, color: 'white', padding: '13px 28px', borderRadius: 99, fontSize: 14, fontWeight: 700, textDecoration: 'none', boxShadow: `0 4px 20px ${c.rosa}44`, transition: 'transform 0.25s, box-shadow 0.25s' }}
@@ -288,10 +288,10 @@ export default function Landing() {
             <Brain size={28} color="white" />
           </div>
           <h2 style={{ fontFamily: F.display, fontSize: 'clamp(2.2rem,4.5vw,3.6rem)', fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.03em', color: c.dark, marginBottom: 16, lineHeight: 1.02 }}>
-            Organizá tu práctica hoy.
+            Organizá tu agenda hoy.
           </h2>
           <p style={{ fontFamily: F.body, fontSize: 17, color: c.mid, marginBottom: 44, lineHeight: 1.75, opacity: 0.8 }}>
-            Accedé al sistema y gestioná tu práctica de manera profesional.
+            Accedé al sistema y gestioná tu agenda de manera profesional.
           </p>
           <Link to="/login"
             style={{ display: 'inline-flex', alignItems: 'center', gap: 9, background: grad, color: 'white', padding: '17px 40px', borderRadius: 99, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: `0 8px 32px ${c.lila}44`, transition: 'transform 0.25s, box-shadow 0.25s' }}
