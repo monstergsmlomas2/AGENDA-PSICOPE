@@ -499,16 +499,6 @@ export default function Configuracion() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* â"€â"€â"€ Switch: Recordatorios a pacientes â"€â"€â"€ */}
-          <SwitchToggle
-            valor={notificacionesPacientes}
-            onChange={setNotificacionesPacientes}
-            label="Enviar recordatorio automático a pacientes"
-            descripcion={`Se envía a las ${horaEnvio} hs del día anterior al turno`}
-          />
-
-          {/* â"€â"€â"€ Divisor â"€â"€â"€ */}
-          <div className="border-t border-purple-300 dark:border-gray-700" />
 
           {/* â"€â"€â"€ Switch: Recordatorios al profesional â"€â"€â"€ */}
           <SwitchToggle
