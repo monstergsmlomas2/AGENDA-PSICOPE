@@ -1,9 +1,4 @@
-import makeWASocket, {
-  DisconnectReason,
-  useMultiFileAuthState,
-  fetchLatestBaileysVersion,
-  Browsers,
-} from "@whiskeysockets/baileys";
+import makeWASocket, { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers } from "@whiskeysockets/baileys";
 import { Boom } from "@hapi/boom";
 import path from "path";
 import fs from "fs";
