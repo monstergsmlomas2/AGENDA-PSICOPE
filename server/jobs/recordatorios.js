@@ -44,8 +44,22 @@ export async function ejecutarJob({ forzar = false } = {}) {
     const notificacionesPacientes = forzar || config.notificaciones_pacientes !== false;
     const notificacionesProfesional = forzar || config.notificaciones_profesional !== false;
     const telefonoProfesional = config.telefono_profesional || "";
-    const mensajePacienteTexto = config.mensaje_paciente || 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
-    const mensajeProfesionalTexto = (config.mensaje_profesional || 'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}').replace(/\\n/g, '\n');
+    const mensajePacienteTexto = config.mensaje_paciente ||
+`👋 ¡Hola {nombre}!
+
+Te recordamos que tenés turno *mañana {fecha}* a las *{hora} hs* en _{consultorio}_.
+
+Ante cualquier cambio, comunicate con nosotros.
+¡Te esperamos! 😊`;
+
+    const mensajeProfesionalTexto = (config.mensaje_profesional ||
+`📅 *Agenda del {fecha}*
+
+Tenés *{cantidad} turno(s)* programado(s):
+
+{lista_turnos}
+
+¡Que tengas un excelente día! ✨`).replace(/\\n/g, '\n');
 
     const turnosResult = await pool.query(`
       SELECT t.*, p.nombre, p.apellido, p.telefono

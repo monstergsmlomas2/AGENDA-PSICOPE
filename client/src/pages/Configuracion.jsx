@@ -89,7 +89,7 @@ export default function Configuracion() {
   // --- Estado sección Recordatorios por WhatsApp ---
   const [savingWhatsApp, setSavingWhatsApp] = useState(false);
   const mensajeRef = useRef(null);
-  const MENSAJE_POR_DEFECTO = 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
+  const MENSAJE_POR_DEFECTO = `👋 ¡Hola {nombre}!\n\nTe recordamos que tenés turno *mañana {fecha}* a las *{hora} hs* en _{consultorio}_.\n\nAnte cualquier cambio, comunicate con nosotros.\n¡Te esperamos! 😊`;
   const VARIABLES_DISPONIBLES = ['{nombre}', '{fecha}', '{hora}', '{consultorio}'];
 
   // --- Estado historial ---
