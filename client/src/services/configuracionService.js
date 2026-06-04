@@ -29,7 +29,7 @@ export const updateConfiguracionNotificaciones = async (data) => {
 
 export const updateConfiguracionWhatsApp = async (data) => {
   try {
-    return await apiPut('/configuracion/whatsapp', data);
+    return await apiPut('/configuracion/notificaciones', data);
   } catch (error) {
     console.error("Error al actualizar configuración de WhatsApp:", error);
     return null;
