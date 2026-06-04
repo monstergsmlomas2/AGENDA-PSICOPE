@@ -7,14 +7,14 @@ const router = express.Router();
 router.post("/", async (req, res) => {
   const { nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones } = req.body;
 
-  if (!nombre || !apellido || !dni) {
-    return res.status(400).json({ error: "Los campos nombre, apellido y DNI son obligatorios" });
+  if (!nombre || !apellido) {
+    return res.status(400).json({ error: "Los campos nombre y apellido son obligatorios" });
   }
 
   try {
     const result = await pool.query(
       `INSERT INTO pacientes (nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones, usuario_id) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING *`,
-      [nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null, req.userId]
+      [nombre, apellido, dni || null, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
