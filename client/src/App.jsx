@@ -1,22 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Turnos from './pages/Turnos';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import Sidebar from './components/Sidebar';
 import BottomNav from './components/BottomNav';
-import Pacientes from './pages/Pacientes';
-import Dashboard from './pages/Dashboard';
-import Consultorios from './pages/Consultorios';
-import ObrasSociales from './pages/ObrasSociales';
-import Informes from './pages/Informes';
-import Pagos from './pages/Pagos';
-import PacienteDetalle from './pages/PacienteDetalle';
-import SesionDetalle from './pages/SesionDetalle';
-import SesionForm from './pages/SesionForm';
-import EntrevistaPage from './pages/EntrevistaPage';
-import EvaluacionDetalle from './pages/EvaluacionDetalle';
-import EvaluacionForm from './pages/EvaluacionForm';
-import Configuracion from './pages/Configuracion';
-import HerramientasEstandarizadas from './pages/HerramientasEstandarizadas';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Landing from './pages/Landing';
@@ -26,6 +11,22 @@ import { Loader2 } from 'lucide-react';
 import GlobalSearch from './components/GlobalSearch';
 import InstallPrompt from './components/InstallPrompt'
 import UpdatePrompt from './components/UpdatePrompt';
+
+const Dashboard               = lazy(() => import('./pages/Dashboard'));
+const Pacientes               = lazy(() => import('./pages/Pacientes'));
+const PacienteDetalle         = lazy(() => import('./pages/PacienteDetalle'));
+const SesionDetalle           = lazy(() => import('./pages/SesionDetalle'));
+const SesionForm              = lazy(() => import('./pages/SesionForm'));
+const EntrevistaPage          = lazy(() => import('./pages/EntrevistaPage'));
+const EvaluacionDetalle       = lazy(() => import('./pages/EvaluacionDetalle'));
+const EvaluacionForm          = lazy(() => import('./pages/EvaluacionForm'));
+const Turnos                  = lazy(() => import('./pages/Turnos'));
+const ObrasSociales           = lazy(() => import('./pages/ObrasSociales'));
+const Informes                = lazy(() => import('./pages/Informes'));
+const Pagos                   = lazy(() => import('./pages/Pagos'));
+const Consultorios            = lazy(() => import('./pages/Consultorios'));
+const Configuracion           = lazy(() => import('./pages/Configuracion'));
+const HerramientasEstandarizadas = lazy(() => import('./pages/HerramientasEstandarizadas'));
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -102,7 +103,13 @@ function ProtectedLayout({ children }) {
         />
       </div>
       <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in pb-20 md:pb-6">
-        {children}
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-full min-h-[300px]">
+            <Loader2 size={28} className="animate-spin text-pink-500" />
+          </div>
+        }>
+          {children}
+        </Suspense>
       </main>
       {/* Bottom navigation — solo en móvil */}
       <BottomNav />

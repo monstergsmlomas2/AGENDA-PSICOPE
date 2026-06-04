@@ -117,5 +117,18 @@ export default defineConfig({
   ],
   server: {
     proxy: Object.fromEntries(apiRoutes.map(r => [r, apiProxy]))
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) return 'vendor-react';
+          if (id.includes('node_modules/@supabase')) return 'vendor-supabase';
+          if (id.includes('node_modules/react-big-calendar') || id.includes('node_modules/moment')) return 'vendor-calendar';
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas')) return 'vendor-pdf';
+          if (id.includes('node_modules/lucide-react')) return 'vendor-icons';
+        },
+      },
+    },
+  },
 })
