@@ -233,8 +233,14 @@ export default function Configuracion() {
   const handleEnviarRecordatorios = async () => {
     setEnviandoRecordatorios(true);
     try {
-      await apiPost('/whatsapp/enviar-recordatorios');
-      toast.success('Recordatorios enviados', 'Se procesaron los recordatorios para los turnos de mañana.');
+      const data = await apiPost('/whatsapp/enviar-recordatorios');
+      if (!data.waConectado) {
+        toast.error('WhatsApp no conectado', `Conectá WhatsApp primero (estado: ${data.mensaje})`);
+      } else if (data.turnos === 0) {
+        toast.success('Sin turnos', 'No hay turnos pendientes para mañana.');
+      } else {
+        toast.success('Recordatorios enviados', `${data.mensaje}`);
+      }
     } catch (err) {
       toast.error('Error', err.message || 'No se pudieron enviar los recordatorios.');
     } finally {
@@ -615,16 +621,13 @@ export default function Configuracion() {
           <div className="flex items-center gap-2">
             <button
               onClick={handleEnviarRecordatorios}
-              disabled={enviandoRecordatorios || waEstado !== 'CONNECTED'}
-              title={waEstado !== 'CONNECTED' ? 'Conectá WhatsApp primero' : 'Enviar recordatorios de mañana ahora'}
+              disabled={enviandoRecordatorios}
+              title="Enviar recordatorios para los turnos de mañana"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {enviandoRecordatorios ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
               {enviandoRecordatorios ? 'Enviando...' : 'Enviar recordatorios ahora'}
             </button>
-            {waEstado !== 'CONNECTED' && (
-              <span className="text-xs text-slate-400 dark:text-slate-500">Requiere WhatsApp conectado</span>
-            )}
           </div>
           <button
             onClick={handleGuardar}
@@ -700,7 +703,7 @@ export default function Configuracion() {
         <div className="px-6 py-4 bg-purple-100/50 dark:bg-slate-950/50 border-t border-purple-300 dark:border-slate-800 flex items-center justify-between gap-3 flex-wrap">
           <button
             onClick={handleEnviarRecordatorios}
-            disabled={enviandoRecordatorios || waEstado !== 'CONNECTED'}
+            disabled={enviandoRecordatorios}
             title={waEstado !== 'CONNECTED' ? 'Conectá WhatsApp primero' : 'Enviar recordatorios de mañana ahora'}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
