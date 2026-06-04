@@ -101,7 +101,7 @@ export default function Configuracion() {
   const [disconnectingDrive, setDisconnectingDrive] = useState(false);
 
   // --- Estado WhatsApp Baileys ---
-  const [waEstado, setWaEstado] = useState('desconectado'); // desconectado | conectando | esperando_qr | conectado
+  const [waEstado, setWaEstado] = useState('DISCONNECTED'); // DISCONNECTED | CONNECTING | QR_READY | CONNECTED | ERROR
   const [waQR, setWaQR] = useState(null);
   const [waLoading, setWaLoading] = useState(true);
   const [waConectando, setWaConectando] = useState(false);
@@ -172,7 +172,7 @@ export default function Configuracion() {
         const token = localStorage.getItem('psicope_token');
         const res = await fetch('/whatsapp/status', { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
-        setWaEstado(data.estado || 'desconectado');
+        setWaEstado(data.estado || 'DISCONNECTED');
       } catch {
         setWaEstado('desconectado');
       } finally {
@@ -184,7 +184,7 @@ export default function Configuracion() {
 
   // Polling cada 3s cuando está esperando QR o conectando
   useEffect(() => {
-    if (waEstado !== 'esperando_qr' && waEstado !== 'conectando') return;
+    if (waEstado !== 'QR_READY' && waEstado !== 'CONNECTING') return;
     const interval = setInterval(async () => {
       try {
         const token = localStorage.getItem('psicope_token');
@@ -205,14 +205,14 @@ export default function Configuracion() {
 
   const handleConectarWA = async () => {
     setWaConectando(true);
-    setWaEstado('conectando');
+    setWaEstado('CONNECTING');
     try {
       const token = localStorage.getItem('psicope_token');
       await fetch('/whatsapp/conectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-      setWaEstado('esperando_qr');
+      setWaEstado('QR_READY');
     } catch {
       toast.error('Error', 'No se pudo iniciar la conexión con WhatsApp.');
-      setWaEstado('desconectado');
+      setWaEstado('DISCONNECTED');
     } finally {
       setWaConectando(false);
     }
@@ -230,7 +230,7 @@ export default function Configuracion() {
     try {
       const token = localStorage.getItem('psicope_token');
       await fetch('/whatsapp/desconectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-      setWaEstado('desconectado');
+      setWaEstado('DISCONNECTED');
       setWaQR(null);
       toast.success('Sesión cerrada', 'WhatsApp desconectado correctamente.');
     } catch {
@@ -381,7 +381,7 @@ export default function Configuracion() {
             <Loader2 size={16} className="animate-spin" />
             <span className="text-sm">Verificando conexión...</span>
           </div>
-        ) : waEstado === 'conectado' ? (
+        ) : waEstado === 'CONNECTED' ? (
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30">
@@ -398,12 +398,12 @@ export default function Configuracion() {
               Cerrar sesión
             </button>
           </div>
-        ) : waEstado === 'esperando_qr' || waEstado === 'conectando' ? (
+        ) : waEstado === 'QR_READY' || waEstado === 'CONNECTING' ? (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30">
                 <RefreshCw size={13} className="animate-spin" />
-                {waEstado === 'conectando' ? 'Iniciando...' : 'Esperando escaneo'}
+                {waEstado === 'CONNECTING' ? 'Iniciando...' : 'Esperando escaneo'}
               </span>
             </div>
             {waQR ? (
