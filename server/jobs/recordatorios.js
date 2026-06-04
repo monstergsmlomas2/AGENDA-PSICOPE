@@ -22,7 +22,7 @@ function reemplazarVariables(texto, variables) {
   return result;
 }
 
-export async function ejecutarJob() {
+export async function ejecutarJob({ forzar = false } = {}) {
   console.log("[Recordatorios] Verificando turnos para mañana...");
 
   // Verificar estado WhatsApp antes de continuar
@@ -40,8 +40,8 @@ export async function ejecutarJob() {
     const config = configResult.rows[0] || {};
     console.log(`[Recordatorios] Config: notif_pacientes=${config.notificaciones_pacientes}, notif_profesional=${config.notificaciones_profesional}, tel=${config.telefono_profesional}`);
 
-    const notificacionesPacientes = config.notificaciones_pacientes !== false;
-    const notificacionesProfesional = config.notificaciones_profesional !== false;
+    const notificacionesPacientes = forzar || config.notificaciones_pacientes !== false;
+    const notificacionesProfesional = forzar || config.notificaciones_profesional !== false;
     const telefonoProfesional = config.telefono_profesional || "";
     const mensajePacienteTexto = config.mensaje_paciente || 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
     const mensajeProfesionalTexto = config.mensaje_profesional || 'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}';

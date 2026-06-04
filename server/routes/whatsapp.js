@@ -45,7 +45,7 @@ router.post("/desconectar", async (req, res) => {
 // POST /whatsapp/enviar-recordatorios — dispara el job manualmente
 router.post("/enviar-recordatorios", async (req, res) => {
   try {
-    const resultado = await ejecutarJob();
+    const resultado = await ejecutarJob({ forzar: true });
     res.json({ ok: true, ...resultado });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });

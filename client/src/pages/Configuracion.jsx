@@ -652,21 +652,8 @@ export default function Configuracion() {
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Toggle Activar recordatorios */}
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-slate-900 dark:text-white">Activar recordatorios automáticos</p>
-              <p className="text-xs text-slate-900 dark:text-gray-400 mt-0.5">
-                Enviar recordatorio a los pacientes antes de su turno
-              </p>
-            </div>
-            <PillToggle valor={notificacionesPacientes} onChange={setNotificacionesPacientes} />
-          </div>
-
-          <div className="border-t border-purple-300 dark:border-slate-700" />
-
           {/* Mensaje personalizado */}
-          <div className={`space-y-3 transition-opacity ${!notificacionesPacientes ? 'opacity-40 pointer-events-none' : ''}`}>
+          <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-slate-900 dark:text-white">
                 Mensaje personalizado
@@ -678,11 +665,10 @@ export default function Configuracion() {
             <textarea
               ref={mensajeRef}
               value={mensajePaciente}
-              disabled={!notificacionesPacientes}
               onChange={(e) => setMensajePaciente(e.target.value)}
               placeholder={MENSAJE_POR_DEFECTO}
               rows={4}
-              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y disabled:cursor-not-allowed"
+              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
             />
             <div>
               <p className="text-xs text-slate-900 dark:text-gray-400 mb-2">
