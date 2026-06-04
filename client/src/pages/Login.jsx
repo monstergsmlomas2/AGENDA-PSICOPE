@@ -49,6 +49,7 @@ export default function Login() {
         justifyContent: 'space-between',
         padding: 48,
         background: 'linear-gradient(150deg, #fdf4ff 0%, #fce7f3 40%, #ede9fe 100%)',
+
       }}
         className="lg-panel"
       >
