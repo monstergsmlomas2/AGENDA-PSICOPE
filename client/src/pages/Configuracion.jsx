@@ -1,5 +1,5 @@
-﻿import { useState, useEffect, useRef } from 'react';
-import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
+﻿import { useState, useEffect } from 'react';
+import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
 import apiFetch from '../services/api';
 import { useConfirm } from '../hooks/useConfirm';
@@ -7,7 +7,6 @@ import { useToast } from '../hooks/useToast';
 import {
   getConfiguracionNotificaciones,
   updateConfiguracionNotificaciones,
-  updateConfiguracionWhatsApp,
   getHistorialWhatsApp,
 } from '../services/configuracionService';
 import TimePicker from '../components/ui/TimePicker';
@@ -85,12 +84,6 @@ export default function Configuracion() {
     'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}'
   );
 
-  // --- Estado sección Recordatorios por WhatsApp ---
-  const [recordatoriosActivos, setRecordatoriosActivos] = useState(false);
-  const [horasAnticipacion, setHorasAnticipacion] = useState(24);
-  const [mensajePersonalizado, setMensajePersonalizado] = useState('');
-  const [savingWhatsApp, setSavingWhatsApp] = useState(false);
-  const [togglingWA, setTogglingWA] = useState(false);
 
   // --- Estado historial ---
   const [historial, setHistorial] = useState([]);
@@ -109,11 +102,6 @@ export default function Configuracion() {
   const [waDesconectando, setWaDesconectando] = useState(false);
   const [enviandoRecordatorios, setEnviandoRecordatorios] = useState(false);
 
-  const mensajeRef = useRef(null);
-
-  const MENSAJE_POR_DEFECTO = 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
-
-  const VARIABLES_DISPONIBLES = ['{nombre}', '{fecha}', '{hora}', '{consultorio}'];
 
   // --- Cargar historial de envíos ---
   const cargarHistorial = async () => {
@@ -148,10 +136,6 @@ export default function Configuracion() {
               'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}'
           );
 
-          // Cargar estado de recordatorios WhatsApp
-          setRecordatoriosActivos(config.recordatorios_activos ?? false);
-          setHorasAnticipacion(config.horas_anticipacion ?? 24);
-          setMensajePersonalizado(config.mensaje_personalizado || '');
         }
       } catch (error) {
         console.error('Error al cargar configuración:', error);
@@ -280,67 +264,6 @@ export default function Configuracion() {
     }
   };
 
-  const handleToggleRecordatorios = async (nuevoValor) => {
-    setRecordatoriosActivos(nuevoValor);
-    setTogglingWA(true);
-    try {
-      const result = await updateConfiguracionWhatsApp({
-        recordatorios_activos: nuevoValor,
-      });
-      if (!result) {
-        setRecordatoriosActivos(!nuevoValor);
-        toast.error('Error', 'No se pudo actualizar el estado de los recordatorios');
-      } else {
-        toast.success(
-          nuevoValor ? 'Recordatorios activados' : 'Recordatorios desactivados',
-          nuevoValor
-            ? 'Los recordatorios automáticos están ahora activos.'
-            : 'Los recordatorios automáticos están ahora desactivados.'
-        );
-      }
-    } catch (error) {
-      setRecordatoriosActivos(!nuevoValor);
-      toast.error('Error', 'No se pudo actualizar el estado de los recordatorios');
-    } finally {
-      setTogglingWA(false);
-    }
-  };
-
-  const handleGuardarWhatsApp = async () => {
-    setSavingWhatsApp(true);
-    try {
-      const result = await updateConfiguracionWhatsApp({
-        horas_anticipacion: horasAnticipacion,
-        mensaje_personalizado: mensajePersonalizado,
-      });
-      if (result) {
-        toast.success('Configuración guardada', 'Los cambios en recordatorios WhatsApp se aplicaron correctamente.');
-      } else {
-        toast.error('Error', 'No se pudo guardar la configuración de WhatsApp');
-      }
-    } catch (error) {
-      console.error('Error al guardar configuración WhatsApp:', error);
-      toast.error('Error', 'No se pudo guardar la configuración de WhatsApp');
-    } finally {
-      setSavingWhatsApp(false);
-    }
-  };
-
-  const insertarVariable = (variable) => {
-    if (!mensajeRef.current) return;
-    const textarea = mensajeRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const currentValue = mensajePersonalizado;
-    const newValue = currentValue.substring(0, start) + variable + currentValue.substring(end);
-    setMensajePersonalizado(newValue);
-    // Restaurar cursor después de la variable insertada
-    setTimeout(() => {
-      textarea.focus();
-      const pos = start + variable.length;
-      textarea.setSelectionRange(pos, pos);
-    }, 0);
-  };
 
   const formatearFechaEnvio = (fechaStr) => {
     if (!fechaStr) return '';
@@ -678,118 +601,6 @@ export default function Configuracion() {
               <Save size={16} />
             )}
             {saving ? 'Guardando...' : 'Guardar configuración'}
-          </button>
-        </div>
-      </div>
-
-      {/* â"€â"€â"€ Sección: Recordatorios por WhatsApp â"€â"€â"€ */}
-      <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl overflow-hidden">
-        {/* Título de sección */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-purple-300 dark:border-slate-700">
-          <Smartphone size={20} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Recordatorios por WhatsApp</h2>
-        </div>
-
-        <div className="p-6 space-y-6">
-          {/* Toggle Activar recordatorios */}
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-sm font-medium text-slate-900 dark:text-white">Activar recordatorios automáticos</p>
-              <p className="text-xs text-slate-900 dark:text-gray-400 mt-0.5">
-                Enviar recordatorio a los pacientes antes de su turno
-              </p>
-            </div>
-            <div className="relative">
-              {togglingWA && (
-                <Loader2 size={14} className="absolute -left-6 top-1/2 -translate-y-1/2 animate-spin text-pink-500 dark:text-teal-400" />
-              )}
-              <PillToggle valor={recordatoriosActivos} onChange={handleToggleRecordatorios} />
-            </div>
-          </div>
-
-          {/* Divisor */}
-          <div className="border-t border-purple-300 dark:border-slate-700" />
-
-          {/* Horas de anticipación */}
-          <div className={`space-y-2 transition-opacity ${!recordatoriosActivos ? 'opacity-40 pointer-events-none' : ''}`}>
-            <label className="block text-sm font-medium text-slate-900 dark:text-white">
-              Anticipación
-            </label>
-            <p className="text-xs text-slate-900 dark:text-gray-400">
-              ¿Cuántas horas antes del turno querés enviar el recordatorio?
-            </p>
-            <div className="flex items-center gap-3">
-              <input
-                type="number"
-                min={1}
-                max={72}
-                value={horasAnticipacion}
-                disabled={!recordatoriosActivos}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value, 10);
-                  if (!isNaN(val)) {
-                    setHorasAnticipacion(Math.max(1, Math.min(72, val)));
-                  }
-                }}
-                className="w-24 px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-              />
-              <span className="text-sm text-slate-900 dark:text-gray-400">horas</span>
-            </div>
-            <p className="text-xs text-slate-900 dark:text-gray-400">
-              Rango permitido: 1 a 72 horas. Por defecto: 24 horas (1 día antes).
-            </p>
-          </div>
-
-          {/* Divisor */}
-          <div className="border-t border-purple-300 dark:border-slate-700" />
-
-          {/* Mensaje personalizado */}
-          <div className={`space-y-3 transition-opacity ${!recordatoriosActivos ? 'opacity-40 pointer-events-none' : ''}`}>
-            <div>
-              <label className="block text-sm font-medium text-slate-900 dark:text-white">
-                Mensaje personalizado
-              </label>
-              <p className="text-xs text-slate-900 dark:text-gray-400 mt-1">
-                Personalizá el mensaje que reciben tus pacientes. Si dejás vacío, se usará el mensaje por defecto.
-              </p>
-            </div>
-            <textarea
-              ref={mensajeRef}
-              value={mensajePersonalizado}
-              disabled={!recordatoriosActivos}
-              onChange={(e) => setMensajePersonalizado(e.target.value)}
-              placeholder={MENSAJE_POR_DEFECTO}
-              rows={4}
-              className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y disabled:cursor-not-allowed"
-            />
-            <div>
-              <p className="text-xs text-slate-900 dark:text-gray-400 mb-2">
-                Variables disponibles — hacé clic para insertar:
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {VARIABLES_DISPONIBLES.map((varText) => (
-                  <VariableChip key={varText} onClick={() => insertarVariable(varText)}>
-                    {varText}
-                  </VariableChip>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer con botón guardar WhatsApp */}
-        <div className="px-6 py-4 bg-purple-100/50 dark:bg-slate-950/50 border-t border-purple-300 dark:border-slate-800 flex justify-end">
-          <button
-            onClick={handleGuardarWhatsApp}
-            disabled={savingWhatsApp || !recordatoriosActivos}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-pink-500 dark:bg-teal-600 hover:bg-pink-400 dark:hover:bg-teal-500 text-slate-900 dark:text-white text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {savingWhatsApp ? (
-              <Loader2 size={16} className="animate-spin" />
-            ) : (
-              <Save size={16} />
-            )}
-            {savingWhatsApp ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </div>
       </div>
