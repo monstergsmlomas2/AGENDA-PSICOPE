@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import {
-  Brain, Eye, EyeOff, Loader2, AlertCircle,
-  CalendarDays, Users, FileText, Bell, ArrowLeft, ArrowRight,
-} from 'lucide-react';
+import { Brain, Eye, EyeOff, Loader2, AlertCircle, CalendarDays, Users, FileText, Bell, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 const FEATURES = [
   { icon: Users, label: 'Gestión de pacientes' },
@@ -31,246 +28,219 @@ export default function Login() {
       await login(email, password);
       navigate('/dashboard', { replace: true });
     } catch (err) {
-      if (err.message?.includes('Invalid login credentials')) {
-        setError('Email o contraseña incorrectos');
-      } else if (err.message?.includes('Email not confirmed')) {
-        setError('Email no confirmado. Revisá tu bandeja de entrada');
-      } else {
-        setError('Error al iniciar sesión. Intentalo de nuevo');
-      }
+      if (err.message?.includes('Invalid login credentials')) setError('Email o contraseña incorrectos');
+      else if (err.message?.includes('Email not confirmed')) setError('Email no confirmado. Revisá tu bandeja de entrada');
+      else setError('Error al iniciar sesión. Intentalo de nuevo');
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex bg-white dark:bg-[var(--bg-base)]">
+    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: "'Inter','Segoe UI',sans-serif" }}>
 
-      {/* ── Panel izquierdo ── */}
-      <div className="hidden lg:flex lg:w-[52%] relative overflow-hidden flex-col justify-between p-12 bg-slate-950">
-        {/* Grid sutil */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)`,
-            backgroundSize: '48px 48px',
-          }}
-        />
-        {/* Glow */}
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            top: '-20%', left: '-10%',
-            width: '600px', height: '600px',
-            background: 'radial-gradient(circle, rgba(124,58,237,0.2) 0%, transparent 60%)',
-            filter: 'blur(40px)',
-          }}
-        />
-        <div
-          className="absolute pointer-events-none"
-          style={{
-            bottom: '-15%', right: '-10%',
-            width: '400px', height: '400px',
-            background: 'radial-gradient(circle, rgba(219,39,119,0.15) 0%, transparent 60%)',
-            filter: 'blur(40px)',
-          }}
-        />
+      {/* ── PANEL IZQUIERDO — identidad psicopedagogía ── */}
+      <div style={{
+        display: 'none',
+        width: '50%',
+        position: 'relative',
+        overflow: 'hidden',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: 48,
+        background: 'linear-gradient(150deg, #fdf4ff 0%, #fce7f3 40%, #ede9fe 100%)',
+      }}
+        className="lg-panel"
+      >
+        {/* Decoración suave */}
+        <div style={{ position: 'absolute', top: -80, right: -80, width: 320, height: 320, borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,0.25) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: -60, left: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(244,114,182,0.2) 0%, transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '45%', left: '60%', width: 180, height: 180, borderRadius: '50%', background: 'radial-gradient(circle, rgba(196,181,253,0.3) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
         {/* Logo */}
-        <div className="relative">
-          <Link to="/" className="inline-flex items-center gap-3 group">
-            <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', boxShadow: '0 4px 16px rgba(124,58,237,0.4)' }}
-            >
-              <Brain size={20} className="text-white" />
+        <div style={{ position: 'relative' }}>
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
+            <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg, #7c3aed, #be185d)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 16px rgba(124,58,237,0.3)' }}>
+              <Brain size={20} color="white" />
             </div>
             <div>
-              <span className="text-lg font-bold text-white tracking-tight">AgendaPsicope</span>
-              <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-widest">Sistema de Gestión</p>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#1e1b4b', letterSpacing: '-0.02em' }}>AgendaPsicope</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: '#7c3aed', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Sistema de Gestión</div>
             </div>
           </Link>
         </div>
 
-        {/* Copy central */}
-        <div className="relative space-y-10">
-          <div>
-            <h2 className="text-5xl font-black text-white leading-[1.05] tracking-tight mb-5">
-              Tu práctica,{' '}
-              <span
-                style={{
-                  background: 'linear-gradient(135deg, #a78bfa, #f472b6)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
-              >
-                organizada
-              </span>
-              <br />y simple.
-            </h2>
-            <p className="text-slate-400 text-base leading-relaxed max-w-xs">
-              Gestioná pacientes, turnos, sesiones y pagos desde un solo lugar.
-            </p>
-          </div>
+        {/* Contenido central */}
+        <div style={{ position: 'relative' }}>
+          <h2 style={{ fontSize: 42, fontWeight: 900, lineHeight: 1.1, letterSpacing: '-0.03em', color: '#1e1b4b', marginBottom: 16 }}>
+            Tu práctica,{' '}
+            <span style={{ background: 'linear-gradient(135deg, #7c3aed, #be185d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              organizada
+            </span>
+            <br />y simple.
+          </h2>
+          <p style={{ fontSize: 15, color: '#6d28d9', lineHeight: 1.7, marginBottom: 32, opacity: 0.75 }}>
+            Todo lo que necesitás para gestionar tu consulta psicopedagógica, en un solo lugar.
+          </p>
 
-          <ul className="space-y-2.5">
-            {FEATURES.map((f) => (
-              <li
-                key={f.label}
-                className="flex items-center gap-3 rounded-xl px-4 py-3 border border-slate-800 bg-slate-900/60 backdrop-blur-sm"
-              >
-                <div
-                  className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  style={{ background: 'rgba(124,58,237,0.15)' }}
-                >
-                  <f.icon size={15} style={{ color: '#a78bfa' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {FEATURES.map(f => (
+              <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(8px)', border: '1px solid rgba(167,139,250,0.3)', borderRadius: 12, padding: '12px 16px' }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(190,24,93,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <f.icon size={16} style={{ color: '#7c3aed' }} />
                 </div>
-                <span className="text-sm font-medium text-slate-300">{f.label}</span>
-              </li>
+                <span style={{ fontSize: 14, fontWeight: 600, color: '#3b0764' }}>{f.label}</span>
+                <CheckCircle2 size={14} style={{ color: '#a78bfa', marginLeft: 'auto' }} />
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
 
-        <div className="relative">
-          <p className="text-slate-600 text-xs">AgendaPsicope v1.0 · {new Date().getFullYear()}</p>
+        {/* Footer panel */}
+        <div style={{ position: 'relative' }}>
+          <p style={{ fontSize: 12, color: '#7c3aed', opacity: 0.6 }}>AgendaPsicope v1.0 · {new Date().getFullYear()}</p>
         </div>
       </div>
 
-      {/* ── Panel derecho (formulario) ── */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12 bg-slate-50 dark:bg-[var(--bg-base)]">
+      {/* ── PANEL DERECHO — formulario ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '48px 24px', background: '#f8fafc' }}>
 
-        {/* Volver mobile */}
-        <div className="lg:hidden w-full max-w-sm mb-6">
-          <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors">
-            <ArrowLeft size={14} />
-            Volver
-          </Link>
+        {/* Logo mobile */}
+        <div style={{ width: '100%', maxWidth: 400, marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #7c3aed, #be185d)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Brain size={16} color="white" />
+            </div>
+            <span style={{ fontWeight: 800, fontSize: 16, color: '#0f172a' }}>
+              Agenda<span style={{ color: '#7c3aed' }}>Psicope</span>
+            </span>
+          </div>
         </div>
 
-        <div className="w-full max-w-sm">
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          <h1 style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-0.025em', color: '#0f172a', marginBottom: 6 }}>
+            Bienvenida de vuelta
+          </h1>
+          <p style={{ fontSize: 14, color: '#64748b', marginBottom: 28 }}>
+            Ingresá tus credenciales para acceder al sistema
+          </p>
 
-          {/* Logo mobile */}
-          <div className="lg:hidden mb-8">
-            <div className="flex items-center gap-2.5 mb-1">
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
-              >
-                <Brain size={18} className="text-white" />
-              </div>
-              <div>
-                <span className="text-base font-bold text-slate-900">Agenda<span style={{ color: '#7c3aed' }}>Psicope</span></span>
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Sistema de Gestión</p>
-              </div>
-            </div>
-          </div>
+          {/* Card formulario */}
+          <div style={{ background: 'white', borderRadius: 18, border: '1px solid #e2e8f0', padding: 32, boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
 
-          {/* Encabezado */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-1">
-              Bienvenida de vuelta
-            </h1>
-            <p className="text-sm text-slate-500">
-              Ingresá tus credenciales para acceder al sistema
-            </p>
-          </div>
-
-          {/* Card */}
-          <div
-            className="bg-white dark:bg-[var(--bg-surface)] rounded-2xl border border-slate-200 dark:border-[var(--border-default)] p-7"
-            style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}
-          >
             {error && (
-              <div className="mb-5 flex items-start gap-2.5 p-3.5 rounded-xl bg-red-50 border border-red-100 text-red-700 text-sm">
-                <AlertCircle size={15} className="mt-0.5 shrink-0" />
-                <span>{error}</span>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 14px', marginBottom: 20, color: '#dc2626', fontSize: 14 }}>
+                <AlertCircle size={15} style={{ marginTop: 1, flexShrink: 0 }} />
+                {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+            <form onSubmit={handleSubmit}>
+              {/* Email */}
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
                   Email
                 </label>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="tu@email.com"
-                  autoComplete="email"
-                  autoFocus
-                  className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-[var(--bg-elevated)] border border-slate-200 dark:border-[var(--border-default)] text-slate-900 dark:text-[var(--text-primary)] placeholder:text-slate-400 text-sm transition-all"
-                  style={{ outline: 'none' }}
-                  onFocus={e => e.target.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'}
-                  onBlur={e => e.target.style.boxShadow = 'none'}
+                <InputField
+                  id="email" type="email" value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="tu@email.com" autoComplete="email" autoFocus
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-2">
+              {/* Password */}
+              <div style={{ marginBottom: 28 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
                   Contraseña
                 </label>
-                <div className="relative">
-                  <input
+                <div style={{ position: 'relative' }}>
+                  <InputField
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
                     autoComplete="current-password"
-                    className="w-full px-4 py-3 pr-11 rounded-xl bg-slate-50 dark:bg-[var(--bg-elevated)] border border-slate-200 dark:border-[var(--border-default)] text-slate-900 dark:text-[var(--text-primary)] placeholder:text-slate-400 text-sm transition-all"
-                    style={{ outline: 'none' }}
-                    onFocus={e => e.target.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)'}
-                    onBlur={e => e.target.style.boxShadow = 'none'}
+                    style={{ paddingRight: 44 }}
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    onClick={() => setShowPassword(v => !v)}
                     tabIndex={-1}
+                    style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8', display: 'flex', padding: 0 }}
                   >
                     {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-1"
-                style={{
-                  background: 'linear-gradient(135deg, #7c3aed, #db2777)',
-                  boxShadow: '0 4px 16px rgba(124,58,237,0.3)',
-                }}
-                onMouseEnter={e => !isSubmitting && (e.currentTarget.style.boxShadow = '0 6px 24px rgba(124,58,237,0.4)')}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(124,58,237,0.3)'}
-              >
-                {isSubmitting ? (
-                  <><Loader2 size={17} className="animate-spin" /> Ingresando…</>
-                ) : (
-                  <><span>Ingresar al sistema</span><ArrowRight size={16} /></>
-                )}
-              </button>
+              <SubmitButton isSubmitting={isSubmitting} />
             </form>
           </div>
 
-          {/* Footer */}
-          <div className="mt-6 text-center space-y-2">
-            <Link
-              to="/"
-              className="hidden lg:inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 transition-colors"
-            >
-              <ArrowLeft size={12} />
-              Volver a la página principal
+          <div style={{ marginTop: 20, textAlign: 'center' }}>
+            <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#94a3b8', textDecoration: 'none' }}
+              onMouseEnter={e => e.currentTarget.style.color = '#7c3aed'}
+              onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>
+              <ArrowLeft size={13} /> Volver a la página principal
             </Link>
-            <p className="text-xs text-slate-400 dark:text-slate-600">
-              AgendaPsicope v1.0 &copy; {new Date().getFullYear()}
-            </p>
+            <p style={{ marginTop: 8, fontSize: 11, color: '#cbd5e1' }}>AgendaPsicope v1.0 © {new Date().getFullYear()}</p>
           </div>
         </div>
       </div>
+
+      {/* CSS para mostrar panel izquierdo en desktop */}
+      <style>{`
+        @media (min-width: 1024px) {
+          .lg-panel { display: flex !important; }
+        }
+      `}</style>
     </div>
+  );
+}
+
+function InputField({ id, type, value, onChange, placeholder, autoComplete, autoFocus, style: extraStyle }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <input
+      id={id} type={type} value={value} onChange={onChange}
+      placeholder={placeholder} autoComplete={autoComplete} autoFocus={autoFocus}
+      onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
+      style={{
+        width: '100%', display: 'block',
+        padding: '12px 16px', borderRadius: 10, fontSize: 14,
+        background: '#f8fafc', color: '#0f172a',
+        border: `1.5px solid ${focused ? '#7c3aed' : '#e2e8f0'}`,
+        boxShadow: focused ? '0 0 0 3px rgba(124,58,237,0.12)' : 'none',
+        outline: 'none', transition: 'border-color 0.2s, box-shadow 0.2s',
+        boxSizing: 'border-box',
+        ...extraStyle,
+      }}
+    />
+  );
+}
+
+function SubmitButton({ isSubmitting }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <button
+      type="submit"
+      disabled={isSubmitting}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        padding: '14px', borderRadius: 11, border: 'none', cursor: isSubmitting ? 'not-allowed' : 'pointer',
+        fontSize: 15, fontWeight: 700, color: 'white',
+        background: 'linear-gradient(135deg, #7c3aed, #be185d)',
+        boxShadow: hovered && !isSubmitting ? '0 8px 28px rgba(124,58,237,0.4)' : '0 4px 16px rgba(124,58,237,0.25)',
+        transform: hovered && !isSubmitting ? 'translateY(-1px)' : 'none',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        opacity: isSubmitting ? 0.7 : 1,
+      }}
+    >
+      {isSubmitting ? <><Loader2 size={17} style={{ animation: 'spin 1s linear infinite' }} /> Ingresando…</> : <><span>Ingresar al sistema</span><ArrowRight size={16} /></>}
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+    </button>
   );
 }

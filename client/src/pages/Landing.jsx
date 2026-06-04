@@ -1,461 +1,361 @@
 import { Link } from 'react-router-dom';
-import {
-  Brain,
-  CalendarDays,
-  Users,
-  FileText,
-  CreditCard,
-  Bell,
-  ChevronRight,
-  CheckCircle2,
-  Star,
-  Shield,
-  Smartphone,
-  MessageCircle,
-  BarChart3,
-  ArrowRight,
-  Sparkles,
-} from 'lucide-react';
+import { Brain, CalendarDays, Users, FileText, CreditCard, Bell, BarChart3, CheckCircle2, Star, ArrowRight, Sparkles } from 'lucide-react';
 
 const FEATURES = [
-  {
-    icon: Users,
-    title: 'Gestión de Pacientes',
-    desc: 'Fichas completas con datos, obra social, entrevista de admisión, sesiones y evaluaciones.',
-  },
-  {
-    icon: CalendarDays,
-    title: 'Agenda de Turnos',
-    desc: 'Calendario visual por consultorio. Vista día, semana o mes de un vistazo.',
-  },
-  {
-    icon: FileText,
-    title: 'Sesiones & Evaluaciones',
-    desc: 'Historial clínico completo con acceso inmediato a cada sesión y evaluación.',
-  },
-  {
-    icon: CreditCard,
-    title: 'Control de Pagos',
-    desc: 'Registro de cobros, obras sociales y deudas. Sabé siempre cuánto facturaste.',
-  },
-  {
-    icon: Bell,
-    title: 'Recordatorios WhatsApp',
-    desc: 'Recordatorios automáticos de turno con formato y mensaje personalizable.',
-  },
-  {
-    icon: BarChart3,
-    title: 'Informes & Reportes',
-    desc: 'Reportes por paciente, obra social o período. Decisiones basadas en datos reales.',
-  },
+  { icon: Users, title: 'Gestión de Pacientes', desc: 'Fichas completas con datos, obra social, entrevista de admisión, sesiones y evaluaciones.' },
+  { icon: CalendarDays, title: 'Agenda de Turnos', desc: 'Calendario visual por consultorio. Vista día, semana o mes de un vistazo.' },
+  { icon: FileText, title: 'Sesiones & Evaluaciones', desc: 'Historial clínico completo con acceso inmediato a cada sesión y evaluación.' },
+  { icon: CreditCard, title: 'Control de Pagos', desc: 'Registro de cobros, obras sociales y deudas. Sabé siempre cuánto facturaste.' },
+  { icon: Bell, title: 'Recordatorios WhatsApp', desc: 'Recordatorios automáticos de turno con mensaje y formato personalizable.' },
+  { icon: BarChart3, title: 'Informes & Reportes', desc: 'Reportes por paciente, obra social o período. Decisiones basadas en datos reales.' },
 ];
 
 const TESTIMONIALS = [
-  {
-    initials: 'MG',
-    name: 'María González',
-    role: 'Psicopedagoga · Buenos Aires',
-    text: 'Antes llevaba todo en papel y Excel. Ahora tengo pacientes, turnos y pagos en un solo lugar. No puedo creer que tardé tanto en usarlo.',
-  },
-  {
-    initials: 'LC',
-    name: 'Laura Cáceres',
-    role: 'Psicopedagoga · Córdoba',
-    text: 'Los recordatorios por WhatsApp me cambiaron la vida. Casi no hay inasistencias. La agenda es super intuitiva y fácil de usar.',
-  },
-  {
-    initials: 'VR',
-    name: 'Valentina Ríos',
-    role: 'Psicopedagoga · Rosario',
-    text: 'El historial de sesiones por paciente es exactamente lo que necesitaba. Ahora puedo concentrarme en lo que realmente importa.',
-  },
+  { initials: 'MG', name: 'María González', role: 'Psicopedagoga · Bs. As.', text: 'Antes llevaba todo en papel y Excel. Ahora tengo todo organizado en un solo lugar.' },
+  { initials: 'LC', name: 'Laura Cáceres', role: 'Psicopedagoga · Córdoba', text: 'Los recordatorios por WhatsApp me cambiaron la vida. Casi no hay más inasistencias.' },
+  { initials: 'VR', name: 'Valentina Ríos', role: 'Psicopedagoga · Rosario', text: 'El historial de sesiones por paciente es exactamente lo que necesitaba.' },
 ];
 
-const STATS = [
-  { value: '100%', label: 'Online, sin instalar nada' },
-  { value: '5 min', label: 'Para empezar a usarlo' },
-  { value: '24/7', label: 'Acceso desde cualquier lugar' },
-  { value: '∞', label: 'Pacientes y sesiones' },
+const BENEFITS = [
+  'Sin instalación — funciona desde el navegador',
+  'Acceso desde cualquier dispositivo',
+  'Datos seguros en la nube',
+  'Modo oscuro y claro incluidos',
+  'Diseñado para psicopedagogas argentinas',
+  'Actualizaciones automáticas sin costo extra',
 ];
+
+const grad = 'linear-gradient(135deg, #7c3aed 0%, #be185d 100%)';
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-white font-sans text-slate-800 antialiased">
+    <div style={{ fontFamily: "'Inter', 'Segoe UI', sans-serif", background: '#fafafa', color: '#0f172a', minHeight: '100vh' }}>
 
-      {/* ── NAV ── */}
-      <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-pink-500 rounded-xl flex items-center justify-center shadow-sm">
-              <Brain size={16} className="text-white" />
+      {/* NAV */}
+      <nav style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(16px)', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px', height: 64, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Brain size={18} color="white" />
             </div>
-            <span className="font-bold text-[15px] tracking-tight">
-              <span className="text-slate-900">Agenda</span>
-              <span className="text-violet-600">Psicope</span>
+            <span style={{ fontWeight: 800, fontSize: 16, letterSpacing: '-0.02em' }}>
+              <span style={{ color: '#0f172a' }}>Agenda</span>
+              <span style={{ color: '#7c3aed' }}>Psicope</span>
             </span>
           </div>
-
-          <div className="hidden md:flex items-center gap-7">
-            <a href="#features" className="text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium">Características</a>
-            <a href="#testimonials" className="text-sm text-slate-500 hover:text-slate-900 transition-colors font-medium">Testimonios</a>
+          <div style={{ display: 'flex', gap: 32 }}>
+            <a href="#features" style={{ fontSize: 14, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>Características</a>
+            <a href="#testimonials" style={{ fontSize: 14, color: '#64748b', textDecoration: 'none', fontWeight: 500 }}>Testimonios</a>
           </div>
-
-          <Link
-            to="/login"
-            className="flex items-center gap-1.5 bg-slate-900 hover:bg-slate-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
-          >
-            Ingresar
-            <ArrowRight size={14} />
+          <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#0f172a', color: 'white', padding: '9px 18px', borderRadius: 10, fontSize: 13, fontWeight: 700, textDecoration: 'none' }}>
+            Ingresar <ArrowRight size={14} />
           </Link>
         </div>
       </nav>
 
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-white pt-20 pb-16 px-6">
-        {/* Grid sutil de fondo */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            backgroundImage: `
-              linear-gradient(to right, #f1f5f9 1px, transparent 1px),
-              linear-gradient(to bottom, #f1f5f9 1px, transparent 1px)
-            `,
-            backgroundSize: '48px 48px',
-            maskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%)',
-          }}
-        />
-        {/* Glow violeta/rosa muy sutil */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] pointer-events-none"
-          style={{
-            background: 'radial-gradient(ellipse at center top, rgba(139,92,246,0.08) 0%, rgba(236,72,153,0.05) 40%, transparent 70%)',
-          }}
-        />
+      {/* HERO */}
+      <section style={{ position: 'relative', overflow: 'hidden', background: '#ffffff', padding: '96px 24px 80px', textAlign: 'center' }}>
+        {/* Grid background */}
+        <div style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none',
+          backgroundImage: 'linear-gradient(#e2e8f0 1px, transparent 1px), linear-gradient(90deg, #e2e8f0 1px, transparent 1px)',
+          backgroundSize: '56px 56px',
+          WebkitMaskImage: 'radial-gradient(ellipse 80% 70% at 50% 0%, black 30%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 80% 70% at 50% 0%, black 30%, transparent 100%)',
+          opacity: 0.5,
+        }} />
+        {/* Glow */}
+        <div style={{ position: 'absolute', top: -100, left: '50%', transform: 'translateX(-50%)', width: 900, height: 500, pointerEvents: 'none', background: 'radial-gradient(ellipse at center top, rgba(124,58,237,0.1) 0%, rgba(190,24,93,0.06) 40%, transparent 70%)' }} />
 
-        <div className="relative max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-violet-50 border border-violet-100 text-violet-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
-            <Sparkles size={12} />
-            Sistema de gestión para psicopedagogas
+        <div style={{ position: 'relative', maxWidth: 720, margin: '0 auto' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#f5f3ff', border: '1px solid #ddd6fe', color: '#6d28d9', fontSize: 11, fontWeight: 700, padding: '6px 14px', borderRadius: 100, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 32 }}>
+            <Sparkles size={11} /> Sistema de gestión para psicopedagogas
           </div>
 
-          <h1 className="text-[3.5rem] md:text-[4.5rem] font-black leading-[1.05] tracking-tight text-slate-900 mb-6">
+          <h1 style={{ fontSize: 'clamp(2.8rem, 6vw, 4.5rem)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.035em', color: '#0f172a', marginBottom: 24 }}>
             Tu práctica,{' '}
-            <span
-              className="inline-block"
-              style={{
-                background: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span style={{ background: grad, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
               organizada
             </span>
             <br />y profesional.
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-500 max-w-xl mx-auto mb-10 leading-relaxed">
-            Gestioná pacientes, turnos, sesiones y pagos desde un solo lugar.
-            Pensado para la práctica psicopedagógica argentina.
+          <p style={{ fontSize: 18, color: '#64748b', maxWidth: 480, margin: '0 auto 40px', lineHeight: 1.7 }}>
+            Gestioná pacientes, turnos, sesiones y pagos desde un solo lugar. Pensado para la práctica psicopedagógica argentina.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
-            <Link
-              to="/login"
-              className="inline-flex items-center justify-center gap-2 text-white font-bold text-sm px-6 py-3.5 rounded-xl transition-all hover:-translate-y-1 hover:scale-105 hover:shadow-xl"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', boxShadow: '0 4px 24px rgba(124,58,237,0.25)' }}
-            >
-              Acceder al sistema
-              <ArrowRight size={16} />
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: grad, color: 'white', padding: '14px 28px', borderRadius: 12, fontSize: 15, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 32px rgba(124,58,237,0.3)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(124,58,237,0.4)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.3)'; }}>
+              Acceder al sistema <ArrowRight size={16} />
             </Link>
-            <a
-              href="#features"
-              className="inline-flex items-center justify-center gap-2 bg-slate-50 text-slate-700 font-semibold text-sm px-6 py-3.5 rounded-xl border border-slate-200 hover:bg-slate-100 transition-colors"
-            >
+            <a href="#features" style={{ display: 'inline-flex', alignItems: 'center', background: '#f8fafc', color: '#475569', padding: '14px 28px', borderRadius: 12, fontSize: 15, fontWeight: 600, textDecoration: 'none', border: '1px solid #e2e8f0', transition: 'background 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background = '#f8fafc'}>
               Ver características
             </a>
           </div>
-
-          <p className="text-xs text-slate-400 flex items-center justify-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1.5"><Shield size={12} /> Datos seguros</span>
-            <span className="text-slate-200">|</span>
-            <span className="flex items-center gap-1.5"><Smartphone size={12} /> Cualquier dispositivo</span>
-            <span className="text-slate-200">|</span>
-            <span className="flex items-center gap-1.5"><MessageCircle size={12} /> WhatsApp integrado</span>
-          </p>
         </div>
 
-        {/* Mock app */}
-        <div className="relative max-w-5xl mx-auto mt-16">
-          <div
-            className="rounded-2xl overflow-hidden border border-slate-200/80"
-            style={{ boxShadow: '0 32px 80px rgba(15,23,42,0.12), 0 0 0 1px rgba(15,23,42,0.04)' }}
-          >
-            {/* Barra de título */}
-            <div className="bg-slate-100 px-4 py-3 flex items-center gap-3 border-b border-slate-200">
-              <div className="flex gap-1.5">
-                <span className="w-3 h-3 rounded-full bg-red-400" />
-                <span className="w-3 h-3 rounded-full bg-yellow-400" />
-                <span className="w-3 h-3 rounded-full bg-green-400" />
-              </div>
-              <div className="flex-1 flex justify-center">
-                <span className="text-xs text-slate-400 bg-white border border-slate-200 rounded-lg px-4 py-1 font-medium">
+        {/* App mockup */}
+        <div style={{ position: 'relative', maxWidth: 860, margin: '64px auto 0' }}>
+          <div style={{ borderRadius: 20, overflow: 'hidden', border: '1px solid #e2e8f0', boxShadow: '0 40px 100px rgba(15,23,42,0.15), 0 0 0 1px rgba(15,23,42,0.03)' }}>
+            <div style={{ background: '#f1f5f9', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #e2e8f0' }}>
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#fc5c65', display: 'inline-block' }} />
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#fed330', display: 'inline-block' }} />
+              <span style={{ width: 12, height: 12, borderRadius: '50%', background: '#26de81', display: 'inline-block' }} />
+              <span style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                <span style={{ background: 'white', border: '1px solid #e2e8f0', borderRadius: 8, padding: '4px 16px', fontSize: 11, color: '#94a3b8', fontWeight: 500 }}>
                   entrerizospsicope.vercel.app/dashboard
                 </span>
-              </div>
+              </span>
             </div>
-
-            {/* Contenido */}
-            <div className="bg-slate-50 p-6">
-              {/* Stats row */}
-              <div className="grid grid-cols-4 gap-3 mb-4">
+            <div style={{ background: '#f8fafc', padding: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 12 }}>
                 {[
-                  { label: 'Pacientes activos', val: '24', color: '#7c3aed' },
-                  { label: 'Turnos esta semana', val: '12', color: '#db2777' },
-                  { label: 'Cobros del mes', val: '$186k', color: '#7c3aed' },
-                  { label: 'Sin sesión reciente', val: '3', color: '#f59e0b' },
-                ].map((s) => (
-                  <div key={s.label} className="bg-white rounded-xl border border-slate-100 p-4" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-                    <div className="w-6 h-6 rounded-lg mb-2" style={{ background: s.color, opacity: 0.15 }} />
-                    <div className="text-xl font-black text-slate-900">{s.val}</div>
-                    <div className="text-[10px] text-slate-400 mt-0.5 font-medium">{s.label}</div>
+                  { label: 'Pacientes activos', val: '24', c: '#7c3aed' },
+                  { label: 'Turnos esta semana', val: '12', c: '#be185d' },
+                  { label: 'Cobros del mes', val: '$186k', c: '#7c3aed' },
+                  { label: 'Sin sesión reciente', val: '3', c: '#d97706' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: '14px 16px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ width: 28, height: 28, borderRadius: 8, background: s.c + '22', marginBottom: 8 }} />
+                    <div style={{ fontSize: 20, fontWeight: 900, color: '#0f172a' }}>{s.val}</div>
+                    <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, fontWeight: 500 }}>{s.label}</div>
                   </div>
                 ))}
               </div>
-              {/* Cards row */}
-              <div className="grid grid-cols-3 gap-3">
-                {['Próximos turnos', 'Últimas sesiones', 'Pagos pendientes'].map((t, i) => (
-                  <div key={t} className="bg-white rounded-xl border border-slate-100 p-4 space-y-2.5" style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
-                    <div className="text-xs font-bold text-slate-600">{t}</div>
-                    <div className="space-y-1.5">
-                      <div className="h-2 rounded-full bg-slate-100" style={{ width: '90%' }} />
-                      <div className="h-2 rounded-full bg-slate-100" style={{ width: '70%' }} />
-                      <div className="h-2 rounded-full bg-slate-100" style={{ width: '50%' }} />
-                    </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+                {['Próximos turnos', 'Últimas sesiones', 'Pagos pendientes'].map(t => (
+                  <div key={t} style={{ background: 'white', borderRadius: 12, border: '1px solid #e2e8f0', padding: '14px 16px', boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#475569', marginBottom: 10 }}>{t}</div>
+                    {[90, 65, 45].map((w, i) => <div key={i} style={{ height: 7, borderRadius: 4, background: '#f1f5f9', width: w + '%', marginBottom: 6 }} />)}
                   </div>
                 ))}
               </div>
             </div>
           </div>
-
-          {/* Sombra decorativa debajo */}
-          <div
-            className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-12 pointer-events-none"
-            style={{ background: 'radial-gradient(ellipse, rgba(124,58,237,0.15) 0%, transparent 70%)', filter: 'blur(8px)' }}
-          />
+          {/* shadow glow */}
+          <div style={{ position: 'absolute', bottom: -24, left: '50%', transform: 'translateX(-50%)', width: '60%', height: 40, background: 'radial-gradient(ellipse, rgba(124,58,237,0.2) 0%, transparent 70%)', filter: 'blur(12px)', pointerEvents: 'none' }} />
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="py-16 px-6 border-y border-slate-100 bg-white">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {STATS.map((s) => (
-            <div key={s.label} className="text-center">
-              <div
-                className="text-3xl font-black mb-1"
-                style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}
-              >
-                {s.value}
-              </div>
-              <div className="text-sm text-slate-500 font-medium">{s.label}</div>
+      {/* STATS */}
+      <section style={{ background: 'white', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '48px 24px' }}>
+        <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 32, textAlign: 'center' }}>
+          {[
+            { v: '100%', l: 'Online, sin instalar nada' },
+            { v: '5 min', l: 'Para empezar a usarlo' },
+            { v: '24/7', l: 'Acceso desde cualquier lugar' },
+            { v: '∞', l: 'Pacientes y sesiones' },
+          ].map(s => (
+            <div key={s.l}>
+              <div style={{ fontSize: 32, fontWeight: 900, letterSpacing: '-0.04em', background: grad, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>{s.v}</div>
+              <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500, marginTop: 4 }}>{s.l}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── FEATURES ── */}
-      <section id="features" className="py-24 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="max-w-2xl mb-16">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-violet-600 mb-4">
-              <span className="w-4 h-px bg-violet-400 inline-block" />
-              Características
-            </span>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight mb-4">
+      {/* FEATURES */}
+      <section id="features" style={{ background: '#fafafa', padding: '96px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ marginBottom: 56 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 24, height: 2, background: grad, borderRadius: 2 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed' }}>Características</span>
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#0f172a', marginBottom: 16 }}>
               Todo lo que necesitás,<br />en un solo sistema.
             </h2>
-            <p className="text-lg text-slate-500 leading-relaxed">
-              Sin funciones innecesarias. Sin curva de aprendizaje. Diseñado específicamente para la práctica psicopedagógica.
+            <p style={{ fontSize: 16, color: '#64748b', maxWidth: 480, lineHeight: 1.7 }}>
+              Sin funciones innecesarias. Sin curva de aprendizaje. Diseñado para la práctica psicopedagógica.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {FEATURES.map((f, i) => (
-              <div
-                key={f.title}
-                className="group relative bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-200 transition-all duration-300 cursor-default hover:scale-[1.03] hover:-translate-y-1 overflow-visible"
-                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.12)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'}
-              >
-                {/* Glow por debajo */}
-                <div
-                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-3/4 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(ellipse, rgba(124,58,237,0.35) 0%, rgba(219,39,119,0.2) 50%, transparent 70%)',
-                    filter: 'blur(8px)',
-                  }}
-                />
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
-                  style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(219,39,119,0.08))' }}
-                >
-                  <f.icon size={18} style={{ color: '#7c3aed' }} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed">{f.desc}</p>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+            {FEATURES.map(f => (
+              <FeatureCard key={f.title} feature={f} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── SPLIT SECTION ── */}
-      <section className="py-24 px-6 bg-slate-50 border-y border-slate-100">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-16 items-center">
+      {/* SPLIT — Por qué */}
+      <section style={{ background: 'white', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '96px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }}>
           <div>
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-violet-600 mb-4">
-              <span className="w-4 h-px bg-violet-400 inline-block" />
-              Por qué AgendaPsicope
-            </span>
-            <h2 className="text-4xl font-black text-slate-900 tracking-tight leading-tight mb-6">
-              Pensado para vos,<br />
-              <span style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 24, height: 2, background: grad, borderRadius: 2 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed' }}>Por qué AgendaPsicope</span>
+            </div>
+            <h2 style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', lineHeight: 1.1, color: '#0f172a', marginBottom: 20 }}>
+              Pensado para vos,{' '}
+              <span style={{ background: grad, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 psicopedagoga.
               </span>
             </h2>
-            <p className="text-slate-500 text-lg leading-relaxed mb-8">
+            <p style={{ fontSize: 16, color: '#64748b', lineHeight: 1.75, marginBottom: 32 }}>
               No es un sistema genérico adaptado. Fue construido desde cero para las necesidades reales de una práctica psicopedagógica en Argentina.
             </p>
-            <Link
-              to="/login"
-              className="inline-flex items-center gap-2 text-white font-bold text-sm px-5 py-3 rounded-xl transition-all hover:-translate-y-0.5"
-              style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', boxShadow: '0 4px 20px rgba(124,58,237,0.2)' }}
-            >
-              Empezar ahora
-              <ArrowRight size={15} />
+            <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: grad, color: 'white', padding: '12px 24px', borderRadius: 10, fontSize: 14, fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 20px rgba(124,58,237,0.25)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.35)'; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(124,58,237,0.25)'; }}>
+              Empezar ahora <ArrowRight size={15} />
             </Link>
           </div>
-
-          <ul className="space-y-3">
-            {[
-              'Sin instalación — funciona desde el navegador',
-              'Acceso desde cualquier dispositivo',
-              'Datos seguros en la nube',
-              'Modo oscuro y claro incluidos',
-              'Diseñado para psicopedagogas argentinas',
-              'Actualizaciones automáticas sin costo extra',
-            ].map((b) => (
-              <li key={b} className="flex items-center gap-3 bg-white rounded-xl px-4 py-3.5 border border-slate-100" style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {BENEFITS.map(b => (
+              <li key={b} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#fafafa', border: '1px solid #e2e8f0', borderRadius: 12, padding: '14px 18px', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
                 <CheckCircle2 size={16} style={{ color: '#7c3aed', flexShrink: 0 }} />
-                <span className="text-sm font-medium text-slate-700">{b}</span>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#334155' }}>{b}</span>
               </li>
             ))}
           </ul>
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section id="testimonials" className="py-24 px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-violet-600 mb-4">
-              <span className="w-4 h-px bg-violet-400 inline-block" />
-              Testimonios
-            </span>
-            <h2 className="text-4xl font-black text-slate-900 tracking-tight">
+      {/* TESTIMONIALS */}
+      <section id="testimonials" style={{ background: '#fafafa', padding: '96px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 56 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+              <div style={{ width: 24, height: 2, background: grad, borderRadius: 2 }} />
+              <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#7c3aed' }}>Testimonios</span>
+              <div style={{ width: 24, height: 2, background: grad, borderRadius: 2 }} />
+            </div>
+            <h2 style={{ fontSize: 'clamp(1.8rem, 3.5vw, 2.8rem)', fontWeight: 900, letterSpacing: '-0.03em', color: '#0f172a' }}>
               Lo que dicen las profesionales
             </h2>
           </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                className="group relative bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-100 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 overflow-visible"
-                style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.1)'}
-                onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'}
-              >
-                {/* Glow por debajo */}
-                <div
-                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-3/4 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
-                  style={{
-                    background: 'radial-gradient(ellipse, rgba(219,39,119,0.3) 0%, rgba(124,58,237,0.2) 50%, transparent 70%)',
-                    filter: 'blur(8px)',
-                  }}
-                />
-                <div className="flex gap-0.5 mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
-                  ))}
-                </div>
-                <blockquote className="text-sm text-slate-600 leading-relaxed mb-6">
-                  "{t.text}"
-                </blockquote>
-                <div className="flex items-center gap-3 pt-4 border-t border-slate-50">
-                  <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                    style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}
-                  >
-                    {t.initials}
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900">{t.name}</div>
-                    <div className="text-xs text-slate-400">{t.role}</div>
-                  </div>
-                </div>
-              </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+            {TESTIMONIALS.map(t => (
+              <TestimonialCard key={t.name} t={t} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA FINAL ── */}
-      <section className="py-24 px-6 bg-slate-900">
-        <div className="max-w-3xl mx-auto text-center">
-          <div
-            className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-8"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', boxShadow: '0 8px 32px rgba(124,58,237,0.4)' }}
-          >
-            <Brain size={26} className="text-white" />
+      {/* CTA FINAL */}
+      <section style={{ background: '#0f172a', padding: '96px 24px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 600, margin: '0 auto' }}>
+          <div style={{ width: 64, height: 64, borderRadius: 18, background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px', boxShadow: '0 12px 40px rgba(124,58,237,0.4)' }}>
+            <Brain size={28} color="white" />
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
+          <h2 style={{ fontSize: 'clamp(2rem, 4vw, 3.2rem)', fontWeight: 900, letterSpacing: '-0.03em', color: 'white', marginBottom: 16 }}>
             Organizá tu práctica hoy.
           </h2>
-          <p className="text-slate-400 text-lg mb-10">
+          <p style={{ fontSize: 17, color: '#94a3b8', marginBottom: 40, lineHeight: 1.7 }}>
             Accedé al sistema y gestioná tu práctica de manera profesional.
           </p>
-          <Link
-            to="/login"
-            className="inline-flex items-center gap-2 text-white font-bold text-base px-8 py-4 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-2xl"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)', boxShadow: '0 4px 24px rgba(124,58,237,0.3)' }}
-          >
-            Ingresar al sistema
-            <ArrowRight size={18} />
+          <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: grad, color: 'white', padding: '16px 36px', borderRadius: 14, fontSize: 16, fontWeight: 700, textDecoration: 'none', boxShadow: '0 8px 32px rgba(124,58,237,0.35)', transition: 'transform 0.2s, box-shadow 0.2s' }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 16px 56px rgba(124,58,237,0.5)'; }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.35)'; }}>
+            Ingresar al sistema <ArrowRight size={18} />
           </Link>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="bg-slate-950 border-t border-slate-800 py-8 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #7c3aed, #db2777)' }}>
-              <Brain size={14} className="text-white" />
+      {/* FOOTER */}
+      <footer style={{ background: '#020617', borderTop: '1px solid #1e293b', padding: '28px 24px' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 28, height: 28, borderRadius: 8, background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Brain size={14} color="white" />
             </div>
-            <span className="text-sm font-bold text-slate-300">
-              Agenda<span className="text-violet-400">Psicope</span>
-            </span>
+            <span style={{ fontWeight: 800, fontSize: 14, color: '#e2e8f0' }}>Agenda<span style={{ color: '#a78bfa' }}>Psicope</span></span>
           </div>
-          <p className="text-xs text-slate-600 text-center">
-            Sistema de gestión para psicopedagogas · {new Date().getFullYear()}
-          </p>
-          <Link to="/login" className="text-xs text-violet-400 hover:text-violet-300 transition-colors font-medium">
-            Ingresar →
-          </Link>
+          <span style={{ fontSize: 12, color: '#475569' }}>Sistema de gestión para psicopedagogas · {new Date().getFullYear()}</span>
+          <Link to="/login" style={{ fontSize: 13, color: '#a78bfa', textDecoration: 'none', fontWeight: 600 }}>Ingresar →</Link>
         </div>
       </footer>
     </div>
   );
 }
+
+function FeatureCard({ feature: f }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        background: 'white',
+        border: `1px solid ${hovered ? '#c4b5fd' : '#e2e8f0'}`,
+        borderRadius: 16,
+        padding: 24,
+        cursor: 'default',
+        transition: 'transform 0.25s, border-color 0.25s',
+        transform: hovered ? 'translateY(-6px) scale(1.02)' : 'none',
+        boxShadow: hovered ? '0 20px 48px rgba(124,58,237,0.12)' : '0 1px 4px rgba(0,0,0,0.05)',
+        overflow: 'visible',
+      }}
+    >
+      {/* Glow debajo */}
+      <div style={{
+        position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)',
+        width: '70%', height: 32, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse, rgba(124,58,237,0.4) 0%, rgba(190,24,93,0.2) 50%, transparent 70%)',
+        filter: 'blur(10px)',
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity 0.3s',
+      }} />
+      <div style={{ width: 44, height: 44, borderRadius: 12, background: 'linear-gradient(135deg, rgba(124,58,237,0.12), rgba(190,24,93,0.08))', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+        <f.icon size={20} style={{ color: '#7c3aed' }} />
+      </div>
+      <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0f172a', marginBottom: 8 }}>{f.title}</h3>
+      <p style={{ fontSize: 14, color: '#64748b', lineHeight: 1.65 }}>{f.desc}</p>
+    </div>
+  );
+}
+
+function TestimonialCard({ t }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: 'relative',
+        background: 'white',
+        border: `1px solid ${hovered ? '#ddd6fe' : '#e2e8f0'}`,
+        borderRadius: 16,
+        padding: 24,
+        transition: 'transform 0.25s, border-color 0.25s',
+        transform: hovered ? 'translateY(-5px) scale(1.02)' : 'none',
+        boxShadow: hovered ? '0 20px 48px rgba(124,58,237,0.1)' : '0 1px 4px rgba(0,0,0,0.05)',
+        overflow: 'visible',
+      }}
+    >
+      {/* Glow debajo */}
+      <div style={{
+        position: 'absolute', bottom: -12, left: '50%', transform: 'translateX(-50%)',
+        width: '70%', height: 28, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse, rgba(190,24,93,0.35) 0%, rgba(124,58,237,0.2) 50%, transparent 70%)',
+        filter: 'blur(10px)',
+        opacity: hovered ? 1 : 0,
+        transition: 'opacity 0.3s',
+      }} />
+      <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
+        {[...Array(5)].map((_, i) => <Star key={i} size={14} style={{ fill: '#fbbf24', color: '#fbbf24' }} />)}
+      </div>
+      <blockquote style={{ fontSize: 14, color: '#475569', lineHeight: 1.75, fontStyle: 'italic', marginBottom: 20 }}>
+        "{t.text}"
+      </blockquote>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 16, borderTop: '1px solid #f8fafc' }}>
+        <div style={{ width: 38, height: 38, borderRadius: '50%', background: grad, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
+          {t.initials}
+        </div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{t.name}</div>
+          <div style={{ fontSize: 11, color: '#94a3b8' }}>{t.role}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// necesario para los componentes con estado
+import { useState } from 'react';
