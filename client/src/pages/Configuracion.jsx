@@ -503,11 +503,8 @@ function TabRecordatorios({ toast }) {
   const [notificacionesPacientes, setNotificacionesPacientes] = useState(true);
   const [notificacionesProfesional, setNotificacionesProfesional] = useState(true);
   const [horaEnvio, setHoraEnvio] = useState('17:00');
-  const [mensajePaciente, setMensajePaciente] = useState('');
   const [mensajeProfesional, setMensajeProfesional] = useState('');
-  const mensajeRef = useRef(null);
 
-  const VARS_PACIENTE = ['{nombre}', '{fecha}', '{hora}', '{consultorio}'];
   const VARS_PROFESIONAL = ['{fecha}', '{cantidad}', '{lista_turnos}'];
 
   useEffect(() => {
@@ -516,7 +513,6 @@ function TabRecordatorios({ toast }) {
         setNotificacionesPacientes(config.notificaciones_pacientes ?? true);
         setNotificacionesProfesional(config.notificaciones_profesional ?? true);
         setHoraEnvio(config.hora_envio || '17:00');
-        setMensajePaciente(config.mensaje_paciente || '');
         setMensajeProfesional(config.mensaje_profesional || '');
       }
       setLoading(false);
@@ -529,7 +525,6 @@ function TabRecordatorios({ toast }) {
       notificaciones_pacientes: notificacionesPacientes,
       notificaciones_profesional: notificacionesProfesional,
       hora_envio: horaEnvio,
-      mensaje_paciente: mensajePaciente,
       mensaje_profesional: mensajeProfesional,
     });
     if (result) {
@@ -538,24 +533,6 @@ function TabRecordatorios({ toast }) {
       toast.error('Error', 'No se pudo guardar la configuración.');
     }
     setSaving(false);
-  };
-
-  const handleEnviarPacientes = async () => {
-    setEnviando(true);
-    try {
-      const data = await apiPost('/whatsapp/enviar-recordatorios');
-      if (!data.waConectado) {
-        toast.error('WhatsApp no conectado', 'Conectá WhatsApp en la pestaña de Conexión primero.');
-      } else if (data.turnos === 0) {
-        toast.success('Sin turnos', 'No hay turnos pendientes para mañana.');
-      } else {
-        toast.success('Enviado', data.mensaje);
-      }
-    } catch (err) {
-      toast.error('Error', err.message || 'No se pudieron enviar los recordatorios.');
-    } finally {
-      setEnviando(false);
-    }
   };
 
   const handleEnviarProfesional = async () => {
@@ -574,20 +551,6 @@ function TabRecordatorios({ toast }) {
     } finally {
       setEnviando(false);
     }
-  };
-
-  const insertarVariable = (variable) => {
-    if (!mensajeRef.current) return;
-    const textarea = mensajeRef.current;
-    const start = textarea.selectionStart;
-    const end = textarea.selectionEnd;
-    const newValue = mensajePaciente.substring(0, start) + variable + mensajePaciente.substring(end);
-    setMensajePaciente(newValue);
-    setTimeout(() => {
-      textarea.focus();
-      const pos = start + variable.length;
-      textarea.setSelectionRange(pos, pos);
-    }, 0);
   };
 
   if (loading) return <div className="flex items-center justify-center h-40"><Loader2 className="animate-spin text-pink-500" size={24} /></div>;
@@ -629,24 +592,14 @@ function TabRecordatorios({ toast }) {
           </div>
         </div>
         <CardFooter>
-          <div className="flex gap-2">
-            <button
-              onClick={handleEnviarPacientes}
-              disabled={enviando}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors disabled:opacity-40"
-            >
-              {enviando ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              Enviar a pacientes ahora
-            </button>
-            <button
-              onClick={handleEnviarProfesional}
-              disabled={enviando}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 text-sm font-semibold transition-colors disabled:opacity-40"
-            >
-              {enviando ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
-              Enviar resumen ahora
-            </button>
-          </div>
+          <button
+            onClick={handleEnviarProfesional}
+            disabled={enviando}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-500/10 text-sm font-semibold transition-colors disabled:opacity-40"
+          >
+            {enviando ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />}
+            Enviar resumen ahora
+          </button>
           <button
             onClick={handleGuardar}
             disabled={saving}
@@ -656,35 +609,6 @@ function TabRecordatorios({ toast }) {
             {saving ? 'Guardando...' : 'Guardar cambios'}
           </button>
         </CardFooter>
-      </Card>
-
-      {/* Plantilla mensaje paciente */}
-      <Card>
-        <CardHeader
-          icon={MessageCircle}
-          iconBg="bg-green-100 dark:bg-green-500/10"
-          iconColor="text-green-600 dark:text-green-400"
-          title="Plantilla: Mensaje a Pacientes"
-          subtitle="Texto que recibe cada paciente en su recordatorio"
-        />
-        <div className="p-6 space-y-3">
-          <textarea
-            ref={mensajeRef}
-            value={mensajePaciente}
-            onChange={(e) => setMensajePaciente(e.target.value)}
-            rows={4}
-            placeholder="Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}."
-            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
-          />
-          <div>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Variables disponibles — hacé clic para insertar:</p>
-            <div className="flex flex-wrap gap-2">
-              {VARS_PACIENTE.map((v) => (
-                <VariableChip key={v} onClick={() => insertarVariable(v)}>{v}</VariableChip>
-              ))}
-            </div>
-          </div>
-        </div>
       </Card>
 
       {/* Plantilla resumen profesional */}
@@ -720,17 +644,20 @@ function TabRecordatorios({ toast }) {
 function TabNotificaciones({ toast }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [mensajePaciente, setMensajePaciente] = useState('');
   const [plantillas, setPlantillas] = useState({
     plantilla_cancelacion: '',
     plantilla_cambio_horario: '',
     plantilla_aviso_libre: '',
   });
+  const mensajeRef = useRef(null);
 
   const VARS = ['{nombre}', '{fecha}', '{hora}', '{consultorio}'];
 
   useEffect(() => {
     getConfiguracion().then((data) => {
       if (data) {
+        setMensajePaciente(data.mensaje_paciente || '');
         setPlantillas({
           plantilla_cancelacion: data.plantilla_cancelacion || '',
           plantilla_cambio_horario: data.plantilla_cambio_horario || '',
@@ -743,11 +670,28 @@ function TabNotificaciones({ toast }) {
 
   const set = (field) => (e) => setPlantillas((p) => ({ ...p, [field]: e.target.value }));
 
+  const insertarVariable = (variable) => {
+    if (!mensajeRef.current) return;
+    const textarea = mensajeRef.current;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newValue = mensajePaciente.substring(0, start) + variable + mensajePaciente.substring(end);
+    setMensajePaciente(newValue);
+    setTimeout(() => {
+      textarea.focus();
+      const pos = start + variable.length;
+      textarea.setSelectionRange(pos, pos);
+    }, 0);
+  };
+
   const handleGuardar = async () => {
     setSaving(true);
-    const result = await updatePlantillasNotificaciones(plantillas);
-    if (result) {
-      toast.success('Plantillas guardadas', 'Las plantillas de avisos se actualizaron.');
+    const [r1, r2] = await Promise.all([
+      updateConfiguracionNotificaciones({ mensaje_paciente: mensajePaciente }),
+      updatePlantillasNotificaciones(plantillas),
+    ]);
+    if (r1 && r2) {
+      toast.success('Plantillas guardadas', 'Las plantillas de notificaciones se actualizaron.');
     } else {
       toast.error('Error', 'No se pudieron guardar las plantillas.');
     }
@@ -779,8 +723,37 @@ function TabNotificaciones({ toast }) {
 
   return (
     <div className="space-y-4">
+      {/* Plantilla recordatorio automático a pacientes */}
+      <Card>
+        <CardHeader
+          icon={MessageCircle}
+          iconBg="bg-green-100 dark:bg-green-500/10"
+          iconColor="text-green-600 dark:text-green-400"
+          title="Plantilla: Recordatorio Automático"
+          subtitle="Texto que recibe cada paciente en el recordatorio del día anterior al turno"
+        />
+        <div className="p-6 space-y-3">
+          <textarea
+            ref={mensajeRef}
+            value={mensajePaciente}
+            onChange={(e) => setMensajePaciente(e.target.value)}
+            rows={4}
+            placeholder="Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}."
+            className="w-full px-3 py-2 rounded-xl bg-white dark:bg-slate-950 border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
+          />
+          <div>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Variables disponibles — hacé clic para insertar:</p>
+            <div className="flex flex-wrap gap-2">
+              {VARS.map((v) => (
+                <VariableChip key={v} onClick={() => insertarVariable(v)}>{v}</VariableChip>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Card>
+
       <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20 text-sm text-blue-700 dark:text-blue-300">
-        Estas plantillas se usan para avisos puntuales a pacientes individuales, distintos a los recordatorios automáticos. Podés enviarlos manualmente desde el perfil de cada paciente.
+        Las plantillas de abajo se usan para avisos puntuales a pacientes individuales (cancelaciones, cambios de horario, etc.).
       </div>
 
       {plantillaDefs.map(({ key, label, subtitle, placeholder }) => (
