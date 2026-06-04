@@ -34,22 +34,22 @@ setInterval(async () => {
   if (job) {
     try {
       let cleanPhone = job.phone.replace(/\D/g, "");
+      // Construir JID directo sin consultar onWhatsApp (evita fallo de red que descarta el mensaje)
       let targetJid = `${cleanPhone}@s.whatsapp.net`;
-
-      const waInfo = await sock.onWhatsApp(cleanPhone);
-      if (waInfo && waInfo.length > 0) {
-        targetJid = waInfo[0].jid;
-      } else if (cleanPhone.startsWith("549")) {
-        const sinNueve = "54" + cleanPhone.substring(3);
-        const waInfo2 = await sock.onWhatsApp(sinNueve);
-        if (waInfo2 && waInfo2.length > 0) targetJid = waInfo2[0].jid;
-      }
 
       await sock.sendMessage(targetJid, { text: job.message });
       lastSendTime = Date.now();
-      console.log(`[WhatsApp] Mensaje enviado a ${job.phone} (JID: ${targetJid})`);
+      console.log(`[WhatsApp] Mensaje enviado a ${job.phone}`);
     } catch (err) {
-      console.error("[WhatsApp] Error enviando mensaje:", err.message);
+      console.error(`[WhatsApp] Error enviando a ${job.phone}:`, err.message);
+      // Reintentar hasta 3 veces antes de descartar
+      const reintentos = (job.reintentos || 0) + 1;
+      if (reintentos < 3) {
+        console.log(`[WhatsApp] Reintento ${reintentos}/3 para ${job.phone}`);
+        messageQueue.unshift({ ...job, reintentos });
+      } else {
+        console.error(`[WhatsApp] Descartado tras 3 intentos: ${job.phone}`);
+      }
     }
   }
   sending = false;
