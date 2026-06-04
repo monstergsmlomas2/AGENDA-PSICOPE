@@ -184,7 +184,7 @@ export default function Turnos() {
   `;
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e?.preventDefault) e.preventDefault();
     if (!validateTurnoForm()) return;
     setSubmitting(true);
     try {
@@ -1165,7 +1165,7 @@ export default function Turnos() {
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
               <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
-              <Button type="submit" form="turnoForm" loading={submitting}>
+              <Button type="button" onClick={handleSubmit} loading={submitting}>
                 {editingTurno ? 'Guardar Cambios' : 'Agendar Turno'}
               </Button>
             </div>

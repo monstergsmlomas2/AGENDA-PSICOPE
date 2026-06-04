@@ -156,7 +156,7 @@ export default function Register() {
                 ¡Cuenta creada!
               </h1>
               <p style={{ fontSize: 14, color: '#64748b', marginBottom: 28, lineHeight: 1.6 }}>
-                Revisá tu email para confirmar tu cuenta antes de ingresar.
+                Tu cuenta fue creada. Ya podés ingresar al sistema.
               </p>
               <Link
                 to="/login"
