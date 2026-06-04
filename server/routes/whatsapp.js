@@ -1,4 +1,5 @@
 import { Router } from "express";
+import pool from "../config/db.js";
 import {
   iniciarWhatsApp,
   cerrarSesionWhatsApp,
@@ -48,6 +49,42 @@ router.post("/enviar-recordatorios", async (req, res) => {
     res.json({ ok: true, ...resultado });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /whatsapp/diagnostico — muestra estado real del servidor
+router.get("/diagnostico", async (req, res) => {
+  try {
+    const wa = getEstadoWhatsApp();
+
+    const configResult = await pool.query(
+      "SELECT notificaciones_pacientes, notificaciones_profesional, telefono_profesional, hora_envio FROM configuracion_notificaciones ORDER BY actualizado_en DESC LIMIT 1"
+    );
+
+    const turnosResult = await pool.query(`
+      SELECT t.id, t.fecha, t.hora, t.estado, p.nombre, p.apellido, p.telefono
+      FROM turnos t
+      JOIN pacientes p ON t.paciente_id = p.id
+      WHERE t.fecha = CURRENT_DATE + INTERVAL '1 day'
+        AND t.estado IN ('pendiente', 'confirmado')
+        AND p.telefono IS NOT NULL AND p.telefono != ''
+    `);
+
+    res.json({
+      whatsapp: wa,
+      config: configResult.rows[0] || null,
+      turnosManana: turnosResult.rows.length,
+      turnos: turnosResult.rows.map(t => ({
+        id: t.id,
+        paciente: `${t.nombre} ${t.apellido}`,
+        telefono: t.telefono,
+        fecha: t.fecha,
+        hora: t.hora,
+        estado: t.estado,
+      })),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
