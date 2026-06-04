@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const apiRoutes = ['/pacientes', '/turnos', '/consultorios', '/obras-sociales', '/informes', '/evaluaciones', '/pagos', '/analytics', '/configuracion', '/drive']
+const apiRoutes = ['/pacientes', '/turnos', '/consultorios', '/obras-sociales', '/informes', '/evaluaciones', '/pagos', '/analytics', '/configuracion', '/drive', '/whatsapp']
 
 const apiProxy = {
   target: 'http://localhost:3000',

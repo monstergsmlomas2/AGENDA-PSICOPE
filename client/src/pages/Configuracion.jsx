@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react';
-import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive } from 'lucide-react';
+import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
 import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
@@ -100,6 +100,13 @@ export default function Configuracion() {
   const [loadingDrive, setLoadingDrive] = useState(true);
   const [disconnectingDrive, setDisconnectingDrive] = useState(false);
 
+  // --- Estado WhatsApp Baileys ---
+  const [waEstado, setWaEstado] = useState('desconectado'); // desconectado | conectando | esperando_qr | conectado
+  const [waQR, setWaQR] = useState(null);
+  const [waLoading, setWaLoading] = useState(true);
+  const [waConectando, setWaConectando] = useState(false);
+  const [waDesconectando, setWaDesconectando] = useState(false);
+
   const mensajeRef = useRef(null);
 
   const MENSAJE_POR_DEFECTO = 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
@@ -158,9 +165,80 @@ export default function Configuracion() {
       setDriveConnected(s?.connected ?? false);
       setLoadingDrive(false);
     });
+
+    // Cargar estado WhatsApp inicial
+    const cargarEstadoWA = async () => {
+      try {
+        const token = localStorage.getItem('psicope_token');
+        const res = await fetch('/whatsapp/status', { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        setWaEstado(data.estado || 'desconectado');
+      } catch {
+        setWaEstado('desconectado');
+      } finally {
+        setWaLoading(false);
+      }
+    };
+    cargarEstadoWA();
   }, []);
 
+  // Polling cada 3s cuando está esperando QR o conectando
+  useEffect(() => {
+    if (waEstado !== 'esperando_qr' && waEstado !== 'conectando') return;
+    const interval = setInterval(async () => {
+      try {
+        const token = localStorage.getItem('psicope_token');
+        const [statusRes, qrRes] = await Promise.all([
+          fetch('/whatsapp/status', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('/whatsapp/qr', { headers: { Authorization: `Bearer ${token}` } }),
+        ]);
+        const status = await statusRes.json();
+        const qrData = await qrRes.json();
+        setWaEstado(status.estado || 'desconectado');
+        setWaQR(qrData.qr || null);
+      } catch {}
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [waEstado]);
+
   // --- Handlers ---
+
+  const handleConectarWA = async () => {
+    setWaConectando(true);
+    setWaEstado('conectando');
+    try {
+      const token = localStorage.getItem('psicope_token');
+      await fetch('/whatsapp/conectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      setWaEstado('esperando_qr');
+    } catch {
+      toast.error('Error', 'No se pudo iniciar la conexión con WhatsApp.');
+      setWaEstado('desconectado');
+    } finally {
+      setWaConectando(false);
+    }
+  };
+
+  const handleDesconectarWA = async () => {
+    const ok = await confirm({
+      title: 'Cerrar sesión de WhatsApp',
+      message: '¿Cerrás la sesión de WhatsApp? Tendrás que escanear el QR de nuevo para reconectar.',
+      confirmLabel: 'Cerrar sesión',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    setWaDesconectando(true);
+    try {
+      const token = localStorage.getItem('psicope_token');
+      await fetch('/whatsapp/desconectar', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      setWaEstado('desconectado');
+      setWaQR(null);
+      toast.success('Sesión cerrada', 'WhatsApp desconectado correctamente.');
+    } catch {
+      toast.error('Error', 'No se pudo cerrar la sesión.');
+    } finally {
+      setWaDesconectando(false);
+    }
+  };
 
   const handleGuardar = async () => {
     setSaving(true);
@@ -284,6 +362,83 @@ export default function Configuracion() {
           <h1 className="text-xl font-bold text-slate-900 dark:text-white">Configuración</h1>
           <p className="text-sm text-slate-900 dark:text-gray-400">Administrá las preferencias del sistema</p>
         </div>
+      </div>
+
+      {/* ─── SECCIÓN WHATSAPP CONEXIÓN ─── */}
+      <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="bg-green-100 dark:bg-green-500/10 p-2.5 rounded-xl">
+            <MessageCircle size={20} className="text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-slate-900 dark:text-white">Conexión WhatsApp</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Conectá WhatsApp para enviar recordatorios automáticos</p>
+          </div>
+        </div>
+
+        {waLoading ? (
+          <div className="flex items-center gap-2 text-slate-400">
+            <Loader2 size={16} className="animate-spin" />
+            <span className="text-sm">Verificando conexión...</span>
+          </div>
+        ) : waEstado === 'conectado' ? (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-green-100 dark:bg-green-500/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-500/30">
+                <Wifi size={13} /> Conectado
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Los recordatorios se enviarán por WhatsApp</span>
+            </div>
+            <button
+              onClick={handleDesconectarWA}
+              disabled={waDesconectando}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold border border-red-300 dark:border-red-500/30 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-60"
+            >
+              {waDesconectando ? <Loader2 size={14} className="animate-spin" /> : <LogOut size={14} />}
+              Cerrar sesión
+            </button>
+          </div>
+        ) : waEstado === 'esperando_qr' || waEstado === 'conectando' ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-500/30">
+                <RefreshCw size={13} className="animate-spin" />
+                {waEstado === 'conectando' ? 'Iniciando...' : 'Esperando escaneo'}
+              </span>
+            </div>
+            {waQR ? (
+              <div className="flex flex-col items-center gap-3 py-2">
+                <p className="text-sm text-slate-600 dark:text-slate-300 text-center">
+                  Abrí WhatsApp en tu teléfono → <strong>Dispositivos vinculados</strong> → <strong>Vincular dispositivo</strong> y escaneá este código:
+                </p>
+                <img src={waQR} alt="QR WhatsApp" className="w-52 h-52 rounded-xl border border-purple-200 dark:border-slate-700" />
+                <p className="text-xs text-slate-400">El QR se actualiza automáticamente</p>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-slate-400">
+                <Loader2 size={16} className="animate-spin" />
+                <span className="text-sm">Generando QR...</span>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                <WifiOff size={13} /> No conectado
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">Conectá para activar el envío de recordatorios</span>
+            </div>
+            <button
+              onClick={handleConectarWA}
+              disabled={waConectando}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors disabled:opacity-60"
+            >
+              {waConectando ? <Loader2 size={14} className="animate-spin" /> : <MessageCircle size={14} />}
+              Conectar WhatsApp
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ─── SECCIÓN GOOGLE DRIVE ─── */}

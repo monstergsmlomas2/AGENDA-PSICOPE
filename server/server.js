@@ -11,8 +11,10 @@ import pagosRoutes from "./routes/pagos.js";
 import analyticsRoutes from "./routes/analytics.js";
 import configuracionRouter from "./routes/configuracion.js";
 import driveRoutes, { handleGoogleCallback } from "./routes/drive.js";
+import whatsappRoutes from "./routes/whatsapp.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
+import { iniciarWhatsApp } from "./services/whatsapp.js";
 import authMiddleware from "./middleware/auth.js";
 
 dotenv.config();
@@ -57,10 +59,12 @@ app.use("/pagos", authMiddleware, pagosRoutes);
 app.use("/analytics", authMiddleware, analyticsRoutes);
 app.use("/configuracion", authMiddleware, configuracionRouter);
 app.use("/drive", authMiddleware, driveRoutes);
+app.use("/whatsapp", authMiddleware, whatsappRoutes);
 app.get("/auth/google/callback", handleGoogleCallback);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
   iniciarJob();
+  iniciarWhatsApp();
 });
