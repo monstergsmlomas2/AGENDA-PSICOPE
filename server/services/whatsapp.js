@@ -99,7 +99,7 @@ export async function iniciarWhatsApp() {
   if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
   if (sock) {
     try { sock.ev.removeAllListeners(); } catch (_) {}
-    try { sock.ws?.close(); } catch (_) {}
+    try { sock.end(undefined); } catch (_) {}
     sock = null;
   }
 
@@ -107,19 +107,29 @@ export async function iniciarWhatsApp() {
 
   await loadSessionFromDB();
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
-  const { version } = await fetchLatestBaileysVersion();
+
+  let version;
+  try {
+    ({ version } = await fetchLatestBaileysVersion());
+    console.log(`[WhatsApp] Versión WA: ${version.join(".")}`);
+  } catch (err) {
+    // Fallback a versión conocida-estable si la red falla
+    version = [2, 3000, 1015901307];
+    console.warn("[WhatsApp] No se pudo obtener versión de WA — usando fallback:", version.join("."));
+  }
 
   status = "CONNECTING";
   qrCode = null;
 
-  // Timeout de 30s si no llega el QR
+  // Timeout extendido: Render/cold starts pueden tardar >30s en generar el QR
   connectingTimer = setTimeout(() => {
     if (status === "CONNECTING") {
+      console.log("[WhatsApp] Timeout esperando QR — reintentando...");
       status = "DISCONNECTED";
       qrCode = null;
       iniciarWhatsApp();
     }
-  }, 30000);
+  }, 60000);
 
   sock = makeWASocket({
     version,
@@ -128,9 +138,11 @@ export async function iniciarWhatsApp() {
     browser: Browsers.macOS("Desktop"),
     syncFullHistory: false,
     connectTimeoutMs: 60000,
-    defaultQueryTimeoutMs: 0,
-    keepAliveIntervalMs: 20000,
+    defaultQueryTimeoutMs: 60000,
+    keepAliveIntervalMs: 25000,
     markOnlineOnConnect: false,
+    retryRequestDelayMs: 2000,
+    maxMsgRetryCount: 5,
   });
 
   sock.ev.on("creds.update", async () => {
@@ -150,17 +162,30 @@ export async function iniciarWhatsApp() {
     }
 
     if (connection === "close") {
-      const code = new Boom(lastDisconnect?.error)?.output?.statusCode;
+      const boom = new Boom(lastDisconnect?.error);
+      const code = boom?.output?.statusCode;
       const loggedOut = code === DisconnectReason.loggedOut;
+      const restartRequired = code === DisconnectReason.restartRequired;
+      const timedOut = code === DisconnectReason.timedOut;
+
+      console.log(`[WhatsApp] Conexión cerrada — código: ${code} | ${DisconnectReason[code] ?? "desconocido"}`);
 
       status = "DISCONNECTED";
       qrCode = null;
       if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
 
       if (loggedOut) {
+        console.log("[WhatsApp] Sesión cerrada por el usuario — limpiando credenciales.");
         resetAuthFolder();
         await pool.query(`DELETE FROM whatsapp_session WHERE id = 'creds.json'`);
         setTimeout(iniciarWhatsApp, 3000);
+      } else if (restartRequired) {
+        // Después de escanear el QR, WA pide restart — es normal
+        console.log("[WhatsApp] Restart requerido post-QR — reconectando.");
+        setTimeout(iniciarWhatsApp, 2000);
+      } else if (timedOut) {
+        console.log("[WhatsApp] Timeout — reconectando en 10s.");
+        setTimeout(iniciarWhatsApp, 10000);
       } else {
         setTimeout(iniciarWhatsApp, 5000);
       }
