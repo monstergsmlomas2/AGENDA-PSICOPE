@@ -65,7 +65,7 @@ Tenés *{cantidad} turno(s)* programado(s):
       SELECT t.*, p.nombre, p.apellido, p.telefono
       FROM turnos t
       JOIN pacientes p ON t.paciente_id = p.id
-      WHERE t.fecha = CURRENT_DATE + INTERVAL '1 day'
+      WHERE t.fecha = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Argentina/Buenos_Aires')::date + INTERVAL '1 day'
         AND t.estado IN ('pendiente', 'confirmado')
         AND p.telefono IS NOT NULL
         AND p.telefono != ''
@@ -84,7 +84,7 @@ Tenés *{cantidad} turno(s)* programado(s):
     if (notificacionesPacientes) {
       for (const turno of turnos) {
         const yaEnviado = await pool.query(
-          `SELECT id FROM notificaciones WHERE turno_id = $1 AND tipo = 'recordatorio_turno' AND estado = 'enviado' AND DATE(enviado_en) = CURRENT_DATE`,
+          `SELECT id FROM notificaciones WHERE turno_id = $1 AND tipo = 'recordatorio_turno' AND estado = 'enviado' AND DATE(enviado_en AT TIME ZONE 'America/Argentina/Buenos_Aires') = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Argentina/Buenos_Aires')::date`,
           [turno.id]
         );
         if (yaEnviado.rows.length > 0) {
