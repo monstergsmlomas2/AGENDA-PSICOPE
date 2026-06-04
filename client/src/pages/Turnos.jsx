@@ -138,7 +138,7 @@ export default function Turnos() {
     const errors = {};
     if (!npNombre.trim() || npNombre.trim().length < 2) errors.npNombre = 'Mínimo 2 caracteres.';
     if (!npApellido.trim() || npApellido.trim().length < 2) errors.npApellido = 'Mínimo 2 caracteres.';
-    if (!npDni.trim()) errors.npDni = 'El DNI es obligatorio.';
+    if (npDni.trim() && !/^\d+$/.test(npDni.trim())) errors.npDni = 'El DNI debe contener solo números.';
     if (npTelefono && !/^[\d\s\-().+]+$/.test(npTelefono)) errors.npTelefono = 'Formato inválido.';
     if (Object.keys(errors).length) { setNpErrors(errors); return; }
     setNpSubmitting(true);
@@ -972,7 +972,7 @@ export default function Turnos() {
                         <div>
                           <input
                             type="text"
-                            placeholder="DNI *"
+                            placeholder="DNI (opcional)"
                             value={npDni}
                             onChange={(e) => { setNpDni(e.target.value); setNpErrors(prev => ({ ...prev, npDni: '' })); }}
                             className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
