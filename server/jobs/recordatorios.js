@@ -69,11 +69,11 @@ export async function ejecutarJob() {
     if (notificacionesPacientes) {
       for (const turno of turnos) {
         const yaEnviado = await pool.query(
-          `SELECT id FROM notificaciones WHERE turno_id = $1 AND tipo = 'recordatorio_turno' AND DATE(enviado_en) = CURRENT_DATE`,
+          `SELECT id FROM notificaciones WHERE turno_id = $1 AND tipo = 'recordatorio_turno' AND estado = 'enviado' AND DATE(enviado_en) = CURRENT_DATE`,
           [turno.id]
         );
         if (yaEnviado.rows.length > 0) {
-          console.log(`[Recordatorios] Ya enviado hoy para turno ${turno.id} (${turno.nombre} ${turno.apellido})`);
+          console.log(`[Recordatorios] Ya enviado exitosamente hoy para turno ${turno.id} (${turno.nombre} ${turno.apellido})`);
           continue;
         }
 
