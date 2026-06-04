@@ -113,6 +113,9 @@ export async function ejecutarJob({ forzar = false } = {}) {
     }
 
     // ─── Recordatorio al profesional ───
+    if (!telefonoProfesional.trim()) {
+      console.warn("[Recordatorios] Teléfono del profesional no configurado — omitiendo recordatorio profesional.");
+    }
     if (notificacionesProfesional && telefonoProfesional.trim()) {
       const listaTurnos = turnos
         .map((t) => `• ${formatearHora(t.hora)} - ${t.nombre} ${t.apellido} (${t.consultorio || "consultorio"})`)
@@ -140,8 +143,14 @@ export async function ejecutarJob({ forzar = false } = {}) {
       }
     }
 
-    console.log(`[Recordatorios] Finalizado: ${enviados}/${turnos.length} mensajes encolados.`);
-    return { enviados, turnos: turnos.length, waConectado: true, mensaje: `${enviados} de ${turnos.length} mensajes encolados` };
+    console.log(`[Recordatorios] Finalizado: ${enviados}/${turnos.length} pacientes encolados. Tel profesional: "${telefonoProfesional}"`);
+    return {
+      enviados,
+      turnos: turnos.length,
+      waConectado: true,
+      telefonoProfesional: telefonoProfesional || null,
+      mensaje: `${enviados} de ${turnos.length} pacientes encolados${telefonoProfesional ? ` + resumen a ${telefonoProfesional}` : " (sin teléfono del profesional configurado)"}`,
+    };
 
   } catch (error) {
     console.error("[Recordatorios] Error crítico:", error.message);

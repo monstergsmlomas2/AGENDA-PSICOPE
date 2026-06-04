@@ -508,24 +508,22 @@ export default function Configuracion() {
             descripcion="Se envía un resumen con todos los turnos del día siguiente"
           />
 
-          {/* â"€â"€â"€ Teléfono del profesional (solo si activo) â"€â"€â"€ */}
-          {notificacionesProfesional && (
-            <div className="space-y-2 pl-0">
-              <label className="block text-sm font-medium text-slate-900 dark:text-white">
-                Teléfono del profesional
-              </label>
-              <input
-                type="text"
-                value={telefonoProfesional}
-                onChange={(e) => setTelefonoProfesional(e.target.value)}
-                placeholder="Ej: 1138057772 (sin +54)"
-                className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors"
-              />
-              <p className="text-xs text-slate-900 dark:text-gray-400">
-                Sin código de país, solo el número argentino
-              </p>
-            </div>
-          )}
+          {/* â"€â"€â"€ Teléfono del profesional â"€â"€â"€ */}
+          <div className="space-y-2 pl-0">
+            <label className="block text-sm font-medium text-slate-900 dark:text-white">
+              Teléfono del profesional
+            </label>
+            <input
+              type="text"
+              value={telefonoProfesional}
+              onChange={(e) => setTelefonoProfesional(e.target.value)}
+              placeholder="Ej: 1138057772 (sin +54)"
+              className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors"
+            />
+            <p className="text-xs text-slate-900 dark:text-gray-400">
+              Sin código de país, solo el número argentino
+            </p>
+          </div>
 
           {/* â"€â"€â"€ Horario de envío â"€â"€â"€ */}
           <div className="space-y-3">
