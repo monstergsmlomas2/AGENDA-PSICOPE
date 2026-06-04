@@ -26,13 +26,14 @@ async function ejecutarJob() {
   console.log("[Recordatorios] Verificando turnos para mañana...");
 
   try {
-    // Leer configuración de notificaciones
+    // Leer configuración de notificaciones — toma la primera fila activa (puede haber una sola profesional)
     const configResult = await pool.query(
-      "SELECT * FROM configuracion_notificaciones WHERE id = 1"
+      "SELECT * FROM configuracion_notificaciones ORDER BY actualizado_en DESC LIMIT 1"
     );
 
     // Si no hay configuración, usar valores por defecto
     const config = configResult.rows[0] || {};
+    console.log(`[Recordatorios] Usando config: notif_pacientes=${config.notificaciones_pacientes}, notif_profesional=${config.notificaciones_profesional}, tel=${config.telefono_profesional}`);
     const notificacionesPacientes = config.notificaciones_pacientes !== false;
     const notificacionesProfesional = config.notificaciones_profesional !== false;
     const telefonoProfesional = config.telefono_profesional || "";
@@ -71,17 +72,20 @@ async function ejecutarJob() {
         });
 
         try {
-          await enviarMensajeWhatsApp({
+          const result = await enviarMensajeWhatsApp({
             telefono: turno.telefono,
             mensaje,
           });
 
-          await pool.query(
-            `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'enviado')`,
-            [turno.id, turno.paciente_id, turno.telefono, mensaje]
-          );
+          console.log(`[Recordatorios] enviarMensaje → ${JSON.stringify(result)} | paciente: ${turno.nombre} ${turno.apellido} | tel: ${turno.telefono}`);
 
-          enviados++;
+          if (result.ok) {
+            await pool.query(
+              `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'enviado')`,
+              [turno.id, turno.paciente_id, turno.telefono, mensaje]
+            );
+            enviados++;
+          }
         } catch (error) {
           await pool.query(
             `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado, error_detalle) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'error', $5)`,

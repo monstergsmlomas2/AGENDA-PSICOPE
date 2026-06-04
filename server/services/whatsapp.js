@@ -15,6 +15,7 @@ let status = "DISCONNECTED"; // DISCONNECTED | CONNECTING | QR_READY | CONNECTED
 let qrCode = null;
 let connectingTimer = null;
 let presenceTimer = null;
+let isReconnecting = false; // evita reconexiones en cascada
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -35,7 +36,6 @@ setInterval(async () => {
       let cleanPhone = job.phone.replace(/\D/g, "");
       let targetJid = `${cleanPhone}@s.whatsapp.net`;
 
-      // Resolver JID real para evitar el problema del número fantasma
       const waInfo = await sock.onWhatsApp(cleanPhone);
       if (waInfo && waInfo.length > 0) {
         targetJid = waInfo[0].jid;
@@ -55,31 +55,73 @@ setInterval(async () => {
   sending = false;
 }, 1000);
 
-// ── Sincronización sesión con Supabase ────────────────────────────────────────
+// ── Sincronización sesión completa con Supabase ───────────────────────────────
+// Guarda TODOS los archivos de auth_info, no solo creds.json
 async function loadSessionFromDB() {
   try {
-    const res = await pool.query(`SELECT session_data FROM whatsapp_session WHERE id = 'creds.json'`);
-    if (!res.rows.length) { console.log("[WhatsApp] No hay sesión guardada en DB."); return; }
+    const res = await pool.query(`SELECT filename, file_data FROM whatsapp_session`);
+    if (!res.rows.length) {
+      console.log("[WhatsApp] No hay sesión guardada en DB.");
+      return;
+    }
     if (!fs.existsSync(AUTH_PATH)) fs.mkdirSync(AUTH_PATH, { recursive: true });
-    fs.writeFileSync(path.join(AUTH_PATH, "creds.json"), res.rows[0].session_data, "utf-8");
-    console.log("[WhatsApp] Sesión cargada desde DB.");
+    for (const row of res.rows) {
+      fs.writeFileSync(path.join(AUTH_PATH, row.filename), row.file_data, "utf-8");
+    }
+    console.log(`[WhatsApp] Sesión cargada desde DB (${res.rows.length} archivos).`);
   } catch (err) {
-    console.error("[WhatsApp] Error cargando sesión:", err.message);
+    // Tabla puede no existir aún — intentar migración automática
+    if (err.message.includes("column") || err.message.includes("does not exist")) {
+      await migrarTablaSession();
+      await loadSessionFromDB();
+    } else {
+      console.error("[WhatsApp] Error cargando sesión:", err.message);
+    }
   }
 }
 
 async function saveSessionToDB() {
   try {
-    const credsPath = path.join(AUTH_PATH, "creds.json");
-    if (!fs.existsSync(credsPath)) return;
-    const content = fs.readFileSync(credsPath, "utf-8");
-    await pool.query(`
-      INSERT INTO whatsapp_session (id, session_data) VALUES ('creds.json', $1)
-      ON CONFLICT (id) DO UPDATE SET session_data = $1, updated_at = NOW()
-    `, [content]);
-    console.log("[WhatsApp] Sesión guardada en DB.");
+    if (!fs.existsSync(AUTH_PATH)) return;
+    const files = fs.readdirSync(AUTH_PATH).filter(f => f.endsWith(".json"));
+    for (const filename of files) {
+      const content = fs.readFileSync(path.join(AUTH_PATH, filename), "utf-8");
+      await pool.query(`
+        INSERT INTO whatsapp_session (filename, file_data) VALUES ($1, $2)
+        ON CONFLICT (filename) DO UPDATE SET file_data = $2, updated_at = NOW()
+      `, [filename, content]);
+    }
+    console.log(`[WhatsApp] Sesión guardada en DB (${files.length} archivos).`);
   } catch (err) {
     console.error("[WhatsApp] Error guardando sesión:", err.message);
+  }
+}
+
+// Migración automática: adapta la tabla vieja (id + session_data) al nuevo esquema
+async function migrarTablaSession() {
+  try {
+    await pool.query(`
+      ALTER TABLE whatsapp_session ADD COLUMN IF NOT EXISTS filename TEXT;
+      ALTER TABLE whatsapp_session ADD COLUMN IF NOT EXISTS file_data TEXT;
+      UPDATE whatsapp_session SET filename = id, file_data = session_data WHERE filename IS NULL;
+      ALTER TABLE whatsapp_session DROP CONSTRAINT IF EXISTS whatsapp_session_pkey;
+      ALTER TABLE whatsapp_session ADD CONSTRAINT whatsapp_session_pkey PRIMARY KEY (filename);
+    `);
+    console.log("[WhatsApp] Tabla whatsapp_session migrada al nuevo esquema.");
+  } catch (err) {
+    // Si falla la migración, crear tabla nueva
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS whatsapp_session (
+          filename TEXT PRIMARY KEY,
+          file_data TEXT NOT NULL,
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        )
+      `);
+      console.log("[WhatsApp] Tabla whatsapp_session creada.");
+    } catch (e) {
+      console.error("[WhatsApp] Error en migración de tabla:", e.message);
+    }
   }
 }
 
@@ -95,6 +137,13 @@ function resetAuthFolder() {
 
 // ── Iniciar conexión ──────────────────────────────────────────────────────────
 export async function iniciarWhatsApp() {
+  // Evitar múltiples reconexiones simultáneas
+  if (isReconnecting) {
+    console.log("[WhatsApp] Ya hay una reconexión en curso, ignorando.");
+    return;
+  }
+  isReconnecting = true;
+
   if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
   if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
   if (sock) {
@@ -113,15 +162,14 @@ export async function iniciarWhatsApp() {
     ({ version } = await fetchLatestBaileysVersion());
     console.log(`[WhatsApp] Versión WA: ${version.join(".")}`);
   } catch (err) {
-    // Fallback a versión conocida-estable si la red falla
     version = [2, 3000, 1015901307];
     console.warn("[WhatsApp] No se pudo obtener versión de WA — usando fallback:", version.join("."));
   }
 
   status = "CONNECTING";
   qrCode = null;
+  isReconnecting = false;
 
-  // Timeout extendido: Render/cold starts pueden tardar >30s en generar el QR
   connectingTimer = setTimeout(() => {
     if (status === "CONNECTING") {
       console.log("[WhatsApp] Timeout esperando QR — reintentando...");
@@ -145,6 +193,7 @@ export async function iniciarWhatsApp() {
     maxMsgRetryCount: 5,
   });
 
+  // Guardar TODOS los archivos de auth en DB al actualizarse las credenciales
   sock.ev.on("creds.update", async () => {
     await saveCreds();
     await saveSessionToDB();
@@ -175,13 +224,13 @@ export async function iniciarWhatsApp() {
       if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
 
       if (loggedOut) {
-        console.log("[WhatsApp] Sesión cerrada por el usuario — limpiando credenciales.");
+        console.log("[WhatsApp] Sesión cerrada — limpiando credenciales.");
         resetAuthFolder();
-        await pool.query(`DELETE FROM whatsapp_session WHERE id = 'creds.json'`);
+        await pool.query(`DELETE FROM whatsapp_session`);
         setTimeout(iniciarWhatsApp, 3000);
       } else if (restartRequired) {
-        // Después de escanear el QR, WA pide restart — es normal
-        console.log("[WhatsApp] Restart requerido post-QR — reconectando.");
+        // Normal post-QR scan: WA pide restart para activar la sesión nueva
+        console.log("[WhatsApp] Restart post-QR — reconectando en 2s.");
         setTimeout(iniciarWhatsApp, 2000);
       } else if (timedOut) {
         console.log("[WhatsApp] Timeout — reconectando en 10s.");
@@ -197,7 +246,9 @@ export async function iniciarWhatsApp() {
       qrCode = null;
       console.log("[WhatsApp] Conectado correctamente.");
 
-      // Marcar unavailable para que el celular siga recibiendo notificaciones
+      // Guardar sesión completa inmediatamente al conectar
+      await saveSessionToDB();
+
       try { await sock.sendPresenceUpdate("unavailable"); } catch (_) {}
       if (presenceTimer) clearInterval(presenceTimer);
       presenceTimer = setInterval(async () => {
@@ -212,7 +263,7 @@ export async function iniciarWhatsApp() {
 // ── Cerrar sesión ─────────────────────────────────────────────────────────────
 export async function cerrarSesionWhatsApp() {
   resetAuthFolder();
-  await pool.query(`DELETE FROM whatsapp_session WHERE id = 'creds.json'`);
+  try { await pool.query(`DELETE FROM whatsapp_session`); } catch (_) {}
   if (sock) {
     try { await sock.logout(); } catch (_) {}
     sock = null;
@@ -225,16 +276,20 @@ export async function cerrarSesionWhatsApp() {
 // ── Enviar mensaje (interfaz pública) ─────────────────────────────────────────
 export async function enviarMensajeWhatsApp({ telefono, mensaje }) {
   if (status !== "CONNECTED") {
-    console.warn(`[WhatsApp] No conectado (estado: ${status}). Mensaje no enviado.`);
-    console.log(`[WhatsApp Mock] A: ${telefono} | Msg: ${mensaje}`);
-    return { ok: true, mock: true };
+    console.warn(`[WhatsApp] No conectado (estado: ${status}). Mensaje descartado para: ${telefono}`);
+    return { ok: false, mock: false, error: "No conectado" };
   }
   if (messageQueue.length >= MAX_QUEUE_SIZE) {
     console.warn("[WhatsApp] Cola llena. Mensaje descartado.");
     return { ok: false, error: "Cola llena" };
   }
   const formateado = formatearTelefono(telefono);
+  if (!formateado) {
+    console.warn(`[WhatsApp] Teléfono inválido: ${telefono}`);
+    return { ok: false, error: "Teléfono inválido" };
+  }
   messageQueue.push({ phone: formateado, message: mensaje });
+  console.log(`[WhatsApp] Mensaje encolado para: ${formateado}`);
   return { ok: true, queued: true };
 }
 
@@ -251,6 +306,7 @@ export function getQRWhatsApp() {
 export function formatearTelefono(rawPhone) {
   if (!rawPhone) return null;
   let num = rawPhone.replace(/\D/g, "");
+  if (!num) return null;
   if (num.startsWith("549") && num.length === 13) return num;
   if (num.startsWith("54") && !num.startsWith("549") && num.length === 12) return "549" + num.substring(2);
   if (num.startsWith("549")) num = num.substring(3);
