@@ -8,10 +8,10 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional AS telefono, email, 
+      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional AS telefono, email,
               notificaciones_pacientes, notificaciones_profesional, hora_envio,
               mensaje_paciente, mensaje_profesional, actualizado_en
-       FROM configuracion_notificaciones WHERE id = 1 AND usuario_id = $1`,
+       FROM configuracion_notificaciones WHERE usuario_id = $1 LIMIT 1`,
       [req.userId]
     );
 
@@ -26,17 +26,16 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /configuracion/notificaciones — devuelve la fila única (id=1)
+// GET /configuracion/notificaciones — devuelve la fila del usuario (upsert si no existe)
 router.get("/notificaciones", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM configuracion_notificaciones WHERE id = 1 AND usuario_id = $1",
+      `INSERT INTO configuracion_notificaciones (usuario_id)
+       VALUES ($1)
+       ON CONFLICT (usuario_id) DO UPDATE SET usuario_id = EXCLUDED.usuario_id
+       RETURNING *`,
       [req.userId]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
 
     res.json(result.rows[0]);
   } catch (error) {
@@ -45,7 +44,7 @@ router.get("/notificaciones", async (req, res) => {
   }
 });
 
-// PUT /configuracion/notificaciones — actualiza la fila única (id=1)
+// PUT /configuracion/notificaciones — upsert por usuario_id
 router.put("/notificaciones", async (req, res) => {
   const {
     notificaciones_pacientes,
@@ -58,16 +57,18 @@ router.put("/notificaciones", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE configuracion_notificaciones SET
-        notificaciones_pacientes = COALESCE($1, notificaciones_pacientes),
-        notificaciones_profesional = COALESCE($2, notificaciones_profesional),
-        telefono_profesional = COALESCE($3, telefono_profesional),
-        hora_envio = COALESCE($4, hora_envio),
-        mensaje_paciente = COALESCE($5, mensaje_paciente),
-        mensaje_profesional = COALESCE($6, mensaje_profesional),
+      `INSERT INTO configuracion_notificaciones
+        (usuario_id, notificaciones_pacientes, notificaciones_profesional, telefono_profesional, hora_envio, mensaje_paciente, mensaje_profesional, actualizado_en)
+       VALUES ($7, $1, $2, $3, $4, $5, $6, NOW())
+       ON CONFLICT (usuario_id) DO UPDATE SET
+        notificaciones_pacientes = COALESCE($1, configuracion_notificaciones.notificaciones_pacientes),
+        notificaciones_profesional = COALESCE($2, configuracion_notificaciones.notificaciones_profesional),
+        telefono_profesional = COALESCE($3, configuracion_notificaciones.telefono_profesional),
+        hora_envio = COALESCE($4, configuracion_notificaciones.hora_envio),
+        mensaje_paciente = COALESCE($5, configuracion_notificaciones.mensaje_paciente),
+        mensaje_profesional = COALESCE($6, configuracion_notificaciones.mensaje_profesional),
         actualizado_en = NOW()
-      WHERE id = 1 AND usuario_id = $7
-      RETURNING *`,
+       RETURNING *`,
       [
         notificaciones_pacientes,
         notificaciones_profesional,
@@ -78,10 +79,6 @@ router.put("/notificaciones", async (req, res) => {
         req.userId,
       ]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
 
     // Reprogramar el cron job con la nueva hora
     await reiniciarJob();
@@ -104,7 +101,7 @@ router.post("/notificaciones/test", async (req, res) => {
   }
 });
 
-// PUT /configuracion/whatsapp — actualiza configuración de recordatorios WhatsApp
+// PUT /configuracion/whatsapp — upsert configuración de recordatorios WhatsApp
 router.put("/whatsapp", async (req, res) => {
   const {
     recordatorios_activos,
@@ -114,13 +111,14 @@ router.put("/whatsapp", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE configuracion_notificaciones SET
-        recordatorios_activos = COALESCE($1, recordatorios_activos),
-        horas_anticipacion = COALESCE($2, horas_anticipacion),
-        mensaje_personalizado = COALESCE($3, mensaje_personalizado),
+      `INSERT INTO configuracion_notificaciones (usuario_id, recordatorios_activos, horas_anticipacion, mensaje_personalizado, actualizado_en)
+       VALUES ($4, $1, $2, $3, NOW())
+       ON CONFLICT (usuario_id) DO UPDATE SET
+        recordatorios_activos = COALESCE($1, configuracion_notificaciones.recordatorios_activos),
+        horas_anticipacion = COALESCE($2, configuracion_notificaciones.horas_anticipacion),
+        mensaje_personalizado = COALESCE($3, configuracion_notificaciones.mensaje_personalizado),
         actualizado_en = NOW()
-      WHERE id = 1 AND usuario_id = $4
-      RETURNING *`,
+       RETURNING *`,
       [
         recordatorios_activos,
         horas_anticipacion,
@@ -128,10 +126,6 @@ router.put("/whatsapp", async (req, res) => {
         req.userId,
       ]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Configuración no encontrada" });
-    }
 
     res.json(result.rows[0]);
   } catch (error) {
