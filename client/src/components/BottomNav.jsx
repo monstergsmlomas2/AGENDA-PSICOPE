@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 
 const bottomItems = [
-  { label: 'Inicio',      to: '/',                icon: LayoutDashboard, end: true },
+  { label: 'Inicio',      to: '/dashboard',       icon: LayoutDashboard, end: true },
   { label: 'Pacientes',   to: '/pacientes',        icon: Users },
   { label: 'Turnos',      to: '/turnos',           icon: Calendar },
   { label: 'Obras Soc.',  to: '/obras-sociales',   icon: ShieldCheck },

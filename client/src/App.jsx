@@ -18,6 +18,7 @@ import EvaluacionForm from './pages/EvaluacionForm';
 import Configuracion from './pages/Configuracion';
 import HerramientasEstandarizadas from './pages/HerramientasEstandarizadas';
 import Login from './pages/Login';
+import Landing from './pages/Landing';
 import { ToastProvider, useToast } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 import { Loader2 } from 'lucide-react';
@@ -121,6 +122,7 @@ function ProtectedLayout({ children }) {
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route
         path="/*"
@@ -128,7 +130,7 @@ function AppRoutes() {
           <ProtectedRoute>
             <ProtectedLayout>
               <Routes>
-                <Route path="/" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/pacientes" element={<Pacientes />} />
                 <Route path="/pacientes/:id" element={<PacienteDetalle />} />
                 <Route path="/pacientes/:id/sesiones/nueva" element={<SesionForm />} />

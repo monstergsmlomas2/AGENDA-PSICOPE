@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 const navItems = [
   {
     label: 'Dashboard',
-    to: '/',
+    to: '/dashboard',
     icon: LayoutDashboard,
   },
   {
