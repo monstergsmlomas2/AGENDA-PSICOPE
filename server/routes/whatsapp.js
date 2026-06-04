@@ -5,6 +5,7 @@ import {
   getEstadoWhatsApp,
   getQRWhatsApp,
 } from "../services/whatsapp.js";
+import { ejecutarJob } from "../jobs/recordatorios.js";
 
 const router = Router();
 
@@ -35,6 +36,16 @@ router.post("/desconectar", async (req, res) => {
   try {
     await cerrarSesionWhatsApp();
     res.json({ ok: true, mensaje: "Sesión cerrada." });
+  } catch (err) {
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// POST /whatsapp/enviar-recordatorios — dispara el job manualmente
+router.post("/enviar-recordatorios", async (req, res) => {
+  try {
+    await ejecutarJob();
+    res.json({ ok: true, mensaje: "Recordatorios enviados." });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
   }

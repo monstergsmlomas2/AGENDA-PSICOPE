@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react';
-import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut } from 'lucide-react';
+import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
 import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
@@ -106,6 +106,7 @@ export default function Configuracion() {
   const [waLoading, setWaLoading] = useState(true);
   const [waConectando, setWaConectando] = useState(false);
   const [waDesconectando, setWaDesconectando] = useState(false);
+  const [enviandoRecordatorios, setEnviandoRecordatorios] = useState(false);
 
   const mensajeRef = useRef(null);
 
@@ -237,6 +238,24 @@ export default function Configuracion() {
       toast.error('Error', 'No se pudo cerrar la sesión.');
     } finally {
       setWaDesconectando(false);
+    }
+  };
+
+  const handleEnviarRecordatorios = async () => {
+    setEnviandoRecordatorios(true);
+    try {
+      const token = localStorage.getItem('psicope_token');
+      const res = await fetch('/whatsapp/enviar-recordatorios', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const data = await res.json();
+      if (data.ok) {
+        toast.success('Recordatorios enviados', 'Se procesaron los recordatorios para los turnos de mañana.');
+      } else {
+        toast.error('Error', data.error || 'No se pudieron enviar los recordatorios.');
+      }
+    } catch {
+      toast.error('Error', 'No se pudo conectar con el servidor.');
+    } finally {
+      setEnviandoRecordatorios(false);
     }
   };
 
@@ -637,7 +656,21 @@ export default function Configuracion() {
         </div>
 
         {/* â"€â"€â"€ Footer con botón guardar â"€â"€â"€ */}
-        <div className="px-6 py-4 bg-purple-100/50 dark:bg-gray-950/50 border-t border-purple-300 dark:border-gray-700 flex justify-end">
+        <div className="px-6 py-4 bg-purple-100/50 dark:bg-gray-950/50 border-t border-purple-300 dark:border-gray-700 flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleEnviarRecordatorios}
+              disabled={enviandoRecordatorios || waEstado !== 'CONNECTED'}
+              title={waEstado !== 'CONNECTED' ? 'Conectá WhatsApp primero' : 'Enviar recordatorios de mañana ahora'}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {enviandoRecordatorios ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+              {enviandoRecordatorios ? 'Enviando...' : 'Enviar recordatorios ahora'}
+            </button>
+            {waEstado !== 'CONNECTED' && (
+              <span className="text-xs text-slate-400 dark:text-slate-500">Requiere WhatsApp conectado</span>
+            )}
+          </div>
           <button
             onClick={handleGuardar}
             disabled={saving}
