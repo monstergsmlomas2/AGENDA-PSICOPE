@@ -331,15 +331,27 @@ function FeatureCard({ feat }) {
       style={{
         position: 'relative', overflow: 'visible',
         background: hov ? '#faf5ff' : 'white',
-        border: `1px solid ${hov ? c.lila : c.border}`,
+        border: `2px solid ${hov ? c.rosa : c.border}`,
         borderRadius: 22, padding: '26px 24px',
-        transition: 'transform 0.3s, border-color 0.3s, background 0.3s',
-        transform: hov ? 'translateY(-5px)' : 'none',
-        boxShadow: hov ? `0 20px 48px ${c.lila}18` : `0 1px 4px rgba(0,0,0,0.04)`,
+        transition: 'transform 0.25s cubic-bezier(.34,1.56,.64,1), border-color 0.25s, box-shadow 0.25s, background 0.25s',
+        transform: hov ? 'translateY(-10px) scale(1.04)' : 'none',
+        boxShadow: hov
+          ? `0 0 0 4px ${c.rosa}33, 0 24px 56px ${c.rosa}44, 0 8px 24px ${c.lila}33`
+          : `0 1px 4px rgba(0,0,0,0.05)`,
         cursor: 'default',
       }}
     >
-      <div style={{ position: 'absolute', bottom: -14, left: '50%', transform: 'translateX(-50%)', width: '65%', height: 32, background: `radial-gradient(ellipse, ${c.lila}44 0%, transparent 70%)`, filter: 'blur(10px)', opacity: hov ? 1 : 0, transition: 'opacity 0.3s', pointerEvents: 'none' }} />
+      {/* resplandor rosado por debajo */}
+      <div style={{
+        position: 'absolute', bottom: -20, left: '10%', right: '10%',
+        height: 40,
+        background: `radial-gradient(ellipse, ${c.rosa}99 0%, ${c.lila}55 50%, transparent 80%)`,
+        filter: 'blur(14px)',
+        opacity: hov ? 1 : 0,
+        transition: 'opacity 0.3s',
+        pointerEvents: 'none',
+        zIndex: -1,
+      }} />
       <div style={{ width: 46, height: 46, borderRadius: 14, background: hov ? grad : `linear-gradient(135deg, ${c.lila}22, ${c.rosa}15)`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18, transition: 'background 0.3s' }}>
         <feat.icon size={20} style={{ color: hov ? 'white' : c.lila }} />
       </div>
@@ -356,14 +368,28 @@ function TestimonialCard({ t }) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
+        position: 'relative', overflow: 'visible',
         background: hov ? '#faf5ff' : 'white',
-        border: `1px solid ${hov ? c.rosa : c.border}`,
+        border: `2px solid ${hov ? c.rosa : c.border}`,
         borderRadius: 22, padding: '26px 24px',
-        transition: 'transform 0.3s, border-color 0.3s, background 0.3s',
-        transform: hov ? 'translateY(-4px)' : 'none',
-        boxShadow: hov ? `0 20px 48px ${c.rosa}18` : `0 1px 4px rgba(0,0,0,0.04)`,
+        transition: 'transform 0.25s cubic-bezier(.34,1.56,.64,1), border-color 0.25s, box-shadow 0.25s, background 0.25s',
+        transform: hov ? 'translateY(-10px) scale(1.04)' : 'none',
+        boxShadow: hov
+          ? `0 0 0 4px ${c.rosa}33, 0 24px 56px ${c.rosa}44, 0 8px 24px ${c.lila}33`
+          : `0 1px 4px rgba(0,0,0,0.04)`,
       }}
     >
+      {/* resplandor rosado por debajo */}
+      <div style={{
+        position: 'absolute', bottom: -20, left: '10%', right: '10%',
+        height: 40,
+        background: `radial-gradient(ellipse, ${c.rosa}99 0%, ${c.lila}55 50%, transparent 80%)`,
+        filter: 'blur(14px)',
+        opacity: hov ? 1 : 0,
+        transition: 'opacity 0.3s',
+        pointerEvents: 'none',
+        zIndex: -1,
+      }} />
       <blockquote style={{ fontFamily: F.display, fontSize: 15, fontStyle: 'italic', color: c.dark, lineHeight: 1.8, marginBottom: 22 }}>
         "{t.text}"
       </blockquote>
