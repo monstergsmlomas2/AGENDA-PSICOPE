@@ -18,6 +18,7 @@ import EvaluacionForm from './pages/EvaluacionForm';
 import Configuracion from './pages/Configuracion';
 import HerramientasEstandarizadas from './pages/HerramientasEstandarizadas';
 import Login from './pages/Login';
+import Register from './pages/Register';
 import Landing from './pages/Landing';
 import { ToastProvider, useToast } from './components/ui';
 import { AuthProvider, useAuth } from './context/AuthContext.jsx';
@@ -124,6 +125,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       <Route
         path="/*"
         element={

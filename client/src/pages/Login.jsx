@@ -185,6 +185,12 @@ export default function Login() {
               onMouseLeave={e => e.currentTarget.style.color = '#94a3b8'}>
               <ArrowLeft size={13} /> Volver a la página principal
             </Link>
+            <p style={{ marginTop: 8, fontSize: 13, color: '#64748b' }}>
+              ¿No tenés cuenta?{' '}
+              <Link to="/register" style={{ color: '#7c3aed', fontWeight: 700, textDecoration: 'none' }}>
+                Registrate
+              </Link>
+            </p>
             <p style={{ marginTop: 8, fontSize: 11, color: '#cbd5e1' }}>AgendaPsicope v1.0 © {new Date().getFullYear()}</p>
           </div>
         </div>
