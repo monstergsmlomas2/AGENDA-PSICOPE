@@ -44,7 +44,7 @@ export async function ejecutarJob({ forzar = false } = {}) {
     const notificacionesProfesional = forzar || config.notificaciones_profesional !== false;
     const telefonoProfesional = config.telefono_profesional || "";
     const mensajePacienteTexto = config.mensaje_paciente || 'Hola {nombre}! Te recordamos que tenés turno mañana {fecha} a las {hora} en {consultorio}. Ante cualquier cambio comunicate con nosotros. ¡Hasta mañana!';
-    const mensajeProfesionalTexto = config.mensaje_profesional || 'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}';
+    const mensajeProfesionalTexto = (config.mensaje_profesional || 'Recordatorio: mañana {fecha} tenés {cantidad} turno(s):\n{lista_turnos}').replace(/\\n/g, '\n');
 
     const turnosResult = await pool.query(`
       SELECT t.*, p.nombre, p.apellido, p.telefono
@@ -77,9 +77,13 @@ export async function ejecutarJob({ forzar = false } = {}) {
           continue;
         }
 
+        const fechaTurnoStr = turno.fecha instanceof Date
+          ? turno.fecha.toISOString().substring(0, 10)
+          : String(turno.fecha).substring(0, 10);
+
         const mensaje = reemplazarVariables(mensajePacienteTexto, {
           nombre: turno.nombre,
-          fecha: formatearFecha(turno.fecha),
+          fecha: formatearFecha(fechaTurnoStr),
           hora: formatearHora(turno.hora),
           consultorio: turno.consultorio || "el consultorio",
         });
@@ -121,8 +125,12 @@ export async function ejecutarJob({ forzar = false } = {}) {
         .map((t) => `• ${formatearHora(t.hora)} - ${t.nombre} ${t.apellido} (${t.consultorio || "consultorio"})`)
         .join("\n");
 
+      const fechaStr = turnos[0].fecha instanceof Date
+        ? turnos[0].fecha.toISOString().substring(0, 10)
+        : String(turnos[0].fecha).substring(0, 10);
+
       const mensajeProfesional = reemplazarVariables(mensajeProfesionalTexto, {
-        fecha: formatearFecha(turnos[0].fecha),
+        fecha: formatearFecha(fechaStr),
         cantidad: String(turnos.length),
         lista_turnos: listaTurnos,
       });
