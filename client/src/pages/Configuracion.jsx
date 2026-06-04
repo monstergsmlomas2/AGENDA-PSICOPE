@@ -1,5 +1,5 @@
 ﻿import { useState, useEffect, useRef } from 'react';
-import { Settings, MessageCircle, ChevronDown, ChevronUp, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
+import { Settings, MessageCircle, Save, Loader2, Smartphone, History, CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw, LogOut, Send } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
 import apiFetch from '../services/api';
 import { useConfirm } from '../hooks/useConfirm';
@@ -72,7 +72,6 @@ export default function Configuracion() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [plantillasAbiertas, setPlantillasAbiertas] = useState(false);
 
   // Estado del formulario
   const [notificacionesPacientes, setNotificacionesPacientes] = useState(true);
@@ -544,63 +543,22 @@ export default function Configuracion() {
             </p>
           </div>
 
-          {/* â"€â"€â"€ Divisor â"€â"€â"€ */}
-          <div className="border-t border-purple-300 dark:border-gray-700" />
-
-          {/* â"€â"€â"€ Plantillas de mensajes (colapsable) â"€â"€â"€ */}
-          <div>
-            <button
-              onClick={() => setPlantillasAbiertas(!plantillasAbiertas)}
-              className="flex items-center justify-between w-full text-left"
-            >
-              <span className="text-sm font-medium text-slate-900 dark:text-white">Personalizar mensajes</span>
-              {plantillasAbiertas ? (
-                <ChevronUp size={18} className="text-slate-900 dark:text-gray-400" />
-              ) : (
-                <ChevronDown size={18} className="text-slate-900 dark:text-gray-400" />
-              )}
-            </button>
-
-            {plantillasAbiertas && (
-              <div className="mt-4 space-y-5">
-                {/* Mensaje a pacientes */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white">
-                    Mensaje para pacientes
-                  </label>
-                  <textarea
-                    value={mensajePaciente}
-                    onChange={(e) => setMensajePaciente(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
-                  />
-                  <div className="flex flex-wrap gap-1.5">
-                    <VariableChip>{'{nombre}'}</VariableChip>
-                    <VariableChip>{'{fecha}'}</VariableChip>
-                    <VariableChip>{'{hora}'}</VariableChip>
-                    <VariableChip>{'{consultorio}'}</VariableChip>
-                  </div>
-                </div>
-
-                {/* Mensaje al profesional */}
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-slate-900 dark:text-white">
-                    Mensaje para el profesional
-                  </label>
-                  <textarea
-                    value={mensajeProfesional}
-                    onChange={(e) => setMensajeProfesional(e.target.value)}
-                    rows={4}
-                    className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
-                  />
-                  <div className="flex flex-wrap gap-1.5">
-                    <VariableChip>{'{fecha}'}</VariableChip>
-                    <VariableChip>{'{cantidad}'}</VariableChip>
-                    <VariableChip>{'{lista_turnos}'}</VariableChip>
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Mensaje al profesional */}
+          <div className="border-t border-purple-300 dark:border-gray-700 pt-4 space-y-2">
+            <label className="block text-sm font-medium text-slate-900 dark:text-white">
+              Mensaje del resumen diario
+            </label>
+            <textarea
+              value={mensajeProfesional}
+              onChange={(e) => setMensajeProfesional(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg bg-white dark:bg-gray-800 border border-pink-300 dark:border-gray-600 text-slate-900 dark:text-white text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent transition-colors resize-y"
+            />
+            <div className="flex flex-wrap gap-1.5">
+              <VariableChip>{'{fecha}'}</VariableChip>
+              <VariableChip>{'{cantidad}'}</VariableChip>
+              <VariableChip>{'{lista_turnos}'}</VariableChip>
+            </div>
           </div>
         </div>
 
