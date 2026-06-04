@@ -1018,7 +1018,7 @@ export default function Configuracion() {
   const [tabActiva, setTabActiva] = useState('perfil');
 
   return (
-    <div className="max-w-3xl mx-auto space-y-5">
+    <div className="max-w-5xl mx-auto space-y-5">
       <ConfirmModal />
 
       {/* Header */}
@@ -1045,7 +1045,7 @@ export default function Configuracion() {
             }`}
           >
             <Icon size={15} />
-            <span className="hidden sm:inline">{label}</span>
+            <span>{label}</span>
           </button>
         ))}
       </div>
