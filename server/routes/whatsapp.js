@@ -75,7 +75,7 @@ router.get("/diagnostico", async (req, res) => {
       SELECT t.id, t.fecha, t.hora, t.estado, p.nombre, p.apellido, p.telefono
       FROM turnos t
       JOIN pacientes p ON t.paciente_id = p.id
-      WHERE t.fecha = CURRENT_DATE + INTERVAL '1 day'
+      WHERE t.fecha = (CURRENT_TIMESTAMP AT TIME ZONE 'America/Argentina/Buenos_Aires')::date + INTERVAL '1 day'
         AND t.estado IN ('pendiente', 'confirmado')
         AND p.telefono IS NOT NULL AND p.telefono != ''
     `);
