@@ -23,3 +23,6 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# WhatsApp session (credenciales locales — se persisten en DB)
+server/auth_info/
