@@ -6,8 +6,9 @@ const DIAS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes"
 const MESES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
 
 function formatearFecha(fecha) {
-  const d = new Date(fecha + "T12:00:00Z");
-  return `${DIAS_ES[d.getDay()]} ${d.getDate()} de ${MESES_ES[d.getMonth()]}`;
+  // Usar T12:00:00-03:00 para fijar zona horaria Argentina y evitar desfase de día
+  const d = new Date(fecha + "T12:00:00-03:00");
+  return `${DIAS_ES[d.getUTCDay()]} ${d.getUTCDate()} de ${MESES_ES[d.getUTCMonth()]}`;
 }
 
 function formatearHora(hora) {
