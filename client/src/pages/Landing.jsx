@@ -283,11 +283,19 @@ export default function Landing() {
             {FEATURES.map((f, i) => (
               <div
                 key={f.title}
-                className="group relative bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-200 transition-all duration-300 cursor-default hover:scale-[1.03] hover:-translate-y-1"
+                className="group relative bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-200 transition-all duration-300 cursor-default hover:scale-[1.03] hover:-translate-y-1 overflow-visible"
                 style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,58,237,0.12)'}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.12)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'}
               >
+                {/* Glow por debajo */}
+                <div
+                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-3/4 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(ellipse, rgba(124,58,237,0.35) 0%, rgba(219,39,119,0.2) 50%, transparent 70%)',
+                    filter: 'blur(8px)',
+                  }}
+                />
                 <div
                   className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
                   style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.1), rgba(219,39,119,0.08))' }}
@@ -364,11 +372,19 @@ export default function Landing() {
             {TESTIMONIALS.map((t) => (
               <div
                 key={t.name}
-                className="bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-100 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
+                className="group relative bg-white border border-slate-100 rounded-2xl p-6 hover:border-violet-100 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 overflow-visible"
                 style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
-                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 12px 40px rgba(124,58,237,0.1)'}
+                onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 32px rgba(124,58,237,0.1)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.04)'}
               >
+                {/* Glow por debajo */}
+                <div
+                  className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-3/4 h-8 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{
+                    background: 'radial-gradient(ellipse, rgba(219,39,119,0.3) 0%, rgba(124,58,237,0.2) 50%, transparent 70%)',
+                    filter: 'blur(8px)',
+                  }}
+                />
                 <div className="flex gap-0.5 mb-4">
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={13} className="fill-amber-400 text-amber-400" />
