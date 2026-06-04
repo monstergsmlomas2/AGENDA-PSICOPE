@@ -45,3 +45,21 @@ export const getHistorialWhatsApp = async () => {
   }
 };
 
+export const updateConfiguracionPerfil = async (data) => {
+  try {
+    return await apiPut('/configuracion/perfil', data);
+  } catch (error) {
+    console.error("Error al actualizar perfil profesional:", error);
+    return null;
+  }
+};
+
+export const updatePlantillasNotificaciones = async (data) => {
+  try {
+    return await apiPut('/configuracion/plantillas-notificaciones', data);
+  } catch (error) {
+    console.error("Error al actualizar plantillas de notificaciones:", error);
+    return null;
+  }
+};
+

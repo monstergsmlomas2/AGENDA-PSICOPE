@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, Sun, Moon, LogOut, X, Search, BookOpen,
+  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -85,7 +85,7 @@ function NavItem({ item, onClick }) {
   );
 }
 
-export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose }) {
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -228,19 +228,6 @@ export default function Sidebar({ darkMode, toggleDarkMode, isOpen, onClose }) {
             </div>
           </div>
         </nav>
-
-        {/* ─── Toggle Theme ─── */}
-        <div className="px-3 py-2 border-t border-purple-300 dark:border-slate-800">
-          <button
-            onClick={toggleDarkMode}
-            className="flex items-center gap-2 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-          >
-            <span className="shrink-0">
-              {darkMode ? <Sun size={17} /> : <Moon size={17} />}
-            </span>
-            <span>{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
-          </button>
-        </div>
 
         {/* ─── Footer ─── */}
         <div className="p-3 border-t border-purple-300 dark:border-slate-800">

@@ -96,12 +96,7 @@ function ProtectedLayout({ children }) {
     <div className="flex h-[100dvh] w-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
       {/* Sidebar — oculto en móvil, visible en desktop */}
       <div className="hidden md:flex">
-        <Sidebar
-          darkMode={darkMode}
-          toggleDarkMode={toggleDarkMode}
-          isOpen={false}
-          onClose={() => {}}
-        />
+        <Sidebar />
       </div>
       <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in pb-20 md:pb-6">
         <Suspense fallback={

@@ -8,9 +8,11 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional AS telefono, email,
+      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional, email,
               notificaciones_pacientes, notificaciones_profesional, hora_envio,
-              mensaje_paciente, mensaje_profesional, actualizado_en
+              mensaje_paciente, mensaje_profesional,
+              plantilla_cancelacion, plantilla_cambio_horario, plantilla_aviso_libre,
+              actualizado_en
        FROM configuracion_notificaciones WHERE usuario_id = $1 LIMIT 1`,
       [req.userId]
     );
@@ -98,6 +100,56 @@ router.post("/notificaciones/test", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al ejecutar el job" });
+  }
+});
+
+// PUT /configuracion/perfil — actualiza datos del perfil profesional
+router.put("/perfil", async (req, res) => {
+  const { nombre_profesional, especialidad, matricula, email, telefono_profesional } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO configuracion_notificaciones (usuario_id, nombre_profesional, especialidad, matricula, email, telefono_profesional, actualizado_en)
+       VALUES ($6, $1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (usuario_id) DO UPDATE SET
+        nombre_profesional = COALESCE($1, configuracion_notificaciones.nombre_profesional),
+        especialidad = COALESCE($2, configuracion_notificaciones.especialidad),
+        matricula = COALESCE($3, configuracion_notificaciones.matricula),
+        email = COALESCE($4, configuracion_notificaciones.email),
+        telefono_profesional = COALESCE($5, configuracion_notificaciones.telefono_profesional),
+        actualizado_en = NOW()
+       RETURNING *`,
+      [nombre_profesional, especialidad, matricula, email, telefono_profesional, req.userId]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al actualizar perfil profesional" });
+  }
+});
+
+// PUT /configuracion/plantillas-notificaciones — upsert plantillas de avisos a pacientes
+router.put("/plantillas-notificaciones", async (req, res) => {
+  const { plantilla_cancelacion, plantilla_cambio_horario, plantilla_aviso_libre } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO configuracion_notificaciones (usuario_id, plantilla_cancelacion, plantilla_cambio_horario, plantilla_aviso_libre, actualizado_en)
+       VALUES ($4, $1, $2, $3, NOW())
+       ON CONFLICT (usuario_id) DO UPDATE SET
+        plantilla_cancelacion = COALESCE($1, configuracion_notificaciones.plantilla_cancelacion),
+        plantilla_cambio_horario = COALESCE($2, configuracion_notificaciones.plantilla_cambio_horario),
+        plantilla_aviso_libre = COALESCE($3, configuracion_notificaciones.plantilla_aviso_libre),
+        actualizado_en = NOW()
+       RETURNING *`,
+      [plantilla_cancelacion, plantilla_cambio_horario, plantilla_aviso_libre, req.userId]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error al actualizar plantillas de notificaciones" });
   }
 });
 
