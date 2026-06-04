@@ -598,6 +598,29 @@ export default function Configuracion() {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Switch activar/desactivar recordatorios a pacientes */}
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <p className="text-sm font-medium text-slate-900 dark:text-white">Enviar recordatorios a pacientes</p>
+              <p className="text-xs text-slate-500 dark:text-gray-400 mt-0.5">
+                {notificacionesPacientes ? 'Los pacientes recibirán recordatorio el día anterior al turno' : 'Los recordatorios automáticos están desactivados'}
+              </p>
+            </div>
+            <PillToggle
+              valor={notificacionesPacientes}
+              onChange={async (val) => {
+                setNotificacionesPacientes(val);
+                await updateConfiguracionNotificaciones({ notificaciones_pacientes: val });
+                toast.success(
+                  val ? 'Recordatorios activados' : 'Recordatorios desactivados',
+                  val ? 'Los pacientes recibirán recordatorios.' : 'No se enviarán recordatorios a pacientes.'
+                );
+              }}
+            />
+          </div>
+
+          <div className="border-t border-purple-300 dark:border-slate-700" />
+
           {/* Mensaje personalizado */}
           <div className="space-y-3">
             <div>
