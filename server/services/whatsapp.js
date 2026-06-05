@@ -1,4 +1,5 @@
 import makeWASocket, { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, downloadMediaMessage } from "@whiskeysockets/baileys";
+import pino from "pino";
 import { Boom } from "@hapi/boom";
 import path from "path";
 import fs from "fs";
@@ -272,19 +273,16 @@ export async function iniciarWhatsApp(userId = null) {
   sock = makeWASocket({
     version,
     auth: state,
-    printQRInTerminal: true,
+    printQRInTerminal: false,
+    logger: pino({ level: "silent" }),
     browser: Browsers.macOS("Desktop"),
-    // ── Config clave para que el MÓVIL siga sonando con los WhatsApp ──
-    // Cuando el servidor se marca "online", WhatsApp redirige las
-    // notificaciones al dispositivo web y silencia el teléfono (igual que
-    // al abrir WhatsApp Web). Estas 4 opciones lo evitan:
-    emitOwnEvents: false,                   // no procesa eventos propios → no interfiere con el estado del teléfono
-    syncFullHistory: false,                 // no pide historial completo → no activa modo "sincronizando"
-    shouldSyncHistoryMessage: () => false,  // rechaza cualquier sync de historial
-    markOnlineOnConnect: false,             // no marca el dispositivo como "online" → el teléfono mantiene su estado normal
+    emitOwnEvents: false,
+    syncFullHistory: false,
+    shouldSyncHistoryMessage: () => false,
+    markOnlineOnConnect: false,
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
-    keepAliveIntervalMs: 25000,
+    keepAliveIntervalMs: 20000,
     retryRequestDelayMs: 2000,
     maxMsgRetryCount: 5,
   });
