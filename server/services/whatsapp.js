@@ -266,6 +266,9 @@ export async function iniciarWhatsApp(userId = null) {
     printQRInTerminal: true,
     browser: Browsers.macOS("Desktop"),
     syncFullHistory: false,
+    // No re-sincronizar historial de mensajes: evita el aviso repetido de
+    // "sincronización terminada" en el móvil. Solo necesitamos enviar/recibir.
+    shouldSyncHistoryMessage: () => false,
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
     keepAliveIntervalMs: 25000,
