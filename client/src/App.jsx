@@ -28,6 +28,7 @@ const Pagos                   = lazy(() => import('./pages/Pagos'));
 const Consultorios            = lazy(() => import('./pages/Consultorios'));
 const Configuracion           = lazy(() => import('./pages/Configuracion'));
 const HerramientasEstandarizadas = lazy(() => import('./pages/HerramientasEstandarizadas'));
+const PanelIA                    = lazy(() => import('./pages/PanelIA'));
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -153,6 +154,7 @@ function AppRoutes() {
                 <Route path="/pagos" element={<Pagos />} />
                 <Route path="/configuracion" element={<Configuracion />} />
                 <Route path="/herramientas" element={<HerramientasEstandarizadas />} />
+                <Route path="/ia" element={<PanelIA />} />
               </Routes>
             </ProtectedLayout>
           </ProtectedRoute>

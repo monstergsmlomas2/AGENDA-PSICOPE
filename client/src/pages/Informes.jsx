@@ -1,7 +1,8 @@
 ﻿import { useState, useEffect } from 'react';
-import { FileText, Plus, Search, Edit, Trash2, X, Filter, Printer, Download, CheckCircle, Clock, Eye, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { FileText, Plus, Search, Edit, Trash2, X, Filter, Printer, Download, CheckCircle, Clock, Eye, ArrowLeft, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
 import { getInformes, getInforme, getInformesProximosVencer, crearInforme, actualizarInforme, eliminarInforme } from '../services/informesService';
 import { getPacientes } from '../services/pacientesService';
+import { generarInforme as generarInformeIA } from '../services/iaService';
 import { consultorio } from '../config/consultorio';
 import { useToast, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
@@ -68,6 +69,7 @@ export default function Informes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [generandoIA, setGenerandoIA] = useState(false);
 
   // Form states
   const [pacienteId, setPacienteId] = useState("");
@@ -127,6 +129,22 @@ export default function Informes() {
 
   const handleContenidoChange = (key, value) => {
     setContenido(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleGenerarConIA = async () => {
+    if (!pacienteId) { toast.error('Seleccioná un paciente primero', ''); return; }
+    setGenerandoIA(true);
+    try {
+      const tipoLabel = tiposInforme.find(t => t.value === tipo)?.label || tipo;
+      const data = await generarInformeIA(Number(pacienteId), tipoLabel);
+      const secciones = seccionesPorTipo[tipo] || [];
+      if (secciones.length > 0) {
+        setContenido({ [secciones[0].key]: data.informe });
+      }
+      toast.success('Informe generado con IA', 'El texto fue insertado. Revisá y ajustá antes de guardar.');
+    } catch (e) {
+      toast.error('Error IA', e.message || 'No se pudo generar el informe.');
+    } finally { setGenerandoIA(false); }
   };
 
   const handleSubmit = async (e) => {
@@ -468,7 +486,18 @@ export default function Informes() {
 
                 {/* Secciones dinámicas según tipo */}
                 <div className="border-t border-purple-300 dark:border-[#333] pt-6">
-                  <h3 className="text-lg font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 mb-4">Contenido del Informe</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-bold text-slate-900 dark:text-teal-400">Contenido del Informe</h3>
+                    <button
+                      type="button"
+                      onClick={handleGenerarConIA}
+                      disabled={generandoIA || !pacienteId}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-50 dark:bg-teal-500/10 border border-pink-200 dark:border-teal-500/30 text-pink-600 dark:text-teal-400 text-xs font-semibold hover:bg-pink-100 dark:hover:bg-teal-500/20 transition-colors disabled:opacity-50"
+                    >
+                      {generandoIA ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                      {generandoIA ? 'Generando...' : 'Generar con IA'}
+                    </button>
+                  </div>
                   <div className="space-y-5">
                     {seccionesActuales.map(sec => (
                       <div key={sec.key}>

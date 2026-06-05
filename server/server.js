@@ -12,6 +12,7 @@ import analyticsRoutes from "./routes/analytics.js";
 import configuracionRouter from "./routes/configuracion.js";
 import driveRoutes, { handleGoogleCallback } from "./routes/drive.js";
 import whatsappRoutes from "./routes/whatsapp.js";
+import iaRoutes from "./routes/ia.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
 import { iniciarWhatsApp } from "./services/whatsapp.js";
@@ -60,6 +61,7 @@ app.use("/analytics", authMiddleware, analyticsRoutes);
 app.use("/configuracion", authMiddleware, configuracionRouter);
 app.use("/drive", authMiddleware, driveRoutes);
 app.use("/whatsapp", authMiddleware, whatsappRoutes);
+app.use("/ia", authMiddleware, iaRoutes);
 app.get("/auth/google/callback", handleGoogleCallback);
 
 const PORT = process.env.PORT || 3000;

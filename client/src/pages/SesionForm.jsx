@@ -2,7 +2,8 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { getSesiones, crearSesion, actualizarSesion } from '../services/pacientesService';
 import { getPacienteById } from '../services/pacientesService';
-import { ArrowLeft, Save, Loader2, ClipboardList, CheckCircle2 } from 'lucide-react';
+import { resumirSesion } from '../services/iaService';
+import { ArrowLeft, Save, Loader2, ClipboardList, CheckCircle2, Sparkles } from 'lucide-react';
 import { useToast } from '../components/ui';
 
 export default function SesionForm() {
@@ -20,6 +21,7 @@ export default function SesionForm() {
   const [loading, setLoading] = useState(!!sesionId);
   const [submitting, setSubmitting] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | 'saving' | 'saved'
+  const [generandoResumen, setGenerandoResumen] = useState(false);
   const autoSaveTimer = useRef(null);
   const isFirstLoad = useRef(true);
 
@@ -83,6 +85,28 @@ export default function SesionForm() {
       toast.error('Error', err?.message || 'No se pudo guardar la sesión.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleGenerarResumenIA = async () => {
+    const notasCrudas = [actividades, observaciones].filter(Boolean).join('\n\n');
+    if (!notasCrudas.trim()) {
+      toast.error('Sin contenido', 'Escribí actividades u observaciones antes de generar el resumen.');
+      return;
+    }
+    setGenerandoResumen(true);
+    try {
+      const sesiones = sesionId ? await getSesiones(id) : [];
+      const nroSesion = sesionId
+        ? (sesiones.findIndex(s => String(s.id) === String(sesionId)) + 1) || undefined
+        : sesiones.length + 1;
+      const data = await resumirSesion(Number(id), notasCrudas, nroSesion);
+      setObservaciones(data.resumen);
+      toast.success('Resumen generado', 'El resumen fue insertado en Observaciones. Podés editarlo.');
+    } catch (e) {
+      toast.error('Error IA', e.message || 'No se pudo generar el resumen.');
+    } finally {
+      setGenerandoResumen(false);
     }
   };
 
@@ -166,7 +190,18 @@ export default function SesionForm() {
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / Evolución</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / Evolución</label>
+              <button
+                type="button"
+                onClick={handleGenerarResumenIA}
+                disabled={generandoResumen}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-50 dark:bg-teal-500/10 border border-pink-200 dark:border-teal-500/30 text-pink-600 dark:text-teal-400 text-xs font-semibold hover:bg-pink-100 dark:hover:bg-teal-500/20 transition-colors disabled:opacity-60"
+              >
+                {generandoResumen ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                {generandoResumen ? 'Generando...' : 'Resumir con IA'}
+              </button>
+            </div>
             <textarea
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}

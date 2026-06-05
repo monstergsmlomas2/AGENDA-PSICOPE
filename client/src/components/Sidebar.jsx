@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen,
+  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -202,6 +202,7 @@ export default function Sidebar({ isOpen, onClose }) {
             </p>
             <div className="space-y-0.5">
               <NavItem item={{ label: 'Tests Estandarizados', to: '/herramientas', icon: BookOpen }} onClick={handleNavClick} />
+              <NavItem item={{ label: 'Panel de IA', to: '/ia', icon: Sparkles }} onClick={handleNavClick} />
             </div>
           </div>
 
