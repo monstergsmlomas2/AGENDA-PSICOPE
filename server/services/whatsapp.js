@@ -1,4 +1,4 @@
-import makeWASocket, { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers } from "@whiskeysockets/baileys";
+import makeWASocket, { DisconnectReason, useMultiFileAuthState, fetchLatestBaileysVersion, Browsers, downloadMediaMessage } from "@whiskeysockets/baileys";
 import { Boom } from "@hapi/boom";
 import path from "path";
 import fs from "fs";
@@ -375,56 +375,80 @@ export async function iniciarWhatsApp(userId = null) {
     if (type !== "notify" && type !== "append") return;
 
     for (const msg of messages) {
+      // ── Extraer texto (texto plano o nota de voz/audio) ──────────────────
       const textoRecibido =
         msg.message?.conversation || msg.message?.extendedTextMessage?.text || null;
 
-      if (!textoRecibido) continue;
+      const esAudio = !textoRecibido && (
+        msg.message?.audioMessage || msg.message?.pttMessage
+      );
 
-      // Anti-loop: ignorar los mensajes que el propio bot generó (confirmaciones
-      // y recordatorios empiezan con estos emojis). Sin esto, la confirmación
-      // vuelve como fromMe:true, la IA la reinterpreta y se crea un loop infinito.
-      const textoTrim = textoRecibido.trim();
-      if (/^(✅|⏰|📅|📌|🔔)/.test(textoTrim) ||
-          textoTrim.includes("Recordatorio creado") ||
-          textoTrim.includes("Evento agendado") ||
-          textoTrim.includes("Recordatorio Personal")) {
-        continue;
+      // Ignorar mensajes sin texto ni audio
+      if (!textoRecibido && !esAudio) continue;
+
+      // Anti-loop: ignorar mensajes generados por el propio bot (confirmaciones/recordatorios)
+      if (textoRecibido) {
+        const textoTrim = textoRecibido.trim();
+        if (/^(✅|⏰|📅|📌|🔔)/.test(textoTrim) ||
+            textoTrim.includes("Recordatorio creado") ||
+            textoTrim.includes("Evento agendado") ||
+            textoTrim.includes("Recordatorio Personal")) {
+          continue;
+        }
       }
 
-      // Anti-duplicado: no procesar el mismo mensaje dos veces (Baileys reentrega
-      // el mismo id en eventos "notify" y "append").
+      // Anti-duplicado: no procesar el mismo mensaje dos veces
       const msgId = msg.key.id;
       if (msgId) {
         if (mensajesProcesados.has(msgId)) continue;
         mensajesProcesados.add(msgId);
         if (mensajesProcesados.size > 500) {
-          // Limitar memoria: descartar los más viejos
           const primeros = [...mensajesProcesados].slice(0, 250);
           primeros.forEach((id) => mensajesProcesados.delete(id));
         }
       }
 
       const remoteJid = msg.key.remoteJid || "";
-      // sock.user.id tiene formato "549XXXXXXXXXX:0@s.whatsapp.net" — extraer solo dígitos antes de ":" y "@"
       const rawUserId = sock?.user?.id || "";
       const propioNumero = rawUserId.split("@")[0].split(":")[0];
       const remoteNumero = remoteJid.replace("@s.whatsapp.net", "").split(":")[0];
 
-      // Mensajes propios: fromMe=true O el remoteJid es el propio número (chat "Tus mensajes")
       const esMensajePropio =
         msg.key.fromMe ||
         (propioNumero && remoteNumero === propioNumero);
 
       if (esMensajePropio) {
-        // Usar remoteNumero como identificador cuando fromMe=true (el destino es quien recibe)
-        // y propioNumero cuando el jid coincide con el propio número
         const numParaBuscar = msg.key.fromMe ? propioNumero : remoteNumero;
+
+        if (esAudio) {
+          // Nota de voz propia → transcribir con Groq Whisper → procesar como texto
+          console.log(`[AgendaPersonal] Audio propio detectado — transcribiendo...`);
+          try {
+            const audioMsg = msg.message.audioMessage || msg.message.pttMessage;
+            const buffer = await downloadMediaMessage(msg, "buffer", {}, {
+              logger: { info: () => {}, debug: () => {}, warn: () => {}, error: () => {} },
+              reuploadRequest: sock.updateMediaMessage,
+            });
+            const texto = await transcribirAudio(buffer, audioMsg.mimetype || "audio/ogg");
+            if (!texto) {
+              console.log(`[AgendaPersonal] Transcripción vacía, ignorando audio.`);
+              continue;
+            }
+            console.log(`[AgendaPersonal] Audio transcripto: "${texto.substring(0, 80)}"`);
+            await procesarMensajePropio(numParaBuscar || propioNumero || remoteNumero, texto);
+          } catch (err) {
+            console.error(`[AgendaPersonal] Error transcribiendo audio: ${err.message}`);
+          }
+          continue;
+        }
+
         console.log(`[AgendaPersonal] Mensaje propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} numBuscar:${numParaBuscar} texto:"${textoRecibido.substring(0, 60)}"`);
         await procesarMensajePropio(numParaBuscar || propioNumero || remoteNumero, textoRecibido.trim());
         continue;
       }
 
-      // Mensajes de terceros → exigir prefijo explícito
+      // Mensajes de terceros → solo texto con prefijo explícito (no audio)
+      if (!textoRecibido) continue;
       const PREFIJOS_AGENDA = ["/agenda", "*agenda*", "agenda:"];
       const textoNorm = textoRecibido.trim().toLowerCase();
       if (!PREFIJOS_AGENDA.some((p) => textoNorm.startsWith(p))) continue;
@@ -491,6 +515,33 @@ export function getEstadoWhatsApp() {
 
 export function getQRWhatsApp() {
   return qrCode;
+}
+
+// ── Transcribir audio con Groq Whisper ───────────────────────────────────────
+async function transcribirAudio(buffer, mimeType) {
+  const groqApiKey = process.env.GROQ_API_KEY;
+  if (!groqApiKey) throw new Error("GROQ_API_KEY no configurada");
+
+  const formData = new FormData();
+  const blob = new Blob([buffer], { type: mimeType || "audio/ogg" });
+  formData.append("file", blob, "audio.ogg");
+  formData.append("model", "whisper-large-v3");
+  formData.append("language", "es");
+  formData.append("response_format", "json");
+
+  const res = await fetch("https://api.groq.com/openai/v1/audio/transcriptions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${groqApiKey}` },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Groq API error ${res.status}: ${err}`);
+  }
+
+  const data = await res.json();
+  return data.text?.trim() || "";
 }
 
 // ── Formatear número argentino ────────────────────────────────────────────────
