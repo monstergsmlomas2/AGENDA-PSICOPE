@@ -142,7 +142,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* ─── Navegación ─── */}
-        <nav className="flex-1 p-2 flex flex-col gap-0.5">
+        <nav className="flex-1 p-2 flex flex-col gap-px">
           {/* Búsqueda rápida */}
           <button
             onClick={() =>
@@ -185,12 +185,12 @@ export default function Sidebar({ isOpen, onClose }) {
           <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} onClick={handleNavClick} />
           <button
             onClick={handleLogout}
+            title="Cerrar sesión"
             className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
           >
             <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
               <LogOut size={16} />
             </span>
-            <span className="truncate">Cerrar sesión</span>
           </button>
         </nav>
       </aside>
