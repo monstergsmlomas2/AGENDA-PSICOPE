@@ -302,7 +302,9 @@ export async function iniciarWhatsApp() {
       if (!textoRecibido) continue;
 
       const remoteJid = msg.key.remoteJid || "";
-      const propioNumero = (sock?.user?.id || "").split(":")[0].split("@")[0];
+      // sock.user.id tiene formato "549XXXXXXXXXX:0@s.whatsapp.net" — extraer solo dígitos antes de ":" y "@"
+      const rawUserId = sock?.user?.id || "";
+      const propioNumero = rawUserId.split("@")[0].split(":")[0];
       const remoteNumero = remoteJid.replace("@s.whatsapp.net", "").split(":")[0];
 
       // Mensajes propios: fromMe=true O el remoteJid es el propio número (chat "Tus mensajes")
@@ -311,8 +313,11 @@ export async function iniciarWhatsApp() {
         (propioNumero && remoteNumero === propioNumero);
 
       if (esMensajePropio) {
-        console.log(`[AgendaPersonal] Mensaje propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} texto:"${textoRecibido.substring(0, 60)}"`);
-        await procesarMensajePropio(propioNumero || remoteNumero, textoRecibido.trim());
+        // Usar remoteNumero como identificador cuando fromMe=true (el destino es quien recibe)
+        // y propioNumero cuando el jid coincide con el propio número
+        const numParaBuscar = msg.key.fromMe ? propioNumero : remoteNumero;
+        console.log(`[AgendaPersonal] Mensaje propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} numBuscar:${numParaBuscar} texto:"${textoRecibido.substring(0, 60)}"`);
+        await procesarMensajePropio(numParaBuscar || propioNumero || remoteNumero, textoRecibido.trim());
         continue;
       }
 
@@ -412,12 +417,19 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
 
     // Normalizar el número del JID para comparar contra la DB
     const destNorm = formatearTelefono(phoneDestinatario) || phoneDestinatario.replace(/\D/g, "");
-    const destCorto = destNorm.replace(/^549/, "");
+    const destCorto = destNorm.replace(/^549/, "").replace(/^54/, "");
+
+    console.log(`[AgendaPersonal] Buscando profesional — destNorm:${destNorm} destCorto:${destCorto} rows:${configResult.rows.length}`);
+    configResult.rows.forEach(r => {
+      const tn = formatearTelefono(r.telefono_profesional);
+      const tc = (tn || "").replace(/^549/, "").replace(/^54/, "");
+      console.log(`[AgendaPersonal]   DB tel:${r.telefono_profesional} → norm:${tn} corto:${tc}`);
+    });
 
     const match = configResult.rows.find((row) => {
       const telNorm = formatearTelefono(row.telefono_profesional);
       if (!telNorm) return false;
-      const telCorto = telNorm.replace(/^549/, "");
+      const telCorto = telNorm.replace(/^549/, "").replace(/^54/, "");
       return destNorm === telNorm || destCorto === telCorto || destCorto === telNorm || destNorm === telCorto;
     });
 
@@ -435,9 +447,16 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
 
     const { esRecordatorio, evento } = await detectarYExtraerRecordatorio(texto, fechaHoy);
 
-    if (!esRecordatorio || !evento?.titulo || !evento?.fecha) return;
+    console.log(`[AgendaPersonal] IA resultado — esRecordatorio:${esRecordatorio} evento:${JSON.stringify(evento)}`);
 
-    const fechaHora = `${evento.fecha}T${evento.hora || "09:00"}:00-03:00`;
+    if (!esRecordatorio || !evento?.titulo || !evento?.fecha) {
+      console.log(`[AgendaPersonal] No es recordatorio o faltan campos — abortando.`);
+      return;
+    }
+
+    // Normalizar hora: la IA puede devolver "HH:MM" o "HH:MM:SS" — usar solo HH:MM
+    const horaNorm = (evento.hora || "09:00").substring(0, 5);
+    const fechaHora = `${evento.fecha}T${horaNorm}:00-03:00`;
 
     const insertResult = await pool.query(
       `INSERT INTO agenda_personal
@@ -473,7 +492,7 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
       day: "numeric",
       month: "long",
     });
-    const horaConfirm = evento.hora || "09:00";
+    const horaConfirm = horaNorm;
 
     const mensajeConfirmacion = `✅ *Recordatorio creado*
 📌 ${evento.titulo}
