@@ -18,6 +18,7 @@ export default function SesionForm() {
   });
   const [actividades, setActividades] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [resumenIA, setResumenIA] = useState('');
   const [loading, setLoading] = useState(!!sesionId);
   const [submitting, setSubmitting] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null); // null | 'saving' | 'saved'
@@ -37,6 +38,7 @@ export default function SesionForm() {
             setFecha(s.fecha ? s.fecha.split('T')[0] : new Date().toISOString().split('T')[0]);
             setActividades(s.actividades_realizadas || '');
             setObservaciones(s.observaciones || '');
+            setResumenIA(s.resumen_ia || '');
           }
         }
       } catch {
@@ -56,7 +58,7 @@ export default function SesionForm() {
     setAutoSaveStatus('saving');
     autoSaveTimer.current = setTimeout(async () => {
       try {
-        await actualizarSesion(id, sesionId, { fecha, actividades_realizadas: actividades, observaciones });
+        await actualizarSesion(id, sesionId, { fecha, actividades_realizadas: actividades, observaciones, resumen_ia: resumenIA || null });
         setAutoSaveStatus('saved');
         setTimeout(() => setAutoSaveStatus(null), 3000);
       } catch {
@@ -71,7 +73,7 @@ export default function SesionForm() {
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     setSubmitting(true);
     try {
-      const data = { fecha, actividades_realizadas: actividades, observaciones };
+      const data = { fecha, actividades_realizadas: actividades, observaciones, resumen_ia: resumenIA || null };
       if (sesionId) {
         await actualizarSesion(id, sesionId, data);
         toast.success('Sesión actualizada', 'Los cambios se guardaron correctamente.');
@@ -101,8 +103,8 @@ export default function SesionForm() {
         ? (sesiones.findIndex(s => String(s.id) === String(sesionId)) + 1) || undefined
         : sesiones.length + 1;
       const data = await resumirSesion(Number(id), notasCrudas, nroSesion);
-      setObservaciones(data.resumen);
-      toast.success('Resumen generado', 'El resumen fue insertado en Observaciones. Podés editarlo.');
+      setResumenIA(data.resumen);
+      toast.success('Resumen generado', 'El resumen fue guardado en el campo Resumen IA.');
     } catch (e) {
       toast.error('Error IA', e.message || 'No se pudo generar el resumen.');
     } finally {
@@ -210,6 +212,37 @@ export default function SesionForm() {
               className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent"
             />
           </div>
+
+          {(resumenIA || generandoResumen) && (
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Sparkles size={14} className="text-pink-500 dark:text-teal-400" />
+                <label className="text-xs font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider">Resumen IA</label>
+                {resumenIA && (
+                  <button
+                    type="button"
+                    onClick={() => setResumenIA('')}
+                    className="ml-auto text-xs text-slate-400 hover:text-red-500 transition-colors"
+                  >
+                    Limpiar
+                  </button>
+                )}
+              </div>
+              {generandoResumen ? (
+                <div className="w-full rounded-xl p-3.5 border border-pink-300 dark:border-teal-500/30 bg-pink-50 dark:bg-teal-500/5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <Loader2 size={14} className="animate-spin text-pink-500 dark:text-teal-400" />
+                  Generando resumen con IA...
+                </div>
+              ) : (
+                <textarea
+                  value={resumenIA}
+                  onChange={(e) => setResumenIA(e.target.value)}
+                  rows="6"
+                  className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-teal-500/30 bg-pink-50 dark:bg-teal-500/5 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent text-sm"
+                />
+              )}
+            </div>
+          )}
 
           <div className="flex justify-end gap-3 pt-2 border-t border-pink-200 dark:border-slate-800">
             <button

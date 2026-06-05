@@ -1,7 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles,
+  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles, CalendarDays,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -20,6 +20,11 @@ const navItems = [
     label: 'Turnos',
     to: '/turnos',
     icon: Calendar,
+  },
+  {
+    label: 'Mi Agenda',
+    to: '/mi-agenda',
+    icon: CalendarDays,
   },
 ];
 

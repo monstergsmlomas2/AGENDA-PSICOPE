@@ -13,8 +13,10 @@ import configuracionRouter from "./routes/configuracion.js";
 import driveRoutes, { handleGoogleCallback } from "./routes/drive.js";
 import whatsappRoutes from "./routes/whatsapp.js";
 import iaRoutes from "./routes/ia.js";
+import agendaPersonalRoutes from "./routes/agendaPersonal.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
+import { iniciarJobPersonal } from "./jobs/recordatoriosPersonales.js";
 import { iniciarWhatsApp } from "./services/whatsapp.js";
 import authMiddleware from "./middleware/auth.js";
 
@@ -62,11 +64,13 @@ app.use("/configuracion", authMiddleware, configuracionRouter);
 app.use("/drive", authMiddleware, driveRoutes);
 app.use("/whatsapp", authMiddleware, whatsappRoutes);
 app.use("/ia", authMiddleware, iaRoutes);
+app.use("/agenda-personal", authMiddleware, agendaPersonalRoutes);
 app.get("/auth/google/callback", handleGoogleCallback);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
   iniciarJob();
+  iniciarJobPersonal();
   iniciarWhatsApp().catch(err => console.error("[WhatsApp] Error al iniciar:", err));
 });

@@ -29,6 +29,7 @@ const Consultorios            = lazy(() => import('./pages/Consultorios'));
 const Configuracion           = lazy(() => import('./pages/Configuracion'));
 const HerramientasEstandarizadas = lazy(() => import('./pages/HerramientasEstandarizadas'));
 const PanelIA                    = lazy(() => import('./pages/PanelIA'));
+const MiAgenda                   = lazy(() => import('./pages/MiAgenda'));
 
 // ─── Componente que protege rutas ───
 function ProtectedRoute({ children }) {
@@ -149,6 +150,7 @@ function AppRoutes() {
                 <Route path="/pacientes/:id/evaluaciones/:evalId/editar" element={<EvaluacionForm />} />
                 <Route path="/consultorios" element={<Consultorios />} />
                 <Route path="/turnos" element={<Turnos />} />
+                <Route path="/mi-agenda" element={<MiAgenda />} />
                 <Route path="/obras-sociales" element={<ObrasSociales />} />
                 <Route path="/informes" element={<Informes />} />
                 <Route path="/pagos" element={<Pagos />} />

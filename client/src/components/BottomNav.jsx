@@ -1,13 +1,14 @@
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, DollarSign, Settings,
-  ShieldCheck, Building, FileText,
+  ShieldCheck, Building, FileText, CalendarDays,
 } from 'lucide-react';
 
 const bottomItems = [
   { label: 'Inicio',      to: '/dashboard',       icon: LayoutDashboard, end: true },
   { label: 'Pacientes',   to: '/pacientes',        icon: Users },
   { label: 'Turnos',      to: '/turnos',           icon: Calendar },
+  { label: 'Agenda',      to: '/mi-agenda',        icon: CalendarDays },
   { label: 'Obras Soc.',  to: '/obras-sociales',   icon: ShieldCheck },
   { label: 'Consult.',    to: '/consultorios',     icon: Building },
   { label: 'Pagos',       to: '/pagos',            icon: DollarSign },

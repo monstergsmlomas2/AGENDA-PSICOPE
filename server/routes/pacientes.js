@@ -172,11 +172,11 @@ router.get("/:id/sesiones", async (req, res) => {
 // 9. CREAR NUEVA SESIÓN
 router.post("/:id/sesiones", async (req, res) => {
   const { id } = req.params;
-  const { fecha, observaciones, actividades_realizadas } = req.body;
+  const { fecha, observaciones, actividades_realizadas, resumen_ia } = req.body;
   try {
     const result = await pool.query(
-      "INSERT INTO sesiones (paciente_id, fecha, observaciones, actividades_realizadas, usuario_id) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [id, fecha, observaciones, actividades_realizadas, req.userId]
+      "INSERT INTO sesiones (paciente_id, fecha, observaciones, actividades_realizadas, resumen_ia, usuario_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [id, fecha, observaciones, actividades_realizadas, resumen_ia || null, req.userId]
     );
     res.json(result.rows[0]);
   } catch (error) {
@@ -187,14 +187,14 @@ router.post("/:id/sesiones", async (req, res) => {
 // 10. ACTUALIZAR SESIÓN
 router.put("/:id/sesiones/:sesionId", async (req, res) => {
   const { id, sesionId } = req.params;
-  const { fecha, actividades_realizadas, observaciones } = req.body;
+  const { fecha, actividades_realizadas, observaciones, resumen_ia } = req.body;
   try {
     const result = await pool.query(
-      `UPDATE sesiones s SET fecha = $1, actividades_realizadas = $2, observaciones = $3
+      `UPDATE sesiones s SET fecha = $1, actividades_realizadas = $2, observaciones = $3, resumen_ia = $4
        FROM pacientes p
-       WHERE s.id = $4 AND s.paciente_id = $5 AND s.paciente_id = p.id AND p.usuario_id = $6
+       WHERE s.id = $5 AND s.paciente_id = $6 AND s.paciente_id = p.id AND p.usuario_id = $7
        RETURNING s.*`,
-      [fecha, actividades_realizadas, observaciones, sesionId, id, req.userId]
+      [fecha, actividades_realizadas, observaciones, resumen_ia || null, sesionId, id, req.userId]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Sesión no encontrada" });

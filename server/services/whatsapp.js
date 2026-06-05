@@ -5,6 +5,7 @@ import fs from "fs";
 import QRCode from "qrcode";
 import { fileURLToPath } from "url";
 import pool from "../config/db.js";
+import { extraerEventoDeTexto } from "./aiService.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_PATH = path.join(__dirname, "..", "auth_info");
@@ -258,6 +259,36 @@ export async function iniciarWhatsApp() {
       }, 5 * 60 * 1000);
     }
   });
+
+  // ── Escuchar mensajes entrantes del profesional ───────────────────────────
+  sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    if (type !== "notify") return;
+
+    for (const msg of messages) {
+      // Ignorar mensajes propios enviados desde este servidor
+      if (msg.key.fromMe) continue;
+
+      const textoRecibido =
+        msg.message?.conversation ||
+        msg.message?.extendedTextMessage?.text ||
+        null;
+
+      // Exigir prefijo explícito para evitar que cualquier mensaje casual cree un evento
+      if (!textoRecibido) continue;
+      const PREFIJOS_AGENDA = ['/agenda', '*agenda*', 'agenda:'];
+      const textoNorm = textoRecibido.trim().toLowerCase();
+      if (!PREFIJOS_AGENDA.some(p => textoNorm.startsWith(p))) continue;
+
+      // Extraer el texto sin el prefijo para enviarlo a la IA
+      const textoProcesado = textoRecibido.trim().replace(/^\/agenda\s*/i, '').replace(/^\*agenda\*\s*/i, '').replace(/^agenda:\s*/i, '').trim();
+      if (!textoProcesado) continue;
+
+      // Normalizar número entrante al formato de comparación
+      const remitente = msg.key.remoteJid?.replace("@s.whatsapp.net", "") || "";
+
+      await procesarMensajeEntrante(remitente, textoProcesado);
+    }
+  });
 }
 
 // ── Cerrar sesión ─────────────────────────────────────────────────────────────
@@ -314,4 +345,85 @@ export function formatearTelefono(rawPhone) {
   if (num.startsWith("0")) num = num.substring(1);
   if (num.length === 10) return "549" + num;
   return num;
+}
+
+// ── Procesar mensaje entrante para agenda personal ───────────────────────────
+async function procesarMensajeEntrante(phoneRemitente, texto) {
+  try {
+    // Buscar si el remitente es el profesional configurado
+    const configResult = await pool.query(
+      `SELECT usuario_id, telefono_profesional
+       FROM configuracion_notificaciones
+       WHERE telefono_profesional IS NOT NULL AND telefono_profesional != ''
+       LIMIT 50`
+    );
+
+    // Comparar número normalizado — igualdad exacta o sin prefijo de país
+    const match = configResult.rows.find(row => {
+      const telNorm = formatearTelefono(row.telefono_profesional);
+      if (!telNorm) return false;
+      return phoneRemitente === telNorm ||
+        phoneRemitente.replace(/^549/, '') === telNorm.replace(/^549/, '');
+    });
+
+    if (!match) return; // No es un profesional registrado, ignorar
+
+    const fechaHoy = new Date()
+      .toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })
+      .split('/')
+      .reverse()
+      .map(p => p.padStart(2, '0'))
+      .join('-');
+
+    let evento;
+    try {
+      evento = await extraerEventoDeTexto(texto, fechaHoy);
+    } catch {
+      // Si la IA no pudo parsear, no responder (puede ser un mensaje casual)
+      console.log(`[AgendaPersonal] No se pudo extraer evento del texto: "${texto.substring(0, 50)}"`);
+      return;
+    }
+
+    // Validar que el JSON tenga al menos titulo y fecha
+    if (!evento?.titulo || !evento?.fecha) return;
+
+    const fechaHora = `${evento.fecha}T${evento.hora || '09:00'}:00-03:00`;
+
+    await pool.query(
+      `INSERT INTO agenda_personal
+         (profesional_id, titulo, descripcion, fecha_hora, recordatorio_minutos)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        match.usuario_id,
+        evento.titulo.substring(0, 255),
+        evento.descripcion || null,
+        fechaHora,
+        evento.recordatorio_minutos || 30,
+      ]
+    );
+
+    // Formatear fecha de confirmación en español
+    const fechaConfirm = new Date(fechaHora).toLocaleDateString('es-AR', {
+      timeZone: 'America/Argentina/Buenos_Aires',
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    const horaConfirm = evento.hora || '09:00';
+
+    const mensajeConfirmacion =
+`✅ *Evento agendado*
+📌 ${evento.titulo}
+📅 ${fechaConfirm} a las ${horaConfirm}
+⏰ Te aviso ${evento.recordatorio_minutos || 30} minutos antes`;
+
+    await enviarMensajeWhatsApp({
+      telefono: match.telefono_profesional,
+      mensaje: mensajeConfirmacion,
+    });
+
+    console.log(`[AgendaPersonal] Evento creado via WhatsApp para usuario ${match.usuario_id}: "${evento.titulo}"`);
+  } catch (err) {
+    console.error('[AgendaPersonal] Error procesando mensaje entrante:', err.message);
+  }
 }

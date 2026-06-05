@@ -286,3 +286,34 @@ Respondé la consulta basándote en la información de la historia clínica.`;
 
   return llamarDeepSeek(system, user, { temperature: 0.3, maxTokens: 1000 });
 }
+
+// ─────────────────────────────────────────────
+// 7. EXTRACCIÓN DE EVENTOS PARA AGENDA PERSONAL
+// ─────────────────────────────────────────────
+export async function extraerEventoDeTexto(textoLibre, fechaHoy) {
+  const system = `Sos un asistente de productividad personal.
+Analizá el siguiente texto escrito por un profesional y extraé los datos
+para agendar un recordatorio en su calendario.
+Devolvé ÚNICAMENTE un objeto JSON estricto con estas claves:
+- "titulo": Breve resumen de la tarea (máximo 50 caracteres).
+- "descripcion": Detalles adicionales mencionados. Cadena vacía si no hay.
+- "fecha": En formato YYYY-MM-DD. Calculá fechas relativas sabiendo que hoy es ${fechaHoy}.
+- "hora": En formato HH:MM (24 horas). Si no se menciona hora, usar "09:00".
+- "recordatorio_minutos": Entero de minutos antes para enviar la alerta.
+  Por defecto 30 si no se especifica.
+Sin texto adicional, sin markdown, solo el JSON.`;
+
+  const user = textoLibre;
+
+  const respuesta = await llamarDeepSeek(system, user, {
+    temperature: 0.1,
+    maxTokens: 300,
+  });
+
+  try {
+    const limpio = respuesta.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(limpio);
+  } catch {
+    throw new Error(`No se pudo parsear el evento extraído por la IA: ${respuesta.substring(0, 100)}`);
+  }
+}
