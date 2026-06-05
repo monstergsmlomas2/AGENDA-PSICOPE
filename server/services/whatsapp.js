@@ -237,14 +237,28 @@ export async function iniciarWhatsApp(userId = null) {
 
   if (!fs.existsSync(AUTH_PATH)) fs.mkdirSync(AUTH_PATH, { recursive: true });
 
-  // Cargar la sesión desde la DB SOLO la primera vez (arranque del proceso).
-  // En reconexiones NO se debe limpiar/reescribir el disco: hacerlo
-  // desincroniza las app-state sync keys y obliga a Baileys a re-hacer el
-  // handshake completo + sync, lo que dispara el aviso "Accediste/Finalizó
-  // sincronización" en el móvil cada vez que reconecta.
-  if (!sessionLoadedFromDB) {
-    await loadSessionFromDB();
-    sessionLoadedFromDB = true;
+  // Cargar creds desde DB SOLO si no hay creds válidas en disco.
+  // En reconexiones, las creds en disco ya están actualizadas por useMultiFileAuthState;
+  // sobreescribirlas con la versión de DB desincroniza las app-state sync keys
+  // y fuerza un full handshake → notificación "Finalizó sincronización" en el móvil
+  // y el teléfono deja de sonar. Solo se carga de DB si el disco está vacío/corrupto.
+  const localCredsPath = path.join(AUTH_PATH, "creds.json");
+  let hasValidLocalCreds = false;
+  try {
+    if (fs.existsSync(localCredsPath)) {
+      const localContent = fs.readFileSync(localCredsPath, "utf-8");
+      const parsed = JSON.parse(localContent);
+      hasValidLocalCreds = localContent.length > 50 && parsed?.noiseKey && parsed?.signedIdentityKey;
+    }
+  } catch (_) {}
+
+  if (!hasValidLocalCreds) {
+    if (!sessionLoadedFromDB) {
+      await loadSessionFromDB();
+      sessionLoadedFromDB = true;
+    }
+  } else {
+    console.log("[WhatsApp] Reutilizando creds locales (skip DB load — evita re-sync en móvil).");
   }
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
 
@@ -275,7 +289,7 @@ export async function iniciarWhatsApp(userId = null) {
     auth: state,
     printQRInTerminal: false,
     logger: pino({ level: "silent" }),
-    browser: Browsers.ubuntu("Chrome"),
+    browser: Browsers.macOS("Desktop"),
     emitOwnEvents: false,
     syncFullHistory: false,
     shouldSyncHistoryMessage: () => false,
