@@ -439,10 +439,11 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
 
     const fechaHora = `${evento.fecha}T${evento.hora || "09:00"}:00-03:00`;
 
-    await pool.query(
+    const insertResult = await pool.query(
       `INSERT INTO agenda_personal
          (profesional_id, titulo, descripcion, fecha_hora, recordatorio_minutos, origen)
-       VALUES ($1, $2, $3, $4, $5, 'whatsapp')`,
+       VALUES ($1, $2, $3, $4, $5, 'whatsapp')
+       RETURNING id`,
       [
         match.usuario_id,
         evento.titulo.substring(0, 255),
@@ -451,6 +452,20 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
         evento.recordatorio_minutos || 30,
       ]
     );
+
+    const eventoId = insertResult.rows[0]?.id;
+    console.log(`[AgendaPersonal] INSERT OK — evento id: ${eventoId}`);
+
+    // Crear recordatorios: 24h antes y 30 min antes
+    if (eventoId) {
+      for (const minutos of [1440, 30]) {
+        await pool.query(
+          `INSERT INTO agenda_personal_recordatorios (evento_id, minutos_antes) VALUES ($1, $2)
+           ON CONFLICT DO NOTHING`,
+          [eventoId, minutos]
+        );
+      }
+    }
 
     const fechaConfirm = new Date(fechaHora).toLocaleDateString("es-AR", {
       timeZone: "America/Argentina/Buenos_Aires",

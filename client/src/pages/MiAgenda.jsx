@@ -4,12 +4,26 @@ import { getEventos, crearEvento, actualizarEvento, eliminarEvento, completarEve
 import { useToast, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 
-const recordatorioOptions = [
-  { value: 15, label: '15 min antes' },
-  { value: 30, label: '30 min antes' },
-  { value: 60, label: '1 hora antes' },
-  { value: 120, label: '2 horas antes' },
+const RECORDATORIO_OPTIONS = [
+  { value: 10,   label: '10 min antes' },
+  { value: 15,   label: '15 min antes' },
+  { value: 30,   label: '30 min antes' },
+  { value: 60,   label: '1 hora antes' },
+  { value: 120,  label: '2 horas antes' },
+  { value: 360,  label: '6 horas antes' },
+  { value: 720,  label: '12 horas antes' },
+  { value: 1440, label: '24 horas antes' },
+  { value: 2880, label: '2 días antes' },
 ];
+
+function labelRecordatorio(minutos) {
+  return RECORDATORIO_OPTIONS.find(o => o.value === minutos)?.label
+    ?? (minutos >= 1440
+        ? `${Math.round(minutos / 1440)} día(s) antes`
+        : minutos >= 60
+        ? `${Math.round(minutos / 60)}h antes`
+        : `${minutos} min antes`);
+}
 
 const estadoConfig = {
   pendiente:  { label: 'Pendiente',  color: 'text-pink-600 dark:text-teal-400',  bg: 'bg-pink-50 dark:bg-teal-500/10',  border: 'border-pink-200 dark:border-teal-500/30',  dot: 'bg-pink-500 dark:bg-teal-400' },
@@ -34,11 +48,11 @@ function agruparEventos(eventos) {
     if (e.estado === 'completado') { grupos.completados.push(e); continue; }
     if (e.estado === 'cancelado')  { grupos.cancelados.push(e);  continue; }
 
-    if (dia < hoy)                        grupos.vencidos.push(e);
+    if (dia < hoy)                              grupos.vencidos.push(e);
     else if (dia.getTime() === hoy.getTime())   grupos.hoy.push(e);
     else if (dia.getTime() === manana.getTime()) grupos.manana.push(e);
-    else if (dia < finSemana)             grupos.semana.push(e);
-    else                                   grupos.proximos.push(e);
+    else if (dia < finSemana)                   grupos.semana.push(e);
+    else                                         grupos.proximos.push(e);
   }
 
   for (const k of Object.keys(grupos)) {
@@ -49,20 +63,20 @@ function agruparEventos(eventos) {
 }
 
 function formatFecha(fechaHora) {
-  const d = new Date(fechaHora);
-  return d.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
+  return new Date(fechaHora).toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function formatHora(fechaHora) {
-  const d = new Date(fechaHora);
-  return d.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false });
+  return new Date(fechaHora).toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false });
 }
 
 function EventoCard({ evento, onEdit, onCompletar, onEliminar }) {
   const cfg = estadoConfig[evento.estado] || estadoConfig.pendiente;
   const hora = formatHora(evento.fecha_hora);
   const fecha = formatFecha(evento.fecha_hora);
-  const recordLabel = recordatorioOptions.find(r => r.value === evento.recordatorio_minutos)?.label;
+  const recs = Array.isArray(evento.recordatorios) && evento.recordatorios.length > 0
+    ? evento.recordatorios
+    : evento.recordatorio_minutos ? [evento.recordatorio_minutos] : [];
   const esHoy = (() => {
     const d = new Date(evento.fecha_hora);
     const hoy = new Date();
@@ -71,12 +85,10 @@ function EventoCard({ evento, onEdit, onCompletar, onEliminar }) {
 
   return (
     <div className={`group relative bg-white dark:bg-[#1a1c23] border ${cfg.border} rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden hover:-translate-y-0.5`}>
-      {/* Barra de color lateral */}
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${cfg.dot} rounded-l-2xl`} />
 
       <div className="pl-5 pr-4 py-4 flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 flex-1 min-w-0">
-          {/* Icono de estado */}
           <div className={`shrink-0 w-10 h-10 rounded-xl flex items-center justify-center ${cfg.bg} border ${cfg.border}`}>
             {evento.estado === 'completado'
               ? <Check size={18} className="text-green-600 dark:text-green-400" />
@@ -106,16 +118,16 @@ function EventoCard({ evento, onEdit, onCompletar, onEliminar }) {
                 <span className={`font-bold ${cfg.color}`}>{hora} hs</span>
                 {!esHoy && <span className="text-slate-500 dark:text-slate-500 font-normal capitalize"> · {fecha}</span>}
               </span>
-              {recordLabel && (
+              {recs.length > 0 && (
                 <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
-                  <Bell size={10} /> {recordLabel}
+                  <Bell size={10} />
+                  {recs.map(m => labelRecordatorio(m)).join(' · ')}
                 </span>
               )}
             </div>
           </div>
         </div>
 
-        {/* Acciones */}
         <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
           {evento.estado === 'pendiente' && (
             <button
@@ -195,6 +207,34 @@ function SkeletonEventos() {
   );
 }
 
+// ── Sub-componente: selector de un recordatorio ───────────────────────────────
+function RecordatorioRow({ index, value, onChange, onRemove, canRemove }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Bell size={14} className="text-pink-400 dark:text-teal-400 shrink-0" />
+      <select
+        value={value}
+        onChange={e => onChange(index, Number(e.target.value))}
+        className={`${inputClass} flex-1`}
+      >
+        {RECORDATORIO_OPTIONS.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+      {canRemove && (
+        <button
+          type="button"
+          onClick={() => onRemove(index)}
+          className="p-1.5 rounded-lg text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors shrink-0"
+          title="Quitar recordatorio"
+        >
+          <X size={14} />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export default function MiAgenda() {
   const [eventos, setEventos] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -207,7 +247,7 @@ export default function MiAgenda() {
   const [descripcion, setDescripcion] = useState('');
   const [fecha, setFecha] = useState('');
   const [hora, setHora] = useState('');
-  const [recordatorioMinutos, setRecordatorioMinutos] = useState(30);
+  const [recordatorios, setRecordatorios] = useState([1440, 30]); // 24h + 30 min por defecto
   const [estado, setEstado] = useState('pendiente');
 
   const { confirm, ConfirmModal } = useConfirm();
@@ -230,16 +270,14 @@ export default function MiAgenda() {
 
   const resetForm = () => {
     setTitulo(''); setDescripcion(''); setFecha(''); setHora('');
-    setRecordatorioMinutos(30); setEstado('pendiente');
+    setRecordatorios([1440, 30]); setEstado('pendiente');
   };
 
   const openNew = () => {
     setEditingEvento(null);
     resetForm();
     const now = new Date();
-    const mes = String(now.getMonth() + 1).padStart(2, '0');
-    const dia = String(now.getDate()).padStart(2, '0');
-    setFecha(`${now.getFullYear()}-${mes}-${dia}`);
+    setFecha(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`);
     setHora(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
     setShowModal(true);
   };
@@ -251,13 +289,29 @@ export default function MiAgenda() {
     setDescripcion(evento.descripcion || '');
     setFecha(d.toISOString().slice(0, 10));
     setHora(d.toLocaleTimeString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires', hour: '2-digit', minute: '2-digit', hour12: false }));
-    setRecordatorioMinutos(evento.recordatorio_minutos || 30);
+    // Usar recordatorios del array nuevo, o fallback al campo legacy
+    const recs = Array.isArray(evento.recordatorios) && evento.recordatorios.length > 0
+      ? evento.recordatorios
+      : evento.recordatorio_minutos ? [evento.recordatorio_minutos] : [1440, 30];
+    setRecordatorios(recs);
     setEstado(evento.estado);
     setShowModal(true);
   };
 
+  // Handlers de recordatorios
+  const handleRecordatorioChange = (index, value) => {
+    setRecordatorios(prev => prev.map((v, i) => i === index ? value : v));
+  };
+  const handleRecordatorioRemove = (index) => {
+    setRecordatorios(prev => prev.filter((_, i) => i !== index));
+  };
+  const handleRecordatorioAdd = () => {
+    if (recordatorios.length >= 4) return;
+    setRecordatorios(prev => [...prev, 30]);
+  };
+
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e?.preventDefault();
     if (!titulo.trim() || !fecha || !hora) {
       toast.error('Campos obligatorios', 'Título, fecha y hora son requeridos.');
       return;
@@ -266,10 +320,23 @@ export default function MiAgenda() {
     try {
       const fecha_hora = `${fecha}T${hora}:00.000-03:00`;
       if (editingEvento) {
-        await actualizarEvento(editingEvento.id, { titulo: titulo.trim(), descripcion: descripcion.trim() || null, fecha_hora, recordatorio_minutos: recordatorioMinutos, estado });
+        await actualizarEvento(editingEvento.id, {
+          titulo: titulo.trim(),
+          descripcion: descripcion.trim() || null,
+          fecha_hora,
+          recordatorios,
+          recordatorio_minutos: recordatorios[0] ?? 30,
+          estado,
+        });
         toast.success('Evento actualizado', 'Los cambios se guardaron.');
       } else {
-        await crearEvento({ titulo: titulo.trim(), descripcion: descripcion.trim() || null, fecha_hora, recordatorio_minutos: recordatorioMinutos });
+        await crearEvento({
+          titulo: titulo.trim(),
+          descripcion: descripcion.trim() || null,
+          fecha_hora,
+          recordatorios,
+          recordatorio_minutos: recordatorios[0] ?? 30,
+        });
         toast.success('Evento creado', 'El evento fue registrado.');
       }
       setShowModal(false);
@@ -403,7 +470,7 @@ export default function MiAgenda() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Título *</label>
-                  <input type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Ej: Revisar informes" className={inputClass} required />
+                  <input type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Ej: Reunión escuela San José" className={inputClass} required />
                 </div>
                 <div>
                   <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Descripción</label>
@@ -419,12 +486,37 @@ export default function MiAgenda() {
                     <input type="time" value={hora} onChange={e => setHora(e.target.value)} className={inputClass} required />
                   </div>
                 </div>
+
+                {/* Recordatorios múltiples */}
                 <div>
-                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Recordatorio</label>
-                  <select value={recordatorioMinutos} onChange={e => setRecordatorioMinutos(Number(e.target.value))} className={inputClass}>
-                    {recordatorioOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                      Recordatorios WhatsApp
+                    </label>
+                    {recordatorios.length < 4 && (
+                      <button
+                        type="button"
+                        onClick={handleRecordatorioAdd}
+                        className="flex items-center gap-1 text-xs font-bold text-pink-600 dark:text-teal-400 hover:underline"
+                      >
+                        <Plus size={12} /> Agregar
+                      </button>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {recordatorios.map((val, idx) => (
+                      <RecordatorioRow
+                        key={idx}
+                        index={idx}
+                        value={val}
+                        onChange={handleRecordatorioChange}
+                        onRemove={handleRecordatorioRemove}
+                        canRemove={recordatorios.length > 1}
+                      />
+                    ))}
+                  </div>
                 </div>
+
                 {editingEvento && (
                   <div>
                     <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
