@@ -55,7 +55,7 @@ router.post("/enviar-recordatorios", async (req, res) => {
 // POST /whatsapp/enviar-resumen-profesional — envía solo al profesional
 router.post("/enviar-resumen-profesional", async (req, res) => {
   try {
-    const resultado = await ejecutarJob({ forzar: true, soloPacientes: false });
+    const resultado = await ejecutarJob({ forzar: true, soloPacientes: false, soloProf: true });
     res.json({ ok: true, ...resultado });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });

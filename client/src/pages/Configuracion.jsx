@@ -297,7 +297,7 @@ function TabWhatsApp({ toast, confirm }) {
   }, []);
 
   useEffect(() => {
-    if (waEstado !== 'QR_READY' && waEstado !== 'CONNECTING') return;
+    if (!['QR_READY', 'CONNECTING', 'ERROR'].includes(waEstado)) return;
     const interval = setInterval(async () => {
       try {
         const [statusRes, qrRes] = await Promise.all([
@@ -318,7 +318,7 @@ function TabWhatsApp({ toast, confirm }) {
     setWaEstado('CONNECTING');
     try {
       await apiFetch('/whatsapp/conectar', { method: 'POST' });
-      setWaEstado('QR_READY');
+      // El polling actualizará a QR_READY cuando el servidor tenga el QR listo
     } catch {
       toast.error('Error', 'No se pudo iniciar la conexión con WhatsApp.');
       setWaEstado('DISCONNECTED');

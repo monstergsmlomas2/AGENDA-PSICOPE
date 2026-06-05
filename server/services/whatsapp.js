@@ -5,7 +5,7 @@ import fs from "fs";
 import QRCode from "qrcode";
 import { fileURLToPath } from "url";
 import pool from "../config/db.js";
-import { extraerEventoDeTexto } from "./aiService.js";
+import { extraerEventoDeTexto, detectarYExtraerRecordatorio } from "./aiService.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const AUTH_PATH = path.join(__dirname, "..", "auth_info");
@@ -17,6 +17,7 @@ let qrCode = null;
 let connectingTimer = null;
 let presenceTimer = null;
 let isReconnecting = false; // evita reconexiones en cascada
+let intentionalDisconnect = false; // evita reconexión automática tras cerrar sesión manualmente
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -84,13 +85,16 @@ async function loadSessionFromDB() {
 async function saveSessionToDB() {
   try {
     if (!fs.existsSync(AUTH_PATH)) return;
-    const files = fs.readdirSync(AUTH_PATH).filter(f => f.endsWith(".json"));
+    const files = fs.readdirSync(AUTH_PATH).filter((f) => f.endsWith(".json"));
     for (const filename of files) {
       const content = fs.readFileSync(path.join(AUTH_PATH, filename), "utf-8");
-      await pool.query(`
+      await pool.query(
+        `
         INSERT INTO whatsapp_session (filename, file_data) VALUES ($1, $2)
         ON CONFLICT (filename) DO UPDATE SET file_data = $2, updated_at = NOW()
-      `, [filename, content]);
+      `,
+        [filename, content]
+      );
     }
     console.log(`[WhatsApp] Sesión guardada en DB (${files.length} archivos).`);
   } catch (err) {
@@ -145,11 +149,21 @@ export async function iniciarWhatsApp() {
   }
   isReconnecting = true;
 
-  if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
-  if (presenceTimer) { clearInterval(presenceTimer); presenceTimer = null; }
+  if (connectingTimer) {
+    clearTimeout(connectingTimer);
+    connectingTimer = null;
+  }
+  if (presenceTimer) {
+    clearInterval(presenceTimer);
+    presenceTimer = null;
+  }
   if (sock) {
-    try { sock.ev.removeAllListeners(); } catch (_) {}
-    try { sock.end(undefined); } catch (_) {}
+    try {
+      sock.ev.removeAllListeners();
+    } catch (_) {}
+    try {
+      sock.end(undefined);
+    } catch (_) {}
     sock = null;
   }
 
@@ -222,7 +236,16 @@ export async function iniciarWhatsApp() {
 
       status = "DISCONNECTED";
       qrCode = null;
-      if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
+      if (connectingTimer) {
+        clearTimeout(connectingTimer);
+        connectingTimer = null;
+      }
+
+      if (intentionalDisconnect) {
+        console.log("[WhatsApp] Desconexión intencional — no reconectar.");
+        intentionalDisconnect = false;
+        return;
+      }
 
       if (loggedOut) {
         console.log("[WhatsApp] Sesión cerrada — limpiando credenciales.");
@@ -242,7 +265,10 @@ export async function iniciarWhatsApp() {
     }
 
     if (connection === "open") {
-      if (connectingTimer) { clearTimeout(connectingTimer); connectingTimer = null; }
+      if (connectingTimer) {
+        clearTimeout(connectingTimer);
+        connectingTimer = null;
+      }
       status = "CONNECTED";
       qrCode = null;
       console.log("[WhatsApp] Conectado correctamente.");
@@ -250,42 +276,51 @@ export async function iniciarWhatsApp() {
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB();
 
-      try { await sock.sendPresenceUpdate("unavailable"); } catch (_) {}
+      try {
+        await sock.sendPresenceUpdate("unavailable");
+      } catch (_) {}
       if (presenceTimer) clearInterval(presenceTimer);
       presenceTimer = setInterval(async () => {
         if (sock && status === "CONNECTED") {
-          try { await sock.sendPresenceUpdate("unavailable"); } catch (_) {}
+          try {
+            await sock.sendPresenceUpdate("unavailable");
+          } catch (_) {}
         }
       }, 5 * 60 * 1000);
     }
   });
 
-  // ── Escuchar mensajes entrantes del profesional ───────────────────────────
+  // ── Escuchar mensajes ────────────────────────────────────────────────────────
   sock.ev.on("messages.upsert", async ({ messages, type }) => {
     if (type !== "notify") return;
 
     for (const msg of messages) {
-      // Ignorar mensajes propios enviados desde este servidor
-      if (msg.key.fromMe) continue;
-
       const textoRecibido =
-        msg.message?.conversation ||
-        msg.message?.extendedTextMessage?.text ||
-        null;
+        msg.message?.conversation || msg.message?.extendedTextMessage?.text || null;
 
-      // Exigir prefijo explícito para evitar que cualquier mensaje casual cree un evento
       if (!textoRecibido) continue;
-      const PREFIJOS_AGENDA = ['/agenda', '*agenda*', 'agenda:'];
-      const textoNorm = textoRecibido.trim().toLowerCase();
-      if (!PREFIJOS_AGENDA.some(p => textoNorm.startsWith(p))) continue;
 
-      // Extraer el texto sin el prefijo para enviarlo a la IA
-      const textoProcesado = textoRecibido.trim().replace(/^\/agenda\s*/i, '').replace(/^\*agenda\*\s*/i, '').replace(/^agenda:\s*/i, '').trim();
+      // Mensajes enviados a sí mismo → detección automática con IA (sin prefijo)
+      if (msg.key.fromMe) {
+        const destinatario = msg.key.remoteJid?.replace("@s.whatsapp.net", "") || "";
+        await procesarMensajePropio(destinatario, textoRecibido.trim());
+        continue;
+      }
+
+      // Mensajes de terceros → exigir prefijo explícito
+      const PREFIJOS_AGENDA = ["/agenda", "*agenda*", "agenda:"];
+      const textoNorm = textoRecibido.trim().toLowerCase();
+      if (!PREFIJOS_AGENDA.some((p) => textoNorm.startsWith(p))) continue;
+
+      const textoProcesado = textoRecibido
+        .trim()
+        .replace(/^\/agenda\s*/i, "")
+        .replace(/^\*agenda\*\s*/i, "")
+        .replace(/^agenda:\s*/i, "")
+        .trim();
       if (!textoProcesado) continue;
 
-      // Normalizar número entrante al formato de comparación
       const remitente = msg.key.remoteJid?.replace("@s.whatsapp.net", "") || "";
-
       await procesarMensajeEntrante(remitente, textoProcesado);
     }
   });
@@ -294,13 +329,20 @@ export async function iniciarWhatsApp() {
 // ── Cerrar sesión ─────────────────────────────────────────────────────────────
 export async function cerrarSesionWhatsApp() {
   resetAuthFolder();
-  try { await pool.query(`DELETE FROM whatsapp_session`); } catch (_) {}
+  try {
+    await pool.query(`DELETE FROM whatsapp_session`);
+  } catch (_) {}
   if (sock) {
-    try { await sock.logout(); } catch (_) {}
+    intentionalDisconnect = true;
+    try {
+      await sock.logout();
+    } catch (_) {}
     sock = null;
   }
   status = "DISCONNECTED";
   qrCode = null;
+  // intentionalDisconnect se resetea en el handler de connection.update, no aquí,
+  // porque el evento loggedOut llega de forma asíncrona después de que esta función termina
   console.log("[WhatsApp] Sesión cerrada.");
 }
 
@@ -344,10 +386,83 @@ export function formatearTelefono(rawPhone) {
   else if (num.startsWith("54")) num = num.substring(2);
   if (num.startsWith("0")) num = num.substring(1);
   if (num.length === 10) return "549" + num;
-  return num;
+  return num.length >= 10 ? num : null;
 }
 
-// ── Procesar mensaje entrante para agenda personal ───────────────────────────
+// ── Procesar mensaje propio (profesional se escribe a sí mismo) ───────────────
+// La IA decide si es un recordatorio/tarea; si lo es, lo agrega a agenda_personal
+async function procesarMensajePropio(phoneDestinatario, texto) {
+  try {
+    // Verificar que el número destino corresponda a un profesional registrado
+    const configResult = await pool.query(
+      `SELECT usuario_id, telefono_profesional
+       FROM configuracion_notificaciones
+       WHERE telefono_profesional IS NOT NULL AND telefono_profesional != ''
+       LIMIT 50`
+    );
+
+    const match = configResult.rows.find((row) => {
+      const telNorm = formatearTelefono(row.telefono_profesional);
+      if (!telNorm) return false;
+      return (
+        phoneDestinatario === telNorm ||
+        phoneDestinatario.replace(/^549/, "") === telNorm.replace(/^549/, "")
+      );
+    });
+
+    if (!match) return;
+
+    const fechaHoy = new Date()
+      .toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
+      .split("/")
+      .reverse()
+      .map((p) => p.padStart(2, "0"))
+      .join("-");
+
+    const { esRecordatorio, evento } = await detectarYExtraerRecordatorio(texto, fechaHoy);
+
+    if (!esRecordatorio || !evento?.titulo || !evento?.fecha) return;
+
+    const fechaHora = `${evento.fecha}T${evento.hora || "09:00"}:00-03:00`;
+
+    await pool.query(
+      `INSERT INTO agenda_personal
+         (profesional_id, titulo, descripcion, fecha_hora, recordatorio_minutos, origen)
+       VALUES ($1, $2, $3, $4, $5, 'whatsapp')`,
+      [
+        match.usuario_id,
+        evento.titulo.substring(0, 255),
+        evento.descripcion || null,
+        fechaHora,
+        evento.recordatorio_minutos || 30,
+      ]
+    );
+
+    const fechaConfirm = new Date(fechaHora).toLocaleDateString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    const horaConfirm = evento.hora || "09:00";
+
+    const mensajeConfirmacion = `✅ *Recordatorio creado*
+📌 ${evento.titulo}
+📅 ${fechaConfirm} a las ${horaConfirm}
+⏰ Te aviso ${evento.recordatorio_minutos || 30} minutos antes`;
+
+    await enviarMensajeWhatsApp({
+      telefono: match.telefono_profesional,
+      mensaje: mensajeConfirmacion,
+    });
+
+    console.log(`[AgendaPersonal] Recordatorio creado via mensaje propio para usuario ${match.usuario_id}: "${evento.titulo}"`);
+  } catch (err) {
+    console.error("[AgendaPersonal] Error procesando mensaje propio:", err.message);
+  }
+}
+
+// ── Procesar mensaje entrante de terceros (con prefijo /agenda) ───────────────
 async function procesarMensajeEntrante(phoneRemitente, texto) {
   try {
     // Buscar si el remitente es el profesional configurado
@@ -359,21 +474,23 @@ async function procesarMensajeEntrante(phoneRemitente, texto) {
     );
 
     // Comparar número normalizado — igualdad exacta o sin prefijo de país
-    const match = configResult.rows.find(row => {
+    const match = configResult.rows.find((row) => {
       const telNorm = formatearTelefono(row.telefono_profesional);
       if (!telNorm) return false;
-      return phoneRemitente === telNorm ||
-        phoneRemitente.replace(/^549/, '') === telNorm.replace(/^549/, '');
+      return (
+        phoneRemitente === telNorm ||
+        phoneRemitente.replace(/^549/, "") === telNorm.replace(/^549/, "")
+      );
     });
 
     if (!match) return; // No es un profesional registrado, ignorar
 
     const fechaHoy = new Date()
-      .toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })
-      .split('/')
+      .toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
+      .split("/")
       .reverse()
-      .map(p => p.padStart(2, '0'))
-      .join('-');
+      .map((p) => p.padStart(2, "0"))
+      .join("-");
 
     let evento;
     try {
@@ -387,7 +504,7 @@ async function procesarMensajeEntrante(phoneRemitente, texto) {
     // Validar que el JSON tenga al menos titulo y fecha
     if (!evento?.titulo || !evento?.fecha) return;
 
-    const fechaHora = `${evento.fecha}T${evento.hora || '09:00'}:00-03:00`;
+    const fechaHora = `${evento.fecha}T${evento.hora || "09:00"}:00-03:00`;
 
     await pool.query(
       `INSERT INTO agenda_personal
@@ -403,16 +520,15 @@ async function procesarMensajeEntrante(phoneRemitente, texto) {
     );
 
     // Formatear fecha de confirmación en español
-    const fechaConfirm = new Date(fechaHora).toLocaleDateString('es-AR', {
-      timeZone: 'America/Argentina/Buenos_Aires',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
+    const fechaConfirm = new Date(fechaHora).toLocaleDateString("es-AR", {
+      timeZone: "America/Argentina/Buenos_Aires",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
     });
-    const horaConfirm = evento.hora || '09:00';
+    const horaConfirm = evento.hora || "09:00";
 
-    const mensajeConfirmacion =
-`✅ *Evento agendado*
+    const mensajeConfirmacion = `✅ *Evento agendado*
 📌 ${evento.titulo}
 📅 ${fechaConfirm} a las ${horaConfirm}
 ⏰ Te aviso ${evento.recordatorio_minutos || 30} minutos antes`;
@@ -424,6 +540,6 @@ async function procesarMensajeEntrante(phoneRemitente, texto) {
 
     console.log(`[AgendaPersonal] Evento creado via WhatsApp para usuario ${match.usuario_id}: "${evento.titulo}"`);
   } catch (err) {
-    console.error('[AgendaPersonal] Error procesando mensaje entrante:', err.message);
+    console.error("[AgendaPersonal] Error procesando mensaje entrante:", err.message);
   }
 }

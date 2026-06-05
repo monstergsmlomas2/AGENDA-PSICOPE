@@ -290,6 +290,59 @@ Respondé la consulta basándote en la información de la historia clínica.`;
 // ─────────────────────────────────────────────
 // 7. EXTRACCIÓN DE EVENTOS PARA AGENDA PERSONAL
 // ─────────────────────────────────────────────
+
+/**
+ * Detecta si un mensaje libre (enviado a sí mismo) es una tarea/recordatorio
+ * y en ese caso extrae los datos del evento.
+ * Devuelve { esRecordatorio: bool, evento: {...} | null }
+ */
+export async function detectarYExtraerRecordatorio(textoLibre, fechaHoy) {
+  const system = `Sos un asistente personal que analiza mensajes que un profesional se envía a sí mismo.
+Tu única tarea es decidir si el mensaje es una tarea, recordatorio, nota para hacer algo, o un evento a agendar.
+Respondé ÚNICAMENTE con un JSON estricto sin texto adicional ni markdown.
+
+Si ES un recordatorio/tarea/evento, devolvé:
+{
+  "es_recordatorio": true,
+  "titulo": "breve resumen (máximo 50 chars)",
+  "descripcion": "detalles adicionales o cadena vacía",
+  "fecha": "YYYY-MM-DD (calculá fechas relativas sabiendo que hoy es ${fechaHoy})",
+  "hora": "HH:MM en formato 24h, o 09:00 si no se menciona",
+  "recordatorio_minutos": número entero de minutos antes para la alerta (default 30)
+}
+
+Si NO es un recordatorio (es una conversación, reflexión, saludo, mensaje casual, consulta, etc.), devolvé:
+{
+  "es_recordatorio": false
+}
+
+Ejemplos de recordatorios: "llamar a la mamá de Juan mañana", "comprar material de evaluación el viernes", "reunión con la directora jueves 15hs", "pagar el alquiler el 10"
+Ejemplos de NO recordatorio: "hola", "qué lindo día", "me olvidé el paraguas", "¿dónde puse las llaves?"`;
+
+  const respuesta = await llamarDeepSeek(system, textoLibre, {
+    temperature: 0.1,
+    maxTokens: 300,
+  });
+
+  try {
+    const limpio = respuesta.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(limpio);
+    if (!parsed.es_recordatorio) return { esRecordatorio: false, evento: null };
+    return {
+      esRecordatorio: true,
+      evento: {
+        titulo: parsed.titulo,
+        descripcion: parsed.descripcion || '',
+        fecha: parsed.fecha,
+        hora: parsed.hora || '09:00',
+        recordatorio_minutos: parsed.recordatorio_minutos || 30,
+      },
+    };
+  } catch {
+    return { esRecordatorio: false, evento: null };
+  }
+}
+
 export async function extraerEventoDeTexto(textoLibre, fechaHoy) {
   const system = `Sos un asistente de productividad personal.
 Analizá el siguiente texto escrito por un profesional y extraé los datos
