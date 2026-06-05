@@ -274,14 +274,17 @@ export async function iniciarWhatsApp(userId = null) {
     auth: state,
     printQRInTerminal: true,
     browser: Browsers.macOS("Desktop"),
-    syncFullHistory: false,
-    // No re-sincronizar historial de mensajes: evita el aviso repetido de
-    // "sincronización terminada" en el móvil. Solo necesitamos enviar/recibir.
-    shouldSyncHistoryMessage: () => false,
+    // ── Config clave para que el MÓVIL siga sonando con los WhatsApp ──
+    // Cuando el servidor se marca "online", WhatsApp redirige las
+    // notificaciones al dispositivo web y silencia el teléfono (igual que
+    // al abrir WhatsApp Web). Estas 4 opciones lo evitan:
+    emitOwnEvents: false,                   // no procesa eventos propios → no interfiere con el estado del teléfono
+    syncFullHistory: false,                 // no pide historial completo → no activa modo "sincronizando"
+    shouldSyncHistoryMessage: () => false,  // rechaza cualquier sync de historial
+    markOnlineOnConnect: false,             // no marca el dispositivo como "online" → el teléfono mantiene su estado normal
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
     keepAliveIntervalMs: 25000,
-    markOnlineOnConnect: false,
     retryRequestDelayMs: 2000,
     maxMsgRetryCount: 5,
   });
@@ -355,17 +358,14 @@ export async function iniciarWhatsApp(userId = null) {
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB();
 
-      try {
-        await sock.sendPresenceUpdate("unavailable");
-      } catch (_) {}
-      if (presenceTimer) clearInterval(presenceTimer);
-      presenceTimer = setInterval(async () => {
-        if (sock && status === "CONNECTED") {
-          try {
-            await sock.sendPresenceUpdate("unavailable");
-          } catch (_) {}
-        }
-      }, 5 * 60 * 1000);
+      // NO enviar presence updates: un WhatsApp Web normal no los manda de
+      // forma activa. Mandar "unavailable"/"available" marca este cliente como
+      // presente y hace que WhatsApp desvíe las notificaciones del teléfono.
+      // Sin presence, el móvil sigue sonando como con WhatsApp Web normal.
+      if (presenceTimer) {
+        clearInterval(presenceTimer);
+        presenceTimer = null;
+      }
     }
   });
 
