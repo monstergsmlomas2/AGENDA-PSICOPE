@@ -194,15 +194,6 @@ export default function SesionForm() {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / Evolución</label>
-              <button
-                type="button"
-                onClick={handleGenerarResumenIA}
-                disabled={generandoResumen}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-50 dark:bg-teal-500/10 border border-pink-200 dark:border-teal-500/30 text-pink-600 dark:text-teal-400 text-xs font-semibold hover:bg-pink-100 dark:hover:bg-teal-500/20 transition-colors disabled:opacity-60"
-              >
-                {generandoResumen ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                {generandoResumen ? 'Generando...' : 'Resumir con IA'}
-              </button>
             </div>
             <textarea
               value={observaciones}
@@ -217,6 +208,15 @@ export default function SesionForm() {
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles size={14} className="text-pink-500 dark:text-teal-400" />
                 <label className="text-xs font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider">Resumen IA</label>
+                <button
+                  type="button"
+                  onClick={handleGenerarResumenIA}
+                  disabled={generandoResumen}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-pink-50 dark:bg-teal-500/10 border border-pink-200 dark:border-teal-500/30 text-pink-600 dark:text-teal-400 text-xs font-semibold hover:bg-pink-100 dark:hover:bg-teal-500/20 transition-colors disabled:opacity-60"
+                >
+                  {generandoResumen ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                  {generandoResumen ? 'Generando...' : 'Resumir con IA'}
+                </button>
                 {resumenIA && (
                   <button
                     type="button"
