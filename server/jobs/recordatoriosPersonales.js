@@ -28,6 +28,15 @@ export async function ejecutarJobPersonal() {
   }
 
   try {
+    // Verificar que la tabla existe antes de operar
+    const tableCheck = await pool.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'agenda_personal_recordatorios')`
+    );
+    if (!tableCheck.rows[0].exists) {
+      console.warn("[AgendaPersonal] Tabla agenda_personal_recordatorios no existe — ejecutar migration 018.");
+      return;
+    }
+
     // Buscar recordatorios pendientes cuyo momento de envío ya llegó
     // momento_envio = fecha_hora del evento - minutos_antes
     const result = await pool.query(`
@@ -107,6 +116,10 @@ export async function ejecutarJobPersonal() {
     }
   } catch (err) {
     console.error("[AgendaPersonal] Error crítico en job:", err.message);
+    // Si la tabla no existe aún, loggear claro y no reintentar hasta el próximo ciclo
+    if (err.message.includes("does not exist") || err.message.includes("relation")) {
+      console.error("[AgendaPersonal] Tabla agenda_personal_recordatorios no encontrada — ejecutar migration 018 en Supabase.");
+    }
   }
 }
 
