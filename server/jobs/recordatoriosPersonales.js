@@ -37,10 +37,27 @@ export async function ejecutarJobPersonal() {
       return;
     }
 
-    // Buscar recordatorios pendientes cuyo momento de envío ya llegó
-    // momento_envio = fecha_hora del evento - minutos_antes
+    // Reclamar de forma ATÓMICA los recordatorios cuyo momento de envío ya llegó.
+    // El UPDATE ... RETURNING marca enviado=true en la misma operación que los
+    // selecciona: así un recordatorio nunca puede ser tomado dos veces (evita
+    // el envío repetido por ciclos solapados del job).
+    //
+    // Límite inferior (NOW() - 1 día): no enviar avisos de eventos muy viejos
+    // que quedaron pendientes. Límite superior (<= NOW()): no adelantar avisos
+    // de mañana — solo dispara cuando el momento de envío realmente llegó.
     const result = await pool.query(`
-      SELECT
+      UPDATE agenda_personal_recordatorios apr
+      SET enviado = true, enviado_at = NOW()
+      FROM agenda_personal ap, configuracion_notificaciones cn
+      WHERE apr.evento_id = ap.id
+        AND cn.usuario_id = ap.profesional_id
+        AND apr.enviado = false
+        AND ap.estado = 'pendiente'
+        AND cn.telefono_profesional IS NOT NULL
+        AND cn.telefono_profesional != ''
+        AND (ap.fecha_hora - (apr.minutos_antes || ' minutes')::INTERVAL)
+            BETWEEN (NOW() - INTERVAL '1 day') AND NOW()
+      RETURNING
         apr.id          AS recordatorio_id,
         apr.minutos_antes,
         ap.id           AS evento_id,
@@ -49,15 +66,6 @@ export async function ejecutarJobPersonal() {
         ap.fecha_hora,
         ap.profesional_id,
         cn.telefono_profesional
-      FROM agenda_personal_recordatorios apr
-      JOIN agenda_personal ap ON ap.id = apr.evento_id
-      JOIN configuracion_notificaciones cn ON cn.usuario_id = ap.profesional_id
-      WHERE apr.enviado = false
-        AND ap.estado = 'pendiente'
-        AND cn.telefono_profesional IS NOT NULL
-        AND cn.telefono_profesional != ''
-        AND (ap.fecha_hora - (apr.minutos_antes || ' minutes')::INTERVAL)
-            <= NOW()
     `);
 
     if (result.rows.length === 0) return;
@@ -87,17 +95,12 @@ export async function ejecutarJobPersonal() {
         if (row.descripcion?.trim()) partes.push(`📝 ${row.descripcion}`);
         partes.push(`🔔 ${cuandoLabel}`);
 
+        // El recordatorio ya fue marcado enviado=true de forma atómica en el
+        // UPDATE ... RETURNING de arriba, así que acá solo encolamos el envío.
         await enviarMensajeWhatsApp({
           telefono: row.telefono_profesional,
           mensaje: partes.join("\n"),
         });
-
-        await pool.query(
-          `UPDATE agenda_personal_recordatorios
-           SET enviado = true, enviado_at = NOW()
-           WHERE id = $1`,
-          [row.recordatorio_id]
-        );
 
         console.log(
           `[AgendaPersonal] Recordatorio enviado: "${row.titulo}" (evento:${row.evento_id} rec:${row.recordatorio_id} ${row.minutos_antes}min)`
@@ -107,11 +110,7 @@ export async function ejecutarJobPersonal() {
           `[AgendaPersonal] Error enviando recordatorio ${row.recordatorio_id} ("${row.titulo}"):`,
           err.message
         );
-        // Marcar como enviado para no reintentar infinitamente
-        await pool.query(
-          `UPDATE agenda_personal_recordatorios SET enviado = true WHERE id = $1`,
-          [row.recordatorio_id]
-        ).catch(() => {});
+        // Ya está marcado enviado=true; no se reintenta (evita spam por reenvío).
       }
     }
   } catch (err) {
