@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-const apiRoutes = ['/pacientes', '/turnos', '/consultorios', '/obras-sociales', '/informes', '/evaluaciones', '/pagos', '/analytics', '/configuracion', '/drive', '/whatsapp', '/ia', '/agenda-personal']
+const apiRoutes = ['/pacientes', '/turnos', '/consultorios', '/obras-sociales', '/informes', '/evaluaciones', '/pagos', '/analytics', '/configuracion', '/drive', '/whatsapp', '/ia', '/agenda-personal', '/push']
 
 const apiProxy = {
   target: 'http://localhost:3000',
@@ -70,6 +70,7 @@ export default defineConfig({
         clientsClaim: true,
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
+        importScripts: ['/sw-push.js'],
         runtimeCaching: [
           {
             urlPattern: /^\/api\//,

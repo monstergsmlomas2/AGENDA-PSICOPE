@@ -14,6 +14,7 @@ import driveRoutes, { handleGoogleCallback } from "./routes/drive.js";
 import whatsappRoutes from "./routes/whatsapp.js";
 import iaRoutes from "./routes/ia.js";
 import agendaPersonalRoutes from "./routes/agendaPersonal.js";
+import pushRoutes from "./routes/push.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
 import { iniciarJobPersonal } from "./jobs/recordatoriosPersonales.js";
@@ -72,6 +73,7 @@ app.use("/drive", authMiddleware, driveRoutes);
 app.use("/whatsapp", authMiddleware, whatsappRoutes);
 app.use("/ia", authMiddleware, iaRoutes);
 app.use("/agenda-personal", authMiddleware, agendaPersonalRoutes);
+app.use("/push", authMiddleware, pushRoutes);
 app.get("/auth/google/callback", handleGoogleCallback);
 
 const PORT = process.env.PORT || 3000;

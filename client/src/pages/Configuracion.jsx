@@ -652,6 +652,66 @@ function TabNotificaciones({ toast }) {
   });
   const mensajeRef = useRef(null);
 
+  // ── Notificaciones Push ──
+  const [pushActivo, setPushActivo] = useState(false);
+  const [pushCargando, setPushCargando] = useState(false);
+  const pushSuportado = 'Notification' in window && 'serviceWorker' in navigator && 'PushManager' in window;
+
+  useEffect(() => {
+    if (!pushSuportado) return;
+    // Verificar si ya hay suscripción activa en el servidor
+    apiFetch('/push/estado').then(data => {
+      if (data?.activo) setPushActivo(true);
+    }).catch(() => {});
+  }, []);
+
+  const togglePush = async (activar) => {
+    if (!pushSuportado) {
+      toast.error('No soportado', 'Tu navegador no soporta notificaciones push.');
+      return;
+    }
+    setPushCargando(true);
+    try {
+      if (activar) {
+        const permiso = await Notification.requestPermission();
+        if (permiso !== 'granted') {
+          toast.error('Permiso denegado', 'Habilitá las notificaciones en la configuración del navegador.');
+          setPushCargando(false);
+          return;
+        }
+        const reg = await navigator.serviceWorker.ready;
+        // Obtener clave pública VAPID del servidor
+        const { publicKey } = await apiFetch('/push/vapid-public-key');
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+        await apiPost('/push/suscribir', { subscription });
+        setPushActivo(true);
+        toast.success('Notificaciones push activadas', 'Recibirás alertas de recordatorios en este dispositivo.');
+      } else {
+        const reg = await navigator.serviceWorker.ready;
+        const subscription = await reg.pushManager.getSubscription();
+        if (subscription) {
+          await apiPost('/push/desuscribir', { endpoint: subscription.endpoint });
+          await subscription.unsubscribe();
+        }
+        setPushActivo(false);
+        toast.success('Notificaciones push desactivadas', 'Ya no recibirás alertas en este dispositivo.');
+      }
+    } catch (err) {
+      toast.error('Error', err.message || 'No se pudo cambiar la configuración de notificaciones.');
+    }
+    setPushCargando(false);
+  };
+
+  function urlBase64ToUint8Array(base64String) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+    const rawData = atob(base64);
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+  }
+
   const VARS = ['{nombre}', '{fecha}', '{hora}', '{consultorio}'];
 
   useEffect(() => {
@@ -779,6 +839,40 @@ function TabNotificaciones({ toast }) {
           </div>
         </Card>
       ))}
+
+      {/* Notificaciones Push */}
+      <Card>
+        <CardHeader
+          icon={Bell}
+          iconBg="bg-purple-100 dark:bg-purple-500/10"
+          iconColor="text-purple-600 dark:text-purple-400"
+          title="Notificaciones Push"
+          subtitle="Recibí alertas de recordatorios directamente en este dispositivo, sin WhatsApp"
+        />
+        <div className="p-6 space-y-4">
+          {!pushSuportado ? (
+            <p className="text-sm text-slate-500 dark:text-slate-400">Tu navegador no soporta notificaciones push.</p>
+          ) : (
+            <>
+              <SwitchToggle
+                valor={pushActivo}
+                onChange={togglePush}
+                label="Activar notificaciones push"
+                descripcion={pushActivo ? 'Recibirás alertas en este dispositivo' : 'Activá para recibir alertas en este dispositivo'}
+              />
+              {pushCargando && (
+                <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <Loader2 size={14} className="animate-spin" />
+                  Procesando...
+                </div>
+              )}
+              <p className="text-xs text-slate-400 dark:text-slate-500">
+                Funciona en cualquier navegador moderno. Si instalaste la app como PWA, las notificaciones llegan aunque la app esté cerrada.
+              </p>
+            </>
+          )}
+        </div>
+      </Card>
 
       <div className="flex justify-end">
         <button

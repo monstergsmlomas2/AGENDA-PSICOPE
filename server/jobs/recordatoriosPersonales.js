@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import pool from "../config/db.js";
 import { enviarMensajeWhatsApp, getEstadoWhatsApp } from "../services/whatsapp.js";
+import { enviarPushAUsuario } from "../routes/push.js";
 
 function formatearHoraArgentina(fechaHora) {
   return new Date(fechaHora).toLocaleTimeString("es-AR", {
@@ -21,11 +22,8 @@ function formatearFechaArgentina(fechaHora) {
 }
 
 export async function ejecutarJobPersonal() {
+
   const waEstado = getEstadoWhatsApp();
-  if (!waEstado.conectado) {
-    console.log(`[AgendaPersonal] WhatsApp no conectado (${waEstado.estado}). Saltando.`);
-    return;
-  }
 
   try {
     // Verificar que la tabla existe antes de operar
@@ -97,9 +95,23 @@ export async function ejecutarJobPersonal() {
 
         // El recordatorio ya fue marcado enviado=true de forma atómica en el
         // UPDATE ... RETURNING de arriba, así que acá solo encolamos el envío.
-        await enviarMensajeWhatsApp({
-          telefono: row.telefono_profesional,
-          mensaje: partes.join("\n"),
+
+        // WhatsApp (si está conectado)
+        if (waEstado.conectado) {
+          await enviarMensajeWhatsApp({
+            telefono: row.telefono_profesional,
+            mensaje: partes.join("\n"),
+          });
+        }
+
+        // Push notification (independiente de WhatsApp)
+        await enviarPushAUsuario(row.profesional_id, {
+          title: `⏰ ${row.titulo}`,
+          body: `📅 ${fecha} a las ${hora} — ${cuandoLabel}`,
+          icon: "/icon-192x192.png",
+          badge: "/icon-192x192.png",
+          tag: `recordatorio-${row.recordatorio_id}`,
+          data: { url: "/mi-agenda" },
         });
 
         console.log(
