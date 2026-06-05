@@ -39,6 +39,13 @@ app.get("/", (req, res) => {
   res.send("Agenda Psicope API funcionando");
 });
 
+// Keep-alive liviano para evitar que Render hiberne el servicio (plan Free).
+// Un pinger externo (UptimeRobot / cron-job.org) golpea esto cada ~10 min para
+// que Baileys no se re-vincule a WhatsApp y deje de avisar "sincronización".
+app.get("/keepalive", (req, res) => {
+  res.json({ ok: true, ts: Date.now() });
+});
+
 // Ruta de test solo disponible en desarrollo
 if (process.env.NODE_ENV !== "production") {
   app.get("/test-db", async (req, res) => {
