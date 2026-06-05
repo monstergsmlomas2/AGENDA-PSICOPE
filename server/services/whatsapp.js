@@ -20,6 +20,7 @@ let isReconnecting = false; // evita reconexiones en cascada
 let intentionalDisconnect = false; // evita reconexión automática tras cerrar sesión manualmente
 const mensajesProcesados = new Set(); // ids de mensajes ya procesados (anti-duplicado / anti-loop)
 let sessionOwnerUserId = null; // usuario que conectó este WhatsApp — dueño de los mensajes propios
+let sessionLoadedFromDB = false; // la sesión se carga del disco solo una vez (evita re-sync en reconexiones)
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -235,7 +236,15 @@ export async function iniciarWhatsApp(userId = null) {
 
   if (!fs.existsSync(AUTH_PATH)) fs.mkdirSync(AUTH_PATH, { recursive: true });
 
-  await loadSessionFromDB();
+  // Cargar la sesión desde la DB SOLO la primera vez (arranque del proceso).
+  // En reconexiones NO se debe limpiar/reescribir el disco: hacerlo
+  // desincroniza las app-state sync keys y obliga a Baileys a re-hacer el
+  // handshake completo + sync, lo que dispara el aviso "Accediste/Finalizó
+  // sincronización" en el móvil cada vez que reconecta.
+  if (!sessionLoadedFromDB) {
+    await loadSessionFromDB();
+    sessionLoadedFromDB = true;
+  }
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
 
   let version;
@@ -320,6 +329,7 @@ export async function iniciarWhatsApp(userId = null) {
         console.log("[WhatsApp] Sesión cerrada — limpiando credenciales.");
         resetAuthFolder();
         await pool.query(`DELETE FROM whatsapp_session`);
+        sessionLoadedFromDB = false; // forzar recarga limpia en el próximo arranque
         setTimeout(iniciarWhatsApp, 3000);
       } else if (restartRequired) {
         // Normal post-QR scan: WA pide restart para activar la sesión nueva
@@ -448,6 +458,7 @@ export async function cerrarSesionWhatsApp() {
   }
   status = "DISCONNECTED";
   qrCode = null;
+  sessionLoadedFromDB = false; // próxima conexión recarga limpio desde cero (nuevo QR)
   // intentionalDisconnect se resetea en el handler de connection.update, no aquí,
   // porque el evento loggedOut llega de forma asíncrona después de que esta función termina
   console.log("[WhatsApp] Sesión cerrada.");
