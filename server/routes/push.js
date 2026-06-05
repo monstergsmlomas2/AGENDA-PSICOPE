@@ -4,11 +4,20 @@ import pool from "../config/db.js";
 
 const router = Router();
 
-webpush.setVapidDetails(
-  process.env.VAPID_MAILTO || "mailto:admin@psicope.app",
-  process.env.VAPID_PUBLIC_KEY,
-  process.env.VAPID_PRIVATE_KEY
-);
+function initVapid() {
+  if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return false;
+  try {
+    webpush.setVapidDetails(
+      process.env.VAPID_MAILTO || "mailto:admin@psicope.app",
+      process.env.VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
+    );
+    return true;
+  } catch (err) {
+    console.error("[Push] VAPID init error:", err.message);
+    return false;
+  }
+}
 
 // GET /push/vapid-public-key — clave pública para que el cliente se suscriba
 router.get("/vapid-public-key", (req, res) => {
@@ -72,6 +81,7 @@ export default router;
 
 // ── Función exportada para enviar push desde jobs ─────────────────────────────
 export async function enviarPushAUsuario(usuarioId, payload) {
+  if (!initVapid()) return; // sin VAPID keys configuradas, skip silencioso
   try {
     const result = await pool.query(
       `SELECT endpoint, p256dh, auth FROM push_subscriptions WHERE usuario_id = $1`,
