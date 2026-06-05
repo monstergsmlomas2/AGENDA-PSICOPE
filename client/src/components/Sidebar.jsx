@@ -59,7 +59,7 @@ function NavItem({ item, onClick }) {
       end={item.to === '/'}
       onClick={onClick}
       className={({ isActive }) =>
-        `group relative flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 ${
+        `group relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
           isActive
             ? 'bg-pink-300 text-black shadow-sm shadow-pink-300/30 dark:bg-teal-500/10 dark:text-teal-400 dark:shadow-teal-500/5'
             : 'text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50'
@@ -68,11 +68,9 @@ function NavItem({ item, onClick }) {
     >
       {({ isActive }) => (
         <>
-          {/* Indicador activo */}
           {isActive && (
-            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-pink-500 rounded-full shadow-sm shadow-pink-500/50 dark:bg-teal-400 dark:shadow-teal-400/50" />
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-pink-500 rounded-full shadow-sm shadow-pink-500/50 dark:bg-teal-400 dark:shadow-teal-400/50" />
           )}
-
           <span
             className={`shrink-0 transition-all duration-200 ${
               isActive
@@ -80,9 +78,8 @@ function NavItem({ item, onClick }) {
                 : 'text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300'
             }`}
           >
-            <Icono size={17} />
+            <Icono size={16} />
           </span>
-
           <span className="truncate">{item.label}</span>
         </>
       )}
@@ -125,122 +122,77 @@ export default function Sidebar({ isOpen, onClose }) {
           md:translate-x-0
         `}
       >
-        {/* ─── Header con botón cerrar en móvil ─── */}
-        <div className="p-4 border-b border-pink-200 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1.5 rounded-xl shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
-              <Brain size={22} className="text-pink-600 dark:text-teal-400" />
+        {/* ─── Header ─── */}
+        <div className="px-3 py-3 border-b border-pink-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1 rounded-lg shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
+              <Brain size={18} className="text-pink-600 dark:text-teal-400" />
             </div>
-            <div>
-              <h1 className="text-base font-bold tracking-tight leading-tight">
-                <span className="text-black dark:text-white">Agenda</span>
-                <span className="text-pink-600 dark:text-teal-400">Psicope</span>
-              </h1>
-              <p className="text-[9px] font-medium text-slate-900 uppercase tracking-widest mt-0.5">
-                Sistema de Gestión
-              </p>
-            </div>
+            <h1 className="text-sm font-bold tracking-tight leading-tight">
+              <span className="text-black dark:text-white">Agenda</span>
+              <span className="text-pink-600 dark:text-teal-400">Psicope</span>
+            </h1>
           </div>
-          {/* Botón cerrar — solo en móvil */}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-pink-200 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors md:hidden"
+            className="p-1 rounded-lg hover:bg-pink-200 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors md:hidden"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
         {/* ─── Navegación ─── */}
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 p-2 flex flex-col gap-0.5">
           {/* Búsqueda rápida */}
-          <div className="mb-2">
-            <button
-              onClick={() =>
-                window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
-              }
-              className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-            >
-              <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-                <Search size={17} />
-              </span>
-              <span className="truncate flex-1 text-left">Buscar paciente</span>
-              <span className="text-xs text-slate-400 font-medium">
-                {navigator.platform.toUpperCase().includes('MAC') ? '⌘K' : 'Ctrl+K'}
-              </span>
-            </button>
-          </div>
+          <button
+            onClick={() =>
+              window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+            }
+            className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50 mb-1"
+          >
+            <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
+              <Search size={16} />
+            </span>
+            <span className="truncate flex-1 text-left">Buscar</span>
+            <span className="text-[10px] text-slate-400 font-medium bg-slate-200/60 dark:bg-slate-800 px-1 rounded">
+              {navigator.platform.toUpperCase().includes('MAC') ? '⌘K' : 'Ctrl+K'}
+            </span>
+          </button>
 
-          {/* Menú Principal */}
-          <div className="mb-1">
-            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-              Menú Principal
-            </p>
-            <div className="space-y-0.5">
-              {navItems.map((item) => (
-                <NavItem key={item.to} item={item} onClick={handleNavClick} />
-              ))}
-            </div>
-          </div>
+          <div className="border-t border-purple-300 dark:border-slate-800 my-0.5" />
 
-          {/* Divisor */}
-          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+          <p className="px-3 pt-1 pb-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Principal</p>
+          {navItems.map((item) => (
+            <NavItem key={item.to} item={item} onClick={handleNavClick} />
+          ))}
 
-          {/* Gestión */}
-          <div>
-            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-              Gestión
-            </p>
-            <div className="space-y-0.5">
-              {gestionItems.map((item) => (
-                <NavItem key={item.to} item={item} onClick={handleNavClick} />
-              ))}
-            </div>
-          </div>
+          <div className="border-t border-purple-300 dark:border-slate-800 my-0.5" />
 
-          {/* Separador antes de Herramientas */}
-          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+          <p className="px-3 pt-1 pb-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Gestión</p>
+          {gestionItems.map((item) => (
+            <NavItem key={item.to} item={item} onClick={handleNavClick} />
+          ))}
 
-          {/* Herramientas Clínicas */}
-          <div>
-            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-              Herramientas
-            </p>
-            <div className="space-y-0.5">
-              <NavItem item={{ label: 'Tests Estandarizados', to: '/herramientas', icon: BookOpen }} onClick={handleNavClick} />
-              <NavItem item={{ label: 'Panel de IA', to: '/ia', icon: Sparkles }} onClick={handleNavClick} />
-            </div>
-          </div>
+          <div className="border-t border-purple-300 dark:border-slate-800 my-0.5" />
 
-          {/* Separador antes de Configuración */}
-          <div className="my-3 border-t border-purple-300 dark:border-slate-800" />
+          <p className="px-3 pt-1 pb-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Herramientas</p>
+          <NavItem item={{ label: 'Tests Estandarizados', to: '/herramientas', icon: BookOpen }} onClick={handleNavClick} />
+          <NavItem item={{ label: 'Panel de IA', to: '/ia', icon: Sparkles }} onClick={handleNavClick} />
 
-          {/* Configuración */}
-          <div>
-            <p className="px-3 py-1.5 text-[10px] font-bold text-slate-900 uppercase tracking-[0.15em]">
-              Sistema
-            </p>
-            <div className="space-y-0.5">
-              <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} onClick={handleNavClick} />
-              {/* Cerrar sesión */}
-              <button
-                onClick={handleLogout}
-                className="group relative flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-              >
-                <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-                  <LogOut size={17} />
-                </span>
-                <span className="truncate">Cerrar sesión</span>
-              </button>
-            </div>
-          </div>
+          <div className="border-t border-purple-300 dark:border-slate-800 my-0.5" />
+
+          <p className="px-3 pt-1 pb-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Sistema</p>
+          <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} onClick={handleNavClick} />
+          <button
+            onClick={handleLogout}
+            className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
+          >
+            <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
+              <LogOut size={16} />
+            </span>
+            <span className="truncate">Cerrar sesión</span>
+          </button>
         </nav>
-
-        {/* ─── Footer ─── */}
-        <div className="p-3 border-t border-purple-300 dark:border-slate-800">
-          <p className="text-[11px] text-slate-900 dark:text-slate-600 text-center font-medium">
-            v1.0 &copy; {new Date().getFullYear()}
-          </p>
-        </div>
       </aside>
     </>
   );
