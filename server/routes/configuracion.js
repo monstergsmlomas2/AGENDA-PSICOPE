@@ -112,20 +112,27 @@ router.put("/perfil", async (req, res) => {
       `INSERT INTO configuracion_notificaciones (usuario_id, nombre_profesional, especialidad, matricula, email, telefono_profesional, actualizado_en)
        VALUES ($6, $1, $2, $3, $4, $5, NOW())
        ON CONFLICT (usuario_id) DO UPDATE SET
-        nombre_profesional = COALESCE($1, configuracion_notificaciones.nombre_profesional),
-        especialidad = COALESCE($2, configuracion_notificaciones.especialidad),
-        matricula = COALESCE($3, configuracion_notificaciones.matricula),
-        email = COALESCE($4, configuracion_notificaciones.email),
-        telefono_profesional = COALESCE($5, configuracion_notificaciones.telefono_profesional),
+        nombre_profesional = $1,
+        especialidad = $2,
+        matricula = $3,
+        email = $4,
+        telefono_profesional = $5,
         actualizado_en = NOW()
        RETURNING *`,
-      [nombre_profesional, especialidad, matricula, email, telefono_profesional, req.userId]
+      [
+        nombre_profesional || null,
+        especialidad || null,
+        matricula || null,
+        email || null,
+        telefono_profesional || null,
+        req.userId,
+      ]
     );
 
     res.json(result.rows[0]);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error al actualizar perfil profesional" });
+    console.error("Error al actualizar perfil profesional:", error.message, error.detail);
+    res.status(500).json({ error: "Error al actualizar perfil profesional", detail: error.message });
   }
 });
 
