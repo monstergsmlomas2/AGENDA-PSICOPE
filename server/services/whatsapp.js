@@ -475,14 +475,19 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
     const eventoId = insertResult.rows[0]?.id;
     console.log(`[AgendaPersonal] INSERT OK — evento id: ${eventoId}`);
 
-    // Crear recordatorios: 24h antes y 30 min antes
+    // Crear recordatorios: 24h antes y 30 min antes.
+    // Secundario: si la tabla no existe o falla, no debe impedir la confirmación.
     if (eventoId) {
-      for (const minutos of [1440, 30]) {
-        await pool.query(
-          `INSERT INTO agenda_personal_recordatorios (evento_id, minutos_antes) VALUES ($1, $2)
-           ON CONFLICT DO NOTHING`,
-          [eventoId, minutos]
-        );
+      try {
+        for (const minutos of [1440, 30]) {
+          await pool.query(
+            `INSERT INTO agenda_personal_recordatorios (evento_id, minutos_antes) VALUES ($1, $2)
+             ON CONFLICT DO NOTHING`,
+            [eventoId, minutos]
+          );
+        }
+      } catch (errRec) {
+        console.error(`[AgendaPersonal] No se pudieron crear recordatorios múltiples (continuo igual): ${errRec.message}`);
       }
     }
 
