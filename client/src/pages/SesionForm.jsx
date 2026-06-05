@@ -213,8 +213,7 @@ export default function SesionForm() {
             />
           </div>
 
-          {(resumenIA || generandoResumen) && (
-            <div>
+          <div>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles size={14} className="text-pink-500 dark:text-teal-400" />
                 <label className="text-xs font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider">Resumen IA</label>
@@ -241,8 +240,7 @@ export default function SesionForm() {
                   className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-teal-500/30 bg-pink-50 dark:bg-teal-500/5 text-slate-900 dark:text-white focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent text-sm"
                 />
               )}
-            </div>
-          )}
+          </div>
 
           <div className="flex justify-end gap-3 pt-2 border-t border-pink-200 dark:border-slate-800">
             <button
