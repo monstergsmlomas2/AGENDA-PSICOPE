@@ -292,7 +292,8 @@ export async function iniciarWhatsApp() {
 
   // ── Escuchar mensajes ────────────────────────────────────────────────────────
   sock.ev.on("messages.upsert", async ({ messages, type }) => {
-    if (type !== "notify") return;
+    // "notify" = mensajes entrantes nuevos; "append" = mensajes propios sincronizados
+    if (type !== "notify" && type !== "append") return;
 
     for (const msg of messages) {
       const textoRecibido =
@@ -300,10 +301,18 @@ export async function iniciarWhatsApp() {
 
       if (!textoRecibido) continue;
 
-      // Mensajes enviados a sí mismo → detección automática con IA (sin prefijo)
-      if (msg.key.fromMe) {
-        const destinatario = msg.key.remoteJid?.replace("@s.whatsapp.net", "") || "";
-        await procesarMensajePropio(destinatario, textoRecibido.trim());
+      const remoteJid = msg.key.remoteJid || "";
+      const propioNumero = (sock?.user?.id || "").split(":")[0].split("@")[0];
+      const remoteNumero = remoteJid.replace("@s.whatsapp.net", "").split(":")[0];
+
+      // Mensajes propios: fromMe=true O el remoteJid es el propio número (chat "Tus mensajes")
+      const esMensajePropio =
+        msg.key.fromMe ||
+        (propioNumero && remoteNumero === propioNumero);
+
+      if (esMensajePropio) {
+        console.log(`[AgendaPersonal] Mensaje propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} texto:"${textoRecibido.substring(0, 60)}"`);
+        await procesarMensajePropio(propioNumero || remoteNumero, textoRecibido.trim());
         continue;
       }
 
@@ -320,7 +329,7 @@ export async function iniciarWhatsApp() {
         .trim();
       if (!textoProcesado) continue;
 
-      const remitente = msg.key.remoteJid?.replace("@s.whatsapp.net", "") || "";
+      const remitente = remoteJid.replace("@s.whatsapp.net", "") || "";
       await procesarMensajeEntrante(remitente, textoProcesado);
     }
   });
@@ -401,16 +410,21 @@ async function procesarMensajePropio(phoneDestinatario, texto) {
        LIMIT 50`
     );
 
+    // Normalizar el número del JID para comparar contra la DB
+    const destNorm = formatearTelefono(phoneDestinatario) || phoneDestinatario.replace(/\D/g, "");
+    const destCorto = destNorm.replace(/^549/, "");
+
     const match = configResult.rows.find((row) => {
       const telNorm = formatearTelefono(row.telefono_profesional);
       if (!telNorm) return false;
-      return (
-        phoneDestinatario === telNorm ||
-        phoneDestinatario.replace(/^549/, "") === telNorm.replace(/^549/, "")
-      );
+      const telCorto = telNorm.replace(/^549/, "");
+      return destNorm === telNorm || destCorto === telCorto || destCorto === telNorm || destNorm === telCorto;
     });
 
-    if (!match) return;
+    if (!match) {
+      console.log(`[AgendaPersonal] Número ${destNorm} no encontrado en configuracion_notificaciones. Ignorando.`);
+      return;
+    }
 
     const fechaHoy = new Date()
       .toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
