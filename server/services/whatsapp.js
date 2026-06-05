@@ -18,6 +18,7 @@ let connectingTimer = null;
 let presenceTimer = null;
 let isReconnecting = false; // evita reconexiones en cascada
 let intentionalDisconnect = false; // evita reconexión automática tras cerrar sesión manualmente
+const mensajesProcesados = new Set(); // ids de mensajes ya procesados (anti-duplicado / anti-loop)
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -327,6 +328,30 @@ export async function iniciarWhatsApp() {
         msg.message?.conversation || msg.message?.extendedTextMessage?.text || null;
 
       if (!textoRecibido) continue;
+
+      // Anti-loop: ignorar los mensajes que el propio bot generó (confirmaciones
+      // y recordatorios empiezan con estos emojis). Sin esto, la confirmación
+      // vuelve como fromMe:true, la IA la reinterpreta y se crea un loop infinito.
+      const textoTrim = textoRecibido.trim();
+      if (/^(✅|⏰|📅|📌|🔔)/.test(textoTrim) ||
+          textoTrim.includes("Recordatorio creado") ||
+          textoTrim.includes("Evento agendado") ||
+          textoTrim.includes("Recordatorio Personal")) {
+        continue;
+      }
+
+      // Anti-duplicado: no procesar el mismo mensaje dos veces (Baileys reentrega
+      // el mismo id en eventos "notify" y "append").
+      const msgId = msg.key.id;
+      if (msgId) {
+        if (mensajesProcesados.has(msgId)) continue;
+        mensajesProcesados.add(msgId);
+        if (mensajesProcesados.size > 500) {
+          // Limitar memoria: descartar los más viejos
+          const primeros = [...mensajesProcesados].slice(0, 250);
+          primeros.forEach((id) => mensajesProcesados.delete(id));
+        }
+      }
 
       const remoteJid = msg.key.remoteJid || "";
       // sock.user.id tiene formato "549XXXXXXXXXX:0@s.whatsapp.net" — extraer solo dígitos antes de ":" y "@"
