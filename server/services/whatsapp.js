@@ -19,6 +19,7 @@ let presenceTimer = null;
 let isReconnecting = false; // evita reconexiones en cascada
 let intentionalDisconnect = false; // evita reconexión automática tras cerrar sesión manualmente
 const mensajesProcesados = new Set(); // ids de mensajes ya procesados (anti-duplicado / anti-loop)
+let sessionOwnerUserId = null; // usuario que conectó este WhatsApp — dueño de los mensajes propios
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -62,7 +63,8 @@ setInterval(async () => {
 // Guarda TODOS los archivos de auth_info, no solo creds.json
 async function loadSessionFromDB() {
   try {
-    const res = await pool.query(`SELECT filename, file_data FROM whatsapp_session`);
+    // Excluir '__owner__' (metadata de sesión, no es un archivo de Baileys)
+    const res = await pool.query(`SELECT filename, file_data FROM whatsapp_session WHERE filename <> '__owner__'`);
     if (!res.rows.length) {
       console.log("[WhatsApp] No hay sesión guardada en DB.");
       return;
@@ -116,8 +118,9 @@ async function saveSessionToDB() {
     // ya consumió y borró del disco. Sin esto, la DB acumula claves obsoletas que
     // corrompen la sesión tras cada reinicio (Bad MAC / Invalid PreKey ID).
     if (files.length > 0) {
+      // Excluir '__owner__' que no es un archivo de disco sino metadata de sesión
       await pool.query(
-        `DELETE FROM whatsapp_session WHERE filename <> ALL($1::text[])`,
+        `DELETE FROM whatsapp_session WHERE filename <> ALL($1::text[]) AND filename <> '__owner__'`,
         [files]
       );
     }
@@ -168,8 +171,43 @@ function resetAuthFolder() {
   } catch (_) {}
 }
 
+// ── Dueño de la sesión ────────────────────────────────────────────────────────
+// Persiste qué usuario conectó este WhatsApp. Los mensajes propios se agendan
+// SIEMPRE a este usuario, sin adivinar por teléfono (evita que los recordatorios
+// de un usuario terminen en otro cuando hay varias cuentas).
+async function guardarSessionOwner(userId) {
+  if (!userId) return;
+  sessionOwnerUserId = userId;
+  try {
+    await pool.query(
+      `INSERT INTO whatsapp_session (filename, file_data) VALUES ('__owner__', $1)
+       ON CONFLICT (filename) DO UPDATE SET file_data = $1, updated_at = NOW()`,
+      [userId]
+    );
+    console.log(`[WhatsApp] Dueño de la sesión registrado: ${userId}`);
+  } catch (err) {
+    console.error("[WhatsApp] Error guardando dueño de sesión:", err.message);
+  }
+}
+
+async function cargarSessionOwner() {
+  try {
+    const res = await pool.query(
+      `SELECT file_data FROM whatsapp_session WHERE filename = '__owner__'`
+    );
+    sessionOwnerUserId = res.rows[0]?.file_data || null;
+    if (sessionOwnerUserId) console.log(`[WhatsApp] Dueño de la sesión: ${sessionOwnerUserId}`);
+  } catch (_) {
+    sessionOwnerUserId = null;
+  }
+}
+
 // ── Iniciar conexión ──────────────────────────────────────────────────────────
-export async function iniciarWhatsApp() {
+export async function iniciarWhatsApp(userId = null) {
+  // Registrar/recordar quién es el dueño de esta sesión
+  if (userId) await guardarSessionOwner(userId);
+  else if (!sessionOwnerUserId) await cargarSessionOwner();
+
   // Evitar múltiples reconexiones simultáneas
   if (isReconnecting) {
     console.log("[WhatsApp] Ya hay una reconexión en curso, ignorando.");
@@ -459,36 +497,34 @@ export function formatearTelefono(rawPhone) {
 // La IA decide si es un recordatorio/tarea; si lo es, lo agrega a agenda_personal
 async function procesarMensajePropio(phoneDestinatario, texto) {
   try {
-    // Verificar que el número destino corresponda a un profesional registrado
+    // El dueño del mensaje es SIEMPRE quien conectó este WhatsApp.
+    // No se adivina por teléfono (eso causaba que los recordatorios de un
+    // usuario terminaran en otro cuando varias cuentas comparten número).
+    if (!sessionOwnerUserId) {
+      await cargarSessionOwner();
+    }
+    if (!sessionOwnerUserId) {
+      console.log(`[AgendaPersonal] Sin dueño de sesión registrado. Reconectá WhatsApp desde la app para asociarlo a tu usuario. Ignorando.`);
+      return;
+    }
+
+    // Buscar la config del dueño (para el teléfono de confirmación)
     const configResult = await pool.query(
       `SELECT usuario_id, telefono_profesional
        FROM configuracion_notificaciones
-       WHERE telefono_profesional IS NOT NULL AND telefono_profesional != ''
-       LIMIT 50`
+       WHERE usuario_id = $1
+       LIMIT 1`,
+      [sessionOwnerUserId]
     );
 
-    // Normalizar el número del JID para comparar contra la DB
-    const destNorm = formatearTelefono(phoneDestinatario) || phoneDestinatario.replace(/\D/g, "");
-    const destCorto = destNorm.replace(/^549/, "").replace(/^54/, "");
+    // Teléfono de confirmación: el de la config del dueño, o el JID si no hay
+    const telConfirmacion =
+      configResult.rows[0]?.telefono_profesional ||
+      formatearTelefono(phoneDestinatario) ||
+      phoneDestinatario.replace(/\D/g, "");
 
-    console.log(`[AgendaPersonal] Buscando profesional — destNorm:${destNorm} destCorto:${destCorto} rows:${configResult.rows.length}`);
-    configResult.rows.forEach(r => {
-      const tn = formatearTelefono(r.telefono_profesional);
-      const tc = (tn || "").replace(/^549/, "").replace(/^54/, "");
-      console.log(`[AgendaPersonal]   DB tel:${r.telefono_profesional} → norm:${tn} corto:${tc}`);
-    });
-
-    const match = configResult.rows.find((row) => {
-      const telNorm = formatearTelefono(row.telefono_profesional);
-      if (!telNorm) return false;
-      const telCorto = telNorm.replace(/^549/, "").replace(/^54/, "");
-      return destNorm === telNorm || destCorto === telCorto || destCorto === telNorm || destNorm === telCorto;
-    });
-
-    if (!match) {
-      console.log(`[AgendaPersonal] Número ${destNorm} no encontrado en configuracion_notificaciones. Ignorando.`);
-      return;
-    }
+    const match = { usuario_id: sessionOwnerUserId, telefono_profesional: telConfirmacion };
+    console.log(`[AgendaPersonal] Dueño de sesión: ${sessionOwnerUserId} — tel confirmación: ${telConfirmacion}`);
 
     const fechaHoy = new Date()
       .toLocaleDateString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })

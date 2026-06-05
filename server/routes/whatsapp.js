@@ -25,7 +25,9 @@ router.get("/qr", (req, res) => {
 // POST /whatsapp/conectar — inicia la conexión y genera el QR
 router.post("/conectar", async (req, res) => {
   try {
-    await iniciarWhatsApp();
+    // Asociar la sesión de WhatsApp al usuario que la conecta, para que los
+    // mensajes propios se agenden a su cuenta (no se adivina por teléfono).
+    await iniciarWhatsApp(req.userId);
     res.json({ ok: true, mensaje: "Iniciando conexión..." });
   } catch (err) {
     res.status(500).json({ ok: false, error: err.message });
