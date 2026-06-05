@@ -66,7 +66,15 @@ async function loadSessionFromDB() {
       console.log("[WhatsApp] No hay sesión guardada en DB.");
       return;
     }
-    if (!fs.existsSync(AUTH_PATH)) fs.mkdirSync(AUTH_PATH, { recursive: true });
+    // Limpiar el disco antes de cargar: la DB es la única fuente de verdad.
+    // Evita mezclar restos de una sesión vieja con la sesión guardada.
+    if (fs.existsSync(AUTH_PATH)) {
+      for (const f of fs.readdirSync(AUTH_PATH)) {
+        if (f.endsWith(".json")) fs.rmSync(path.join(AUTH_PATH, f), { force: true });
+      }
+    } else {
+      fs.mkdirSync(AUTH_PATH, { recursive: true });
+    }
     for (const row of res.rows) {
       fs.writeFileSync(path.join(AUTH_PATH, row.filename), row.file_data, "utf-8");
     }
@@ -82,10 +90,16 @@ async function loadSessionFromDB() {
   }
 }
 
+let savingSession = false;
 async function saveSessionToDB() {
+  // Evitar guardados concurrentes: el DELETE de uno podría pisar archivos
+  // que otro acaba de escribir (creds.update se dispara en ráfaga).
+  if (savingSession) return;
+  savingSession = true;
   try {
     if (!fs.existsSync(AUTH_PATH)) return;
     const files = fs.readdirSync(AUTH_PATH).filter((f) => f.endsWith(".json"));
+
     for (const filename of files) {
       const content = fs.readFileSync(path.join(AUTH_PATH, filename), "utf-8");
       await pool.query(
@@ -96,9 +110,22 @@ async function saveSessionToDB() {
         [filename, content]
       );
     }
-    console.log(`[WhatsApp] Sesión guardada en DB (${files.length} archivos).`);
+
+    // Sincronizar borrados: eliminar de la DB las pre-keys/archivos que Baileys
+    // ya consumió y borró del disco. Sin esto, la DB acumula claves obsoletas que
+    // corrompen la sesión tras cada reinicio (Bad MAC / Invalid PreKey ID).
+    if (files.length > 0) {
+      await pool.query(
+        `DELETE FROM whatsapp_session WHERE filename <> ALL($1::text[])`,
+        [files]
+      );
+    }
+
+    console.log(`[WhatsApp] Sesión guardada en DB (${files.length} archivos, huérfanos limpiados).`);
   } catch (err) {
     console.error("[WhatsApp] Error guardando sesión:", err.message);
+  } finally {
+    savingSession = false;
   }
 }
 
