@@ -57,7 +57,7 @@ export async function ejecutarJobPersonal() {
         AND cn.telefono_profesional IS NOT NULL
         AND cn.telefono_profesional != ''
         AND (ap.fecha_hora - (apr.minutos_antes || ' minutes')::INTERVAL)
-            <= (NOW() AT TIME ZONE 'America/Argentina/Buenos_Aires')
+            <= NOW()
     `);
 
     if (result.rows.length === 0) return;
