@@ -862,6 +862,109 @@ function TabIntegraciones({ toast, confirm }) {
         </div>
       </Card>
 
+      {/* ─ Google Drive ─ */}
+      <Card>
+        <SectionHeader
+          icon={HardDrive}
+          iconBg="bg-blue-100 dark:bg-blue-500/10"
+          iconColor="text-blue-600 dark:text-blue-400"
+          title="Google Drive"
+          subtitle="Almacenamiento de archivos y documentos de pacientes"
+          action={
+            driveLoading ? null : (
+              <StatusBadge
+                connected={driveConnected}
+                labelOn="Conectado"
+                labelOff="No conectado"
+              />
+            )
+          }
+        />
+        <div className="p-5">
+          {driveLoading ? (
+            <div className="flex items-center gap-2 text-slate-400 text-sm">
+              <Loader2 size={16} className="animate-spin" /> Verificando...
+            </div>
+          ) : driveConnected ? (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                  <Cloud size={20} className="text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">Google Drive conectado</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-500 mt-0.5">Los archivos se guardan en la carpeta <strong>"Agenda Psicope"</strong> de tu Drive</p>
+                </div>
+                <button
+                  onClick={handleDesconectarDrive}
+                  disabled={driveDisconnecting}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-semibold transition-colors disabled:opacity-60 shrink-0"
+                >
+                  {driveDisconnecting ? <Loader2 size={12} className="animate-spin" /> : <CloudOff size={12} />}
+                  Desconectar
+                </button>
+              </div>
+
+              {/* Info de uso */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { icon: FolderOpen, label: 'Organización', desc: 'Una carpeta por paciente' },
+                  { icon: Cloud, label: 'Almacenamiento', desc: 'Tu cuenta personal de Google' },
+                  { icon: CheckCircle, label: 'Acceso', desc: 'Desde cualquier dispositivo' },
+                ].map(({ icon: Icon, label, desc }) => (
+                  <div key={label} className="p-3 rounded-xl bg-purple-50 dark:bg-slate-800/50 border border-purple-100 dark:border-slate-800 text-center">
+                    <Icon size={16} className="text-blue-500 mx-auto mb-1" />
+                    <p className="text-xs font-semibold text-slate-900 dark:text-white">{label}</p>
+                    <p className="text-[10px] text-slate-400 mt-0.5">{desc}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <CloudOff size={18} className="text-slate-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Drive no conectado</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conectá tu cuenta para adjuntar y acceder a archivos de pacientes</p>
+                  </div>
+                </div>
+                <button
+                  onClick={async () => {
+                    const data = await getDriveAuthUrl();
+                    if (data?.url) window.location.href = data.url;
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shrink-0"
+                >
+                  <HardDrive size={15} /> Conectar Google Drive
+                </button>
+              </div>
+
+              {/* Qué ofrece */}
+              <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/20 space-y-2">
+                <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide">¿Para qué sirve?</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'Adjuntá informes, evaluaciones y documentos a cada paciente',
+                    'Los archivos se organizan automáticamente por paciente',
+                    'Accedé desde cualquier dispositivo con tu cuenta de Google',
+                    'Los archivos son tuyos — se guardan en tu propio Drive',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-xs text-blue-600 dark:text-blue-400">
+                      <CheckCircle size={12} className="shrink-0 mt-0.5 text-blue-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </div>
+      </Card>
+
       {/* ─ Google Calendar ─ */}
       <Card>
         <SectionHeader
@@ -972,109 +1075,6 @@ function TabIntegraciones({ toast, confirm }) {
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   "Exportar turnos futuros" sincroniza todos los turnos pendientes y confirmados desde hoy que aún no tienen evento en Calendar. Los cambios futuros se sincronizan en tiempo real.
                 </p>
-              </div>
-            </div>
-          )}
-        </div>
-      </Card>
-
-      {/* ─ Google Drive ─ */}
-      <Card>
-        <SectionHeader
-          icon={HardDrive}
-          iconBg="bg-blue-100 dark:bg-blue-500/10"
-          iconColor="text-blue-600 dark:text-blue-400"
-          title="Google Drive"
-          subtitle="Almacenamiento de archivos y documentos de pacientes"
-          action={
-            driveLoading ? null : (
-              <StatusBadge
-                connected={driveConnected}
-                labelOn="Conectado"
-                labelOff="No conectado"
-              />
-            )
-          }
-        />
-        <div className="p-5">
-          {driveLoading ? (
-            <div className="flex items-center gap-2 text-slate-400 text-sm">
-              <Loader2 size={16} className="animate-spin" /> Verificando...
-            </div>
-          ) : driveConnected ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-500/5 border border-blue-200 dark:border-blue-500/20">
-                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
-                  <Cloud size={20} className="text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">Google Drive conectado</p>
-                  <p className="text-xs text-blue-600 dark:text-blue-500 mt-0.5">Los archivos se guardan en la carpeta <strong>"Agenda Psicope"</strong> de tu Drive</p>
-                </div>
-                <button
-                  onClick={handleDesconectarDrive}
-                  disabled={driveDisconnecting}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 text-xs font-semibold transition-colors disabled:opacity-60 shrink-0"
-                >
-                  {driveDisconnecting ? <Loader2 size={12} className="animate-spin" /> : <CloudOff size={12} />}
-                  Desconectar
-                </button>
-              </div>
-
-              {/* Info de uso */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {[
-                  { icon: FolderOpen, label: 'Organización', desc: 'Una carpeta por paciente' },
-                  { icon: Cloud, label: 'Almacenamiento', desc: 'Tu cuenta personal de Google' },
-                  { icon: CheckCircle, label: 'Acceso', desc: 'Desde cualquier dispositivo' },
-                ].map(({ icon: Icon, label, desc }) => (
-                  <div key={label} className="p-3 rounded-xl bg-purple-50 dark:bg-slate-800/50 border border-purple-100 dark:border-slate-800 text-center">
-                    <Icon size={16} className="text-blue-500 mx-auto mb-1" />
-                    <p className="text-xs font-semibold text-slate-900 dark:text-white">{label}</p>
-                    <p className="text-[10px] text-slate-400 mt-0.5">{desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-                    <CloudOff size={18} className="text-slate-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">Drive no conectado</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conectá tu cuenta para adjuntar y acceder a archivos de pacientes</p>
-                  </div>
-                </div>
-                <button
-                  onClick={async () => {
-                    const data = await getDriveAuthUrl();
-                    if (data?.url) window.location.href = data.url;
-                  }}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-sm shrink-0"
-                >
-                  <HardDrive size={15} /> Conectar Google Drive
-                </button>
-              </div>
-
-              {/* Qué ofrece */}
-              <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-500/5 border border-blue-100 dark:border-blue-500/20 space-y-2">
-                <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 uppercase tracking-wide">¿Para qué sirve?</p>
-                <ul className="space-y-1.5">
-                  {[
-                    'Adjuntá informes, evaluaciones y documentos a cada paciente',
-                    'Los archivos se organizan automáticamente por paciente',
-                    'Accedé desde cualquier dispositivo con tu cuenta de Google',
-                    'Los archivos son tuyos — se guardan en tu propio Drive',
-                  ].map((item) => (
-                    <li key={item} className="flex items-start gap-2 text-xs text-blue-600 dark:text-blue-400">
-                      <CheckCircle size={12} className="shrink-0 mt-0.5 text-blue-500" />
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
           )}
