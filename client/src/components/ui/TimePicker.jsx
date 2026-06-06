@@ -1,4 +1,5 @@
 ﻿import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
 const MINUTES = Array.from({ length: 12 }, (_, i) => String(i * 5).padStart(2, '0'));
@@ -47,7 +48,9 @@ function Drum({ items, selected, onSelect }) {
 
 export default function TimePicker({ value, onChange, className, placeholder }) {
   const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+  const triggerRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const parts = (value || '00:00').substring(0, 5).split(':');
   const currentHour = parts[0].padStart(2, '0');
@@ -66,7 +69,10 @@ export default function TimePicker({ value, onChange, className, placeholder }) 
 
   useEffect(() => {
     const handleClick = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
+      if (
+        triggerRef.current && !triggerRef.current.contains(e.target) &&
+        dropdownRef.current && !dropdownRef.current.contains(e.target)
+      ) {
         onChange(`${hour}:${minute}`);
         setOpen(false);
       }
@@ -75,23 +81,36 @@ export default function TimePicker({ value, onChange, className, placeholder }) 
     return () => document.removeEventListener('mousedown', handleClick);
   }, [hour, minute, onChange]);
 
+  const handleOpen = () => {
+    if (!open && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+    }
+    setOpen((v) => !v);
+  };
+
   const handleConfirm = () => {
     onChange(`${hour}:${minute}`);
     setOpen(false);
   };
 
   return (
-    <div ref={ref} className="relative">
+    <div className="relative">
       <button
+        ref={triggerRef}
         type="button"
-        onClick={() => setOpen(!open)}
-        className={`text-left w-full ${className || ''}`}
+        onClick={handleOpen}
+        className={`text-left ${className || ''}`}
       >
         {value ? value.substring(0, 5) : placeholder || 'HH:mm'}
       </button>
 
-      {open && (
-        <div className="absolute z-50 mt-2 bg-white dark:bg-gray-900 border border-purple-300 dark:border-gray-700 rounded-2xl shadow-2xl p-4" style={{ minWidth: 200 }}>
+      {open && createPortal(
+        <div
+          ref={dropdownRef}
+          className="fixed z-[9999] bg-white dark:bg-gray-900 border border-purple-300 dark:border-gray-700 rounded-2xl shadow-2xl p-4"
+          style={{ top: dropdownPos.top, left: dropdownPos.left, minWidth: 200 }}
+        >
           <div className="flex items-center justify-center gap-2">
             <Drum items={HOURS} selected={hour} onSelect={setHour} />
             <span className="text-pink-500 dark:text-teal-400 text-2xl font-bold mb-1">:</span>
@@ -101,7 +120,8 @@ export default function TimePicker({ value, onChange, className, placeholder }) 
             <button type="button" onClick={() => setOpen(false)} className="px-4 py-1.5 text-sm text-slate-900 hover:text-slate-700 dark:text-gray-400 dark:hover:text-white transition-colors">Cancelar</button>
             <button type="button" onClick={handleConfirm} className="px-4 py-1.5 text-sm bg-pink-500 hover:bg-pink-400 dark:bg-teal-500 dark:hover:bg-teal-400 text-white rounded-lg font-semibold transition-colors">Aceptar</button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
