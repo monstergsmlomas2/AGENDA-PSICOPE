@@ -232,6 +232,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   const [estado, setEstado] = useState('idle'); // idle | grabando | procesando
   const [modalConfirm, setModalConfirm] = useState(null);
   const [modalOpinion, setModalOpinion] = useState(null);
+  const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const navigate = useNavigate();
@@ -239,11 +240,42 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
   const activo = estado === 'grabando' || estado === 'procesando';
 
+  // Detectar si Web Speech API está disponible (Chrome/Edge/Safari)
+  const tieneSpeechAPI = typeof window !== 'undefined' &&
+    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
+
   const detenerGrabacion = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
   }, []);
+
+  // ── Enviar texto ya transcripto al servidor para clasificar intención ──
+  const clasificarTexto = useCallback(async (transcripcion) => {
+    setEstado('procesando');
+    try {
+      const res = await fetch('/ia/clasificar-intencion', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('psicope_token')}`,
+        },
+        body: JSON.stringify({ transcripcion }),
+      });
+      if (!res.ok) throw new Error('Error del servidor');
+      const data = await res.json();
+      setEstado('idle');
+      manejarRespuesta({ ...data, transcripcion });
+    } catch (err) {
+      setEstado('idle');
+      toast.error('Error', 'No se pudo procesar el comando. Intentá de nuevo.');
+      console.error('[AsistenteVoz]', err);
+    }
+  }, [toast]);
 
   const iniciarGrabacion = useCallback(async () => {
     if (estado !== 'idle') {
@@ -251,6 +283,42 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       return;
     }
 
+    // ── Opción 1: Web Speech API (gratis, nativa, instantánea) ──
+    if (tieneSpeechAPI) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognitionRef.current = recognition;
+      recognition.lang = 'es-AR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onresult = (e) => {
+        const transcripcion = e.results[0][0].transcript;
+        clasificarTexto(transcripcion);
+      };
+
+      recognition.onerror = (e) => {
+        setEstado('idle');
+        if (e.error === 'not-allowed') {
+          toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
+        } else if (e.error === 'no-speech') {
+          toast.warning('No se escuchó nada', 'Hablá después de presionar el botón.');
+        } else {
+          toast.error('Error de micrófono', `Error: ${e.error}`);
+        }
+      };
+
+      recognition.onend = () => {
+        if (estado === 'grabando') setEstado('idle');
+      };
+
+      recognition.start();
+      setEstado('grabando');
+      return;
+    }
+
+    // ── Opción 2: Groq Whisper vía servidor (fallback) ──
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream, {
@@ -283,13 +351,15 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
           const res = await fetch('/ia/asistente', {
             method: 'POST',
-            headers: { Authorization: `Bearer ${localStorage.getItem('psicope_token')}` },
+            headers: {
+              'Accept': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('psicope_token')}`,
+            },
             body: formData,
           });
 
-          if (!res.ok) throw new Error('Error del servidor');
+          if (!res.ok) throw new Error(`Error ${res.status}`);
           const data = await res.json();
-
           setEstado('idle');
           manejarRespuesta(data);
         } catch (err) {
@@ -304,7 +374,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
     } catch {
       toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
     }
-  }, [estado, detenerGrabacion, toast]);
+  }, [estado, detenerGrabacion, tieneSpeechAPI, clasificarTexto, toast]);
 
   function manejarRespuesta(data) {
     const { intencion, params, transcripcion } = data;

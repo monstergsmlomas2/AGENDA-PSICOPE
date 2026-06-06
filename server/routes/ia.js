@@ -251,7 +251,34 @@ router.post('/buscar-historia', async (req, res) => {
 });
 
 // ─────────────────────────────────────────────
-// 8. ASISTENTE DE VOZ
+// 8. CLASIFICAR INTENCIÓN (texto ya transcripto — usado por Web Speech API)
+// POST /ia/clasificar-intencion
+// Body: { transcripcion }
+// ─────────────────────────────────────────────
+router.post('/clasificar-intencion', async (req, res) => {
+  const { transcripcion } = req.body;
+  if (!transcripcion?.trim()) return res.status(400).json({ error: 'transcripcion es requerida' });
+
+  try {
+    const pacientesResult = await pool.query(
+      'SELECT id, nombre, apellido FROM pacientes WHERE usuario_id = $1 ORDER BY apellido ASC',
+      [req.userId]
+    );
+    const fechaHoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+    const { intencion, params } = await clasificarIntencionAsistente(
+      transcripcion,
+      pacientesResult.rows,
+      fechaHoy
+    );
+    res.json({ intencion, params });
+  } catch (err) {
+    console.error('[IA] clasificar-intencion:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ─────────────────────────────────────────────
+// 9. ASISTENTE DE VOZ (audio — Groq Whisper + fallback)
 // POST /ia/asistente
 // Form-data: archivo (audio)
 // Devuelve: { transcripcion, intencion, params, proveedorTranscripcion }
@@ -298,49 +325,9 @@ router.post('/asistente', upload.single('archivo'), async (req, res) => {
     }
   }
 
-  // ── Fallback: DeepSeek audio (base64) ──
+  // Sin Groq no hay transcripción de audio disponible desde el servidor
   if (!transcripcion) {
-    try {
-      const deepseekKey = process.env.DEEPSEEK_API_KEY;
-      if (!deepseekKey) throw new Error('DEEPSEEK_API_KEY no configurada');
-
-      const base64Audio = req.file.buffer.toString('base64');
-      const mimeType = req.file.mimetype || 'audio/webm';
-
-      const dsRes = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${deepseekKey}`,
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: 'Transcribí exactamente el audio en español. Devolvé solo el texto transcripto, sin explicaciones ni prefijos.' },
-                { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Audio}` } },
-              ],
-            },
-          ],
-          temperature: 0,
-          max_tokens: 500,
-        }),
-      });
-
-      if (!dsRes.ok) {
-        const err = await dsRes.text();
-        throw new Error(`DeepSeek error ${dsRes.status}: ${err}`);
-      }
-
-      const dsData = await dsRes.json();
-      transcripcion = dsData.choices[0].message.content.trim();
-      proveedorTranscripcion = 'deepseek';
-    } catch (err) {
-      console.error('[Asistente] Fallback DeepSeek también falló:', err.message);
-      return res.status(500).json({ error: 'No se pudo transcribir el audio. Intentá de nuevo.' });
-    }
+    return res.status(503).json({ error: 'Servicio de transcripción no disponible. Configurá GROQ_API_KEY.' });
   }
 
   // ── Paso 2: Clasificar intención con DeepSeek ──
