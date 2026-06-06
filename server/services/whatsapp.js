@@ -23,6 +23,16 @@ const mensajesProcesados = new Set(); // ids de mensajes ya procesados (anti-dup
 let sessionOwnerUserId = null; // usuario que conectó este WhatsApp — dueño de los mensajes propios
 let sessionLoadedFromDB = false; // la sesión se carga del disco solo una vez (evita re-sync en reconexiones)
 let WA_VERSION_CACHE = null; // versión de protocolo WA fijada en la 1ª conexión del proceso
+let reconnectAttempts = 0; // contador para backoff exponencial — se resetea al conectar OK
+const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
+
+// Backoff exponencial: 5s, 10s, 20s, 40s, 60s (tope). Menos reconexiones en
+// ráfaga = menos handshakes = menos avisos "Finalizó sincronización" en el móvil.
+function nextReconnectDelay() {
+  const delay = Math.min(5000 * 2 ** reconnectAttempts, MAX_RECONNECT_DELAY_MS);
+  reconnectAttempts += 1;
+  return delay;
+}
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -365,16 +375,20 @@ export async function iniciarWhatsApp(userId = null) {
         resetAuthFolder();
         await pool.query(`DELETE FROM whatsapp_session`);
         sessionLoadedFromDB = false; // forzar recarga limpia en el próximo arranque
+        reconnectAttempts = 0;
         setTimeout(iniciarWhatsApp, 3000);
       } else if (restartRequired) {
-        // Normal post-QR scan: WA pide restart para activar la sesión nueva
+        // Normal post-QR scan: WA pide restart para activar la sesión nueva.
+        // No cuenta como fallo: reconexión inmediata sin penalizar el backoff.
         console.log("[WhatsApp] Restart post-QR — reconectando en 2s.");
         setTimeout(iniciarWhatsApp, 2000);
-      } else if (timedOut) {
-        console.log("[WhatsApp] Timeout — reconectando en 10s.");
-        setTimeout(iniciarWhatsApp, 10000);
       } else {
-        setTimeout(iniciarWhatsApp, 5000);
+        // Fallos de red (timedOut, connectionLost, etc.): backoff exponencial.
+        // Reconectar en ráfaga multiplica los handshakes y, con ellos, los avisos
+        // de sincronización en el móvil. Espaciamos cada reintento.
+        const delay = nextReconnectDelay();
+        console.log(`[WhatsApp] Desconexión por red — reintento ${reconnectAttempts} en ${delay / 1000}s.`);
+        setTimeout(iniciarWhatsApp, delay);
       }
     }
 
@@ -385,6 +399,7 @@ export async function iniciarWhatsApp(userId = null) {
       }
       status = "CONNECTED";
       qrCode = null;
+      reconnectAttempts = 0; // conexión OK → resetear backoff
       console.log("[WhatsApp] Conectado correctamente.");
 
       // Guardar sesión completa inmediatamente al conectar
