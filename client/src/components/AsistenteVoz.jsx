@@ -522,6 +522,31 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
           onClose={() => setModalOpinion(null)}
         />
       )}
+      {/* Logo centrado mientras está activo */}
+      {activo && (
+        <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9996]">
+          <div className={`relative flex items-center justify-center transition-all duration-500 ${activo ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+            {/* Anillos pulsantes detrás del logo */}
+            <div className="absolute w-40 h-40 rounded-full bg-pink-400/20 dark:bg-teal-400/20 animate-ping" style={{ animationDuration: '1.5s' }} />
+            <div className="absolute w-52 h-52 rounded-full bg-purple-400/10 dark:bg-blue-400/10 animate-ping" style={{ animationDuration: '2s' }} />
+            <div className="absolute w-64 h-64 rounded-full bg-blue-400/5 dark:bg-purple-400/5 animate-ping" style={{ animationDuration: '2.5s' }} />
+            {/* Logo */}
+            <img
+              src="/icon-192x192.png"
+              alt="Psicope"
+              className="w-24 h-24 rounded-2xl shadow-2xl shadow-pink-500/30 dark:shadow-teal-400/30 animate-pulse"
+              style={{ animationDuration: '2s' }}
+            />
+            {/* Texto de estado debajo del logo */}
+            <div className="absolute -bottom-10 whitespace-nowrap">
+              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                {estado === 'grabando' ? 'Escuchando…' : 'Procesando…'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
     </>
   );
 }
