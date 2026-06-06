@@ -179,9 +179,10 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   }
 
   function detenerGrabacion() {
-    if (recognitionRef.current) {
-      recognitionRef.current.abort();
+    const rec = recognitionRef.current;
+    if (rec) {
       recognitionRef.current = null;
+      try { rec.abort(); } catch { /* ya estaba cerrado */ }
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
@@ -250,11 +251,18 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       };
 
       recognition.onend = () => {
+        recognitionRef.current = null;
         if (estadoRef.current === 'grabando') setEstadoSync('idle');
       };
 
-      recognition.start();
-      setEstadoSync('grabando');
+      try {
+        recognition.start();
+        setEstadoSync('grabando');
+      } catch (err) {
+        recognitionRef.current = null;
+        toastRef.current.error('Error de micrófono', 'No se pudo iniciar. Intentá de nuevo.');
+        console.error('[AsistenteVoz] start():', err);
+      }
       return;
     }
 
