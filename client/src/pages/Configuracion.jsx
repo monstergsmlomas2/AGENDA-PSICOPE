@@ -4,8 +4,10 @@ import {
   CheckCircle, XCircle, HardDrive, Wifi, WifiOff, RefreshCw,
   LogOut, Send, User, Sun, Moon, Shield, Bell, Plug,
   QrCode, AlertCircle, FolderOpen, CloudOff, Cloud, Lock, KeyRound,
+  Calendar, ToggleLeft, ToggleRight, RefreshCcw, ChevronDown,
 } from 'lucide-react';
 import { getDriveStatus, getDriveAuthUrl, disconnectDrive } from '../services/driveService';
+import { getCalendarStatus, getCalendarios, updateCalendarConfig, sincronizarTodos } from '../services/calendarService';
 import apiFetch from '../services/api';
 import { useConfirm } from '../hooks/useConfirm';
 import { useToast } from '../hooks/useToast';
@@ -579,6 +581,15 @@ function TabIntegraciones({ toast, confirm }) {
   const [driveLoading, setDriveLoading] = useState(true);
   const [driveDisconnecting, setDriveDisconnecting] = useState(false);
 
+  // Calendar state
+  const [calendarStatus, setCalendarStatus] = useState(null);
+  const [calendarLoading, setCalendarLoading] = useState(true);
+  const [calendarios, setCalendarios] = useState([]);
+  const [calendarSaving, setCalendarSaving] = useState(false);
+  const [calendarSyncing, setCalendarSyncing] = useState(false);
+  const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(true);
+  const [calendarId, setCalendarId] = useState('primary');
+
   useEffect(() => {
     // Cargar estado WA
     apiFetch('/whatsapp/status')
@@ -596,6 +607,17 @@ function TabIntegraciones({ toast, confirm }) {
     getDriveStatus().then((s) => {
       setDriveConnected(s?.connected ?? false);
       setDriveLoading(false);
+    });
+
+    // Cargar estado Calendar
+    getCalendarStatus().then((s) => {
+      setCalendarStatus(s);
+      setCalendarSyncEnabled(s?.sync_enabled ?? true);
+      setCalendarId(s?.calendar_id || 'primary');
+      setCalendarLoading(false);
+      if (s?.connected) {
+        getCalendarios().then((list) => setCalendarios(Array.isArray(list) ? list : []));
+      }
     });
   }, []);
 
@@ -664,6 +686,25 @@ function TabIntegraciones({ toast, confirm }) {
     setDriveConnected(false);
     setDriveDisconnecting(false);
     toast.success('Drive desconectado', 'Los archivos ya no son accesibles desde la app.');
+  };
+
+  const handleGuardarCalendar = async () => {
+    setCalendarSaving(true);
+    const result = await updateCalendarConfig({ calendar_id: calendarId, sync_enabled: calendarSyncEnabled });
+    if (result) toast.success('Calendar guardado', 'Configuración de sincronización actualizada.');
+    else toast.error('Error', 'No se pudo guardar la configuración.');
+    setCalendarSaving(false);
+  };
+
+  const handleSincronizarTodos = async () => {
+    setCalendarSyncing(true);
+    const result = await sincronizarTodos();
+    if (result?.sincronizados != null) {
+      toast.success('Sincronización completa', `${result.sincronizados} de ${result.total} turnos exportados a Google Calendar.`);
+    } else {
+      toast.error('Error', 'No se pudo completar la sincronización.');
+    }
+    setCalendarSyncing(false);
   };
 
   const formatFecha = (fechaStr) => {
@@ -818,6 +859,122 @@ function TabIntegraciones({ toast, confirm }) {
               </div>
             )}
           </div>
+        </div>
+      </Card>
+
+      {/* ─ Google Calendar ─ */}
+      <Card>
+        <SectionHeader
+          icon={Calendar}
+          iconBg="bg-indigo-100 dark:bg-indigo-500/10"
+          iconColor="text-indigo-600 dark:text-indigo-400"
+          title="Google Calendar"
+          subtitle="Sincronizá tus turnos automáticamente con tu calendario de Google"
+          action={
+            calendarLoading ? null : (
+              <StatusBadge
+                connected={calendarStatus?.connected && calendarSyncEnabled}
+                labelOn="Activo"
+                labelOff={calendarStatus?.connected ? 'Desactivado' : 'No conectado'}
+              />
+            )
+          }
+        />
+
+        <div className="p-5">
+          {calendarLoading ? (
+            <div className="flex items-center gap-2 text-slate-400 text-sm">
+              <Loader2 size={16} className="animate-spin" /> Verificando...
+            </div>
+          ) : !calendarStatus?.connected ? (
+            /* ── NO CONECTADO: mismo OAuth que Drive ── */
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20">
+                <AlertCircle size={16} className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  Para sincronizar con Google Calendar necesitás conectar Google Drive primero. Ambas integraciones usan el mismo inicio de sesión.
+                </p>
+              </div>
+              <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20 space-y-2">
+                <p className="text-xs font-semibold text-indigo-700 dark:text-indigo-400 uppercase tracking-wide">¿Para qué sirve?</p>
+                <ul className="space-y-1.5">
+                  {[
+                    'Los turnos se exportan automáticamente a tu Google Calendar',
+                    'Cada cambio de estado o fecha se refleja en tiempo real',
+                    'Accedé a tu agenda desde el celular, computadora o cualquier dispositivo',
+                    'Compatible con Google Meet, recordatorios y cualquier app de calendario',
+                  ].map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-xs text-indigo-600 dark:text-indigo-400">
+                      <CheckCircle size={12} className="shrink-0 mt-0.5 text-indigo-500" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : (
+            /* ── CONECTADO ── */
+            <div className="space-y-4">
+              {/* Toggle de sincronización */}
+              <div className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-500/5 border border-indigo-100 dark:border-indigo-500/20">
+                <SwitchToggle
+                  valor={calendarSyncEnabled}
+                  onChange={setCalendarSyncEnabled}
+                  label="Sincronización automática"
+                  descripcion="Los turnos se exportan a Google Calendar al crearlos, editarlos o eliminarlos"
+                />
+              </div>
+
+              {/* Selector de calendario */}
+              {calendarSyncEnabled && (
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                    Calendario de destino
+                  </label>
+                  {calendarios.length > 0 ? (
+                    <div className="relative">
+                      <select
+                        value={calendarId}
+                        onChange={(e) => setCalendarId(e.target.value)}
+                        className="w-full appearance-none px-3 py-2.5 pr-8 rounded-xl bg-purple-50/60 dark:bg-slate-800 border border-purple-200 dark:border-slate-700 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 dark:focus:ring-indigo-500 focus:border-transparent transition-colors"
+                      >
+                        {calendarios.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.summary}{c.primary ? ' (Principal)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown size={14} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-400 px-1">Cargando calendarios...</p>
+                  )}
+                  <p className="text-xs text-slate-400 px-1">Los nuevos turnos se agregarán a este calendario</p>
+                </div>
+              )}
+
+              {/* Guardar config */}
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <button
+                  onClick={handleSincronizarTodos}
+                  disabled={calendarSyncing || !calendarSyncEnabled}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-indigo-300 dark:border-indigo-500/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-sm font-semibold transition-colors disabled:opacity-50"
+                >
+                  {calendarSyncing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCcw size={14} />}
+                  {calendarSyncing ? 'Exportando...' : 'Exportar turnos futuros'}
+                </button>
+                <SaveButton onClick={handleGuardarCalendar} saving={calendarSaving} label="Guardar" />
+              </div>
+
+              {/* Info */}
+              <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                <AlertCircle size={13} className="text-slate-400 shrink-0 mt-0.5" />
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  "Exportar turnos futuros" sincroniza todos los turnos pendientes y confirmados desde hoy que aún no tienen evento en Calendar. Los cambios futuros se sincronizan en tiempo real.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

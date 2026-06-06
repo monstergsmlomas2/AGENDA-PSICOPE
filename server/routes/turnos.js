@@ -1,5 +1,10 @@
 import express from "express";
 import pool from "../config/db.js";
+import {
+  crearEventoCalendar,
+  actualizarEventoCalendar,
+  eliminarEventoCalendar,
+} from "../services/googleCalendar.js";
 
 const ESTADOS_VALIDOS = ['pendiente', 'confirmado', 'inasistencia', 'cancelado'];
 const TIPOS_TURNO_VALIDOS = ['tratamiento', 'evaluacion'];
@@ -109,7 +114,18 @@ router.post("/", async (req, res) => {
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
       [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular', tipoTurnoFinal, importe_custom || null, req.userId]
     );
-    res.json(result.rows[0]);
+    const turno = result.rows[0];
+
+    // Obtener nombre del paciente para el evento de Calendar
+    const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [paciente_id]);
+    const paciente = pacienteRow.rows[0] || {};
+    const eventId = await crearEventoCalendar(req.userId, { ...turno, paciente_nombre: paciente.nombre, paciente_apellido: paciente.apellido });
+    if (eventId) {
+      await pool.query('UPDATE turnos SET google_calendar_event_id = $1 WHERE id = $2', [eventId, turno.id]);
+      turno.google_calendar_event_id = eventId;
+    }
+
+    res.json(turno);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al crear turno" });
@@ -164,6 +180,13 @@ router.patch("/:id/estado", async (req, res) => {
       }
     }
 
+    // Sincronizar con Google Calendar
+    if (turno.google_calendar_event_id) {
+      const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [turno.paciente_id]);
+      const p = pacienteRow.rows[0] || {};
+      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, { ...turno, paciente_nombre: p.nombre, paciente_apellido: p.apellido });
+    }
+
     res.json(turno);
   } catch (error) {
     console.error(error);
@@ -190,7 +213,16 @@ router.put("/:id", async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ error: "Turno no encontrado" });
     }
-    res.json(result.rows[0]);
+    const turno = result.rows[0];
+
+    // Sincronizar con Google Calendar
+    if (turno.google_calendar_event_id) {
+      const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [turno.paciente_id]);
+      const p = pacienteRow.rows[0] || {};
+      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, { ...turno, paciente_nombre: p.nombre, paciente_apellido: p.apellido });
+    }
+
+    res.json(turno);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Error al actualizar turno" });
@@ -256,8 +288,17 @@ router.post("/:id/recordatorio", async (req, res) => {
 router.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    const result = await pool.query("DELETE FROM turnos WHERE id = $1 AND usuario_id = $2 RETURNING id", [id, req.userId]);
+    const result = await pool.query(
+      "DELETE FROM turnos WHERE id = $1 AND usuario_id = $2 RETURNING id, google_calendar_event_id",
+      [id, req.userId]
+    );
     if (result.rowCount === 0) return res.status(404).json({ error: "Turno no encontrado" });
+
+    const { google_calendar_event_id } = result.rows[0];
+    if (google_calendar_event_id) {
+      await eliminarEventoCalendar(req.userId, google_calendar_event_id);
+    }
+
     res.json({ message: "Turno eliminado" });
   } catch (error) {
     console.error(error);
