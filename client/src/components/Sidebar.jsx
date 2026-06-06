@@ -128,11 +128,11 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         {/* ─── Header ─── */}
         <div className="px-3 py-3 border-b border-pink-200 dark:border-slate-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1 rounded-lg shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
-              <Brain size={18} className="text-pink-600 dark:text-teal-400" />
+          <div className="flex items-center gap-2.5">
+            <div className="bg-pink-300/40 dark:bg-teal-500/15 p-1.5 rounded-xl shadow-sm shadow-pink-300/20 dark:shadow-teal-500/10">
+              <Brain size={22} className="text-pink-600 dark:text-teal-400" />
             </div>
-            <h1 className="text-sm font-bold tracking-tight leading-tight">
+            <h1 className="text-lg font-extrabold tracking-tight leading-tight">
               <span className="text-black dark:text-white">Agenda</span>
               <span className="text-pink-600 dark:text-teal-400">Psicope</span>
             </h1>
