@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mic, MicOff, X, Loader2, MessageSquare, Stethoscope, Send } from 'lucide-react';
 import { apiPost } from '../services/api.js';
 import { useToast } from '../hooks/useToast.js';
+import API_URL from '../config/api.js';
 
 // ─── Bordes animados tipo Siri ───────────────────────────────────────────────
 function SiriBorder({ activo }) {
@@ -257,7 +258,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   const clasificarTexto = useCallback(async (transcripcion) => {
     setEstado('procesando');
     try {
-      const res = await fetch('/ia/clasificar-intencion', {
+      const res = await fetch(`${API_URL}/ia/clasificar-intencion`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -349,7 +350,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
           const formData = new FormData();
           formData.append('archivo', blob, 'audio.webm');
 
-          const res = await fetch('/ia/asistente', {
+          const res = await fetch(`${API_URL}/ia/asistente`, {
             method: 'POST',
             headers: {
               'Accept': 'application/json',
