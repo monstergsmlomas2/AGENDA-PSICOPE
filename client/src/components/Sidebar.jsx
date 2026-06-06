@@ -91,7 +91,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
   useEffect(() => {
     apiGet('/configuracion').then(data => {
-      if (data?.nombre) setNombreProfesional(data.nombre);
+      if (data?.nombre_profesional) setNombreProfesional(data.nombre_profesional);
     }).catch(() => {});
   }, []);
 
@@ -195,7 +195,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <UserCircle size={28} className="shrink-0 text-pink-400 dark:text-teal-500" />
             <div className="flex-1 min-w-0">
               <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                {nombreProfesional || 'Profesional'}
+                {nombreProfesional || user?.email?.split('@')[0] || 'Usuario'}
               </p>
               <p className="text-[10px] text-slate-400 truncate">{user?.email || ''}</p>
             </div>
