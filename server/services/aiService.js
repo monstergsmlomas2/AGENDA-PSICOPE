@@ -343,6 +343,65 @@ Ejemplos de NO recordatorio: "hola", "qué lindo día", "me olvidé el paraguas"
   }
 }
 
+// ─────────────────────────────────────────────
+// 8. CLASIFICAR INTENCIÓN DEL ASISTENTE DE VOZ
+// ─────────────────────────────────────────────
+
+/**
+ * Recibe el texto transcripto y la lista de pacientes del usuario,
+ * y devuelve la intención detectada + parámetros estructurados.
+ *
+ * Intenciones posibles:
+ *   - navegar_paciente   { pacienteId, pacienteNombre }
+ *   - navegar_ruta       { ruta }
+ *   - transcribir_sesion { texto }
+ *   - recordatorio_whatsapp { pacienteId, pacienteNombre, mensaje, fecha?, hora? }
+ *   - opinion_clinica    { pacienteId, pacienteNombre, consulta }
+ *   - respuesta_directa  { respuesta }
+ *   - no_entendido       {}
+ */
+export async function clasificarIntencionAsistente(texto, pacientes = [], fechaHoy) {
+  const listaPacientes = pacientes.length > 0
+    ? pacientes.map(p => `ID:${p.id} — ${p.nombre} ${p.apellido}`).join('\n')
+    : 'Sin pacientes registrados';
+
+  const system = `Sos el asistente de voz de una aplicación de gestión clínica psicopedagógica.
+Recibís texto dictado por el profesional y debés clasificar la intención y extraer parámetros.
+Respondé ÚNICAMENTE con un JSON estricto sin markdown ni texto adicional.
+
+Intenciones posibles:
+- "navegar_paciente": el profesional quiere ir a la ficha/sesiones/historia de un paciente.
+  Parámetros: { "pacienteId": "uuid", "pacienteNombre": "nombre completo" }
+- "navegar_ruta": quiere ir a una sección de la app (turnos, pagos, dashboard, etc).
+  Parámetros: { "ruta": "/turnos" | "/dashboard" | "/pacientes" | "/pagos" | "/informes" | "/obras-sociales" | "/consultorios" | "/configuracion" | "/ia" }
+- "transcribir_sesion": dictó el contenido de una sesión para guardarla.
+  Parámetros: { "texto": "texto completo de la sesión" }
+- "recordatorio_whatsapp": quiere enviar un recordatorio o mensaje por WhatsApp a un paciente.
+  Parámetros: { "pacienteId": "uuid o null si no se detecta", "pacienteNombre": "nombre", "mensaje": "texto del mensaje", "fecha": "YYYY-MM-DD o null", "hora": "HH:MM o null" }
+- "opinion_clinica": quiere una opinión o análisis clínico sobre un paciente.
+  Parámetros: { "pacienteId": "uuid o null", "pacienteNombre": "nombre o null", "consulta": "pregunta completa" }
+- "respuesta_directa": pregunta general que puedo responder directamente sin abrir pantallas.
+  Parámetros: { "respuesta": "texto de respuesta breve" }
+- "no_entendido": no se puede determinar la intención.
+  Parámetros: {}
+
+Hoy es ${fechaHoy}.
+
+Lista de pacientes del profesional (usala para hacer match de nombres):
+${listaPacientes}
+
+Devolvé exactamente: { "intencion": "...", "params": { ... } }`;
+
+  const respuesta = await llamarDeepSeek(system, texto, { temperature: 0.1, maxTokens: 400 });
+
+  try {
+    const limpio = respuesta.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    return JSON.parse(limpio);
+  } catch {
+    return { intencion: 'no_entendido', params: {} };
+  }
+}
+
 export async function extraerEventoDeTexto(textoLibre, fechaHoy) {
   const system = `Sos un asistente de productividad personal.
 Analizá el siguiente texto escrito por un profesional y extraé los datos

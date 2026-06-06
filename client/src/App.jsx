@@ -12,6 +12,7 @@ import { Loader2 } from 'lucide-react';
 import GlobalSearch from './components/GlobalSearch';
 import InstallPrompt from './components/InstallPrompt'
 import UpdatePrompt from './components/UpdatePrompt';
+import AsistenteVoz from './components/AsistenteVoz';
 
 const Dashboard               = lazy(() => import('./pages/Dashboard'));
 const Pacientes               = lazy(() => import('./pages/Pacientes'));
@@ -120,6 +121,9 @@ function ProtectedLayout({ children }) {
 
       {/* Banner de nueva versión disponible */}
       <UpdatePrompt />
+
+      {/* Asistente de voz tipo Siri */}
+      <AsistenteVoz />
     </div>
   );
 }

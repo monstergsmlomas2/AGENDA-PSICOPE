@@ -8,6 +8,7 @@ import {
   analizarAbandonos,
   detectarEstancamiento,
   buscarEnHistoria,
+  clasificarIntencionAsistente,
 } from '../services/aiService.js';
 
 const router = express.Router();
@@ -246,6 +247,122 @@ router.post('/buscar-historia', async (req, res) => {
   } catch (error) {
     console.error('[IA] buscar-historia:', error.message);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ─────────────────────────────────────────────
+// 8. ASISTENTE DE VOZ
+// POST /ia/asistente
+// Form-data: archivo (audio)
+// Devuelve: { transcripcion, intencion, params, proveedorTranscripcion }
+// ─────────────────────────────────────────────
+router.post('/asistente', upload.single('archivo'), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No se recibió archivo de audio' });
+
+  const groqApiKey = process.env.GROQ_API_KEY;
+  let transcripcion = null;
+  let proveedorTranscripcion = null;
+
+  // ── Paso 1: Transcripción con Groq (con fallback a DeepSeek) ──
+  if (groqApiKey) {
+    try {
+      const formData = new FormData();
+      const blob = new Blob([req.file.buffer], { type: req.file.mimetype });
+      formData.append('file', blob, req.file.originalname || 'audio.webm');
+      formData.append('model', 'whisper-large-v3');
+      formData.append('language', 'es');
+      formData.append('response_format', 'json');
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${groqApiKey}` },
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (groqRes.ok) {
+        const data = await groqRes.json();
+        transcripcion = data.text;
+        proveedorTranscripcion = 'groq';
+      } else {
+        const errText = await groqRes.text();
+        console.warn(`[Asistente] Groq falló (${groqRes.status}), usando fallback DeepSeek. Error: ${errText}`);
+      }
+    } catch (err) {
+      console.warn(`[Asistente] Groq timeout/error: ${err.message} — usando fallback DeepSeek`);
+    }
+  }
+
+  // ── Fallback: DeepSeek audio (base64) ──
+  if (!transcripcion) {
+    try {
+      const deepseekKey = process.env.DEEPSEEK_API_KEY;
+      if (!deepseekKey) throw new Error('DEEPSEEK_API_KEY no configurada');
+
+      const base64Audio = req.file.buffer.toString('base64');
+      const mimeType = req.file.mimetype || 'audio/webm';
+
+      const dsRes = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${deepseekKey}`,
+        },
+        body: JSON.stringify({
+          model: 'deepseek-chat',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                { type: 'text', text: 'Transcribí exactamente el audio en español. Devolvé solo el texto transcripto, sin explicaciones ni prefijos.' },
+                { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Audio}` } },
+              ],
+            },
+          ],
+          temperature: 0,
+          max_tokens: 500,
+        }),
+      });
+
+      if (!dsRes.ok) {
+        const err = await dsRes.text();
+        throw new Error(`DeepSeek error ${dsRes.status}: ${err}`);
+      }
+
+      const dsData = await dsRes.json();
+      transcripcion = dsData.choices[0].message.content.trim();
+      proveedorTranscripcion = 'deepseek';
+    } catch (err) {
+      console.error('[Asistente] Fallback DeepSeek también falló:', err.message);
+      return res.status(500).json({ error: 'No se pudo transcribir el audio. Intentá de nuevo.' });
+    }
+  }
+
+  // ── Paso 2: Clasificar intención con DeepSeek ──
+  try {
+    const pacientesResult = await pool.query(
+      'SELECT id, nombre, apellido FROM pacientes WHERE usuario_id = $1 ORDER BY apellido ASC',
+      [req.userId]
+    );
+
+    const fechaHoy = new Date().toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' });
+
+    const { intencion, params } = await clasificarIntencionAsistente(
+      transcripcion,
+      pacientesResult.rows,
+      fechaHoy
+    );
+
+    res.json({ transcripcion, intencion, params, proveedorTranscripcion });
+  } catch (err) {
+    console.error('[Asistente] clasificar intención:', err.message);
+    // Aunque falle la clasificación, devolvemos la transcripción
+    res.json({ transcripcion, intencion: 'no_entendido', params: {}, proveedorTranscripcion });
   }
 });
 
