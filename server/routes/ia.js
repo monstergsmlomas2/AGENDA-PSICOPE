@@ -301,7 +301,7 @@ router.post('/asistente', upload.single('archivo'), async (req, res) => {
       formData.append('response_format', 'json');
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000); // 5s timeout
+      const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
       const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST',

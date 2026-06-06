@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Mic, MicOff, X, Loader2, MessageSquare, Stethoscope, Send } from 'lucide-react';
+import { Mic, MicOff, X, Loader2, MessageSquare, Stethoscope, Send, Keyboard } from 'lucide-react';
 import { apiPost } from '../services/api.js';
 import { useToast } from '../hooks/useToast.js';
 import API_URL from '../config/api.js';
@@ -146,17 +146,82 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
   );
 }
 
+// ─── Modal para escribir el pedido (sin voz) ─────────────────────────────────
+function ModalTexto({ onEnviar, onClose }) {
+  const [texto, setTexto] = useState('');
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  function enviar() {
+    const t = texto.trim();
+    if (t) onEnviar(t);
+  }
+
+  function onKeyDown(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      enviar();
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-pink-200 dark:border-slate-700 overflow-hidden">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-pink-100 dark:border-slate-700">
+          <div className="p-2 rounded-full bg-pink-100 dark:bg-teal-500/10">
+            <MessageSquare size={18} className="text-pink-500 dark:text-teal-400" />
+          </div>
+          <p className="flex-1 text-sm font-semibold text-slate-900 dark:text-white">Escribí tu pedido</p>
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-slate-800 text-slate-400 transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="px-5 py-4">
+          <textarea
+            ref={inputRef}
+            value={texto}
+            onChange={(e) => setTexto(e.target.value)}
+            onKeyDown={onKeyDown}
+            rows={3}
+            placeholder="Ej: Recordame llamar a la mamá de Juan mañana a las 10"
+            className="w-full resize-none rounded-xl border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500"
+          />
+          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Ctrl + Enter para enviar</p>
+        </div>
+        <div className="flex gap-2 px-5 py-4 border-t border-pink-100 dark:border-slate-700">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
+            Cancelar
+          </button>
+          <button
+            onClick={enviar}
+            disabled={!texto.trim()}
+            className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-pink-500 hover:bg-pink-600 dark:bg-teal-500 dark:hover:bg-teal-600 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Send size={14} />
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function AsistenteVoz({ onTranscripcionSesion }) {
   const [estado, setEstado] = useState('idle'); // idle | grabando | procesando
   const [modalConfirm, setModalConfirm] = useState(null);
   const [modalOpinion, setModalOpinion] = useState(null);
+  const [modalTexto, setModalTexto] = useState(false); // ventana para escribir el pedido
 
   // Refs para acceso estable dentro de callbacks del navegador
   const estadoRef = useRef('idle');
-  const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const streamRef = useRef(null);
   const chunksRef = useRef([]);
+  const watchdogRef = useRef(null);
   const navigateRef = useRef(null);
   const toastRef = useRef(null);
   const onTranscripcionRef = useRef(onTranscripcionSesion);
@@ -171,24 +236,38 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
   const activo = estado === 'grabando' || estado === 'procesando';
 
-  const tieneSpeechAPI = typeof window !== 'undefined' &&
-    ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
-
   function setEstadoSync(nuevoEstado) {
     estadoRef.current = nuevoEstado;
     setEstado(nuevoEstado);
   }
 
+  function limpiarWatchdog() {
+    if (watchdogRef.current) {
+      clearTimeout(watchdogRef.current);
+      watchdogRef.current = null;
+    }
+  }
+
+  // Libera el micrófono y resetea todo el estado de grabación.
+  function liberarRecursos() {
+    limpiarWatchdog();
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+    mediaRecorderRef.current = null;
+    chunksRef.current = [];
+  }
+
   function detenerGrabacion() {
-    const rec = recognitionRef.current;
-    if (rec) {
-      recognitionRef.current = null;
-      try { rec.abort(); } catch { /* ya estaba cerrado */ }
+    limpiarWatchdog();
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state !== 'inactive') {
+      try { mr.stop(); } catch { /* ya estaba detenido */ }
+    } else {
+      liberarRecursos();
+      setEstadoSync('idle');
     }
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop();
-    }
-    setEstadoSync('idle');
   }
 
   function manejarRespuesta(data) {
@@ -197,7 +276,12 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
     setModalConfirm({ transcripcion: data.transcripcion || '', intencion, params });
   }
 
+  // Clasifica un texto escrito (sin audio): va directo a DeepSeek vía el servidor.
+  // No depende de Groq, así que funciona aunque la transcripción de audio esté caída.
   async function clasificarTexto(transcripcion) {
+    const texto = (transcripcion || '').trim();
+    if (!texto) return;
+    setModalTexto(false);
     setEstadoSync('procesando');
     try {
       const res = await fetch(`${API_URL}/ia/clasificar-intencion`, {
@@ -207,116 +291,138 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
           'Accept': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('psicope_token')}`,
         },
-        body: JSON.stringify({ transcripcion }),
+        body: JSON.stringify({ transcripcion: texto }),
       });
-      if (!res.ok) throw new Error('Error del servidor');
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${res.status}`);
+      }
       const data = await res.json();
       setEstadoSync('idle');
-      manejarRespuesta({ ...data, transcripcion });
+      manejarRespuesta({ ...data, transcripcion: texto });
     } catch (err) {
       setEstadoSync('idle');
-      toastRef.current.error('Error', `No se pudo clasificar: ${err.message}`);
       console.error('[AsistenteVoz] clasificarTexto:', err);
+      toastRef.current.error('Error', err.message || 'No se pudo procesar el pedido. Intentá de nuevo.');
     }
   }
 
+  // Grabación con MediaRecorder + transcripción Groq Whisper en el servidor.
+  // Es la única ruta: la Web Speech API de Chrome falla de forma intermitente
+  // y se cuelga sin emitir eventos en PWA instalada (modo standalone).
   async function iniciarGrabacion() {
     if (estadoRef.current !== 'idle') {
       detenerGrabacion();
       return;
     }
 
-    // ── Opción 1: Web Speech API ──
-    if (tieneSpeechAPI) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
-      recognitionRef.current = recognition;
-      recognition.lang = 'es-AR';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.maxAlternatives = 1;
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      toastRef.current.error('No disponible', 'Tu navegador no permite grabar audio. Probá con Chrome o Edge actualizado.');
+      return;
+    }
 
-      recognition.onresult = (e) => {
-        const texto = e.results[0][0].transcript;
-        clasificarTexto(texto);
-      };
-
-      recognition.onerror = (e) => {
-        if (e.error === 'aborted') return;
-        setEstadoSync('idle');
-        if (e.error === 'not-allowed') {
-          toastRef.current.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
-        } else if (e.error === 'no-speech') {
-          toastRef.current.warning('No se escuchó nada', 'Hablá después de presionar el botón.');
-        } else {
-          toastRef.current.error('Error de micrófono', `Error: ${e.error}`);
-        }
-      };
-
-      recognition.onend = () => {
-        recognitionRef.current = null;
-        if (estadoRef.current === 'grabando') setEstadoSync('idle');
-      };
-
-      try {
-        recognition.start();
-        setEstadoSync('grabando');
-      } catch (err) {
-        recognitionRef.current = null;
-        toastRef.current.error('Error de micrófono', 'No se pudo iniciar. Intentá de nuevo.');
-        console.error('[AsistenteVoz] start():', err);
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      console.error('[AsistenteVoz] getUserMedia:', err);
+      if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+        toastRef.current.error('Sin micrófono', 'Habilitá el acceso al micrófono en los permisos del sitio/app.');
+      } else if (err.name === 'NotFoundError') {
+        toastRef.current.error('Sin micrófono', 'No se detectó ningún micrófono en el dispositivo.');
+      } else {
+        toastRef.current.error('Error de micrófono', 'No se pudo acceder al micrófono. Intentá de nuevo.');
       }
       return;
     }
 
-    // ── Opción 2: Groq Whisper vía servidor ──
+    streamRef.current = stream;
+
+    let mediaRecorder;
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm',
-      });
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach(t => t.stop());
-        const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
-
-        if (blob.size < 1000) {
-          setEstadoSync('idle');
-          toastRef.current.warning('Audio muy corto', 'Mantené presionado mientras hablás.');
-          return;
-        }
-
-        setEstadoSync('procesando');
-        try {
-          const formData = new FormData();
-          formData.append('archivo', blob, 'audio.webm');
-          const res = await fetch(`${API_URL}/ia/asistente`, {
-            method: 'POST',
-            headers: { 'Accept': 'application/json', Authorization: `Bearer ${localStorage.getItem('psicope_token')}` },
-            body: formData,
-          });
-          if (!res.ok) throw new Error(`Error ${res.status}`);
-          const data = await res.json();
-          setEstadoSync('idle');
-          manejarRespuesta(data);
-        } catch (err) {
-          setEstadoSync('idle');
-          toastRef.current.error('Error', 'No se pudo procesar el audio. Intentá de nuevo.');
-          console.error('[AsistenteVoz]', err);
-        }
-      };
-
-      mediaRecorder.start();
-      setEstadoSync('grabando');
-    } catch {
-      toastRef.current.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : MediaRecorder.isTypeSupported('audio/mp4')
+            ? 'audio/mp4'
+            : '';
+      mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+    } catch (err) {
+      console.error('[AsistenteVoz] MediaRecorder:', err);
+      liberarRecursos();
+      toastRef.current.error('Error', 'No se pudo iniciar la grabación. Intentá de nuevo.');
+      return;
     }
+
+    mediaRecorderRef.current = mediaRecorder;
+    chunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) chunksRef.current.push(e.data);
+    };
+
+    mediaRecorder.onerror = (e) => {
+      console.error('[AsistenteVoz] MediaRecorder error:', e.error);
+      liberarRecursos();
+      setEstadoSync('idle');
+      toastRef.current.error('Error de grabación', 'Se interrumpió la grabación. Intentá de nuevo.');
+    };
+
+    mediaRecorder.onstop = async () => {
+      limpiarWatchdog();
+      const tipo = mediaRecorder.mimeType || 'audio/webm';
+      const blob = new Blob(chunksRef.current, { type: tipo });
+      liberarRecursos();
+
+      if (blob.size < 1000) {
+        setEstadoSync('idle');
+        toastRef.current.warning('Audio muy corto', 'Tocá el botón, hablá un par de segundos y volvé a tocar para enviar.');
+        return;
+      }
+
+      setEstadoSync('procesando');
+      try {
+        const formData = new FormData();
+        const ext = tipo.includes('mp4') ? 'mp4' : 'webm';
+        formData.append('archivo', blob, `audio.${ext}`);
+        const res = await fetch(`${API_URL}/ia/asistente`, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', Authorization: `Bearer ${localStorage.getItem('psicope_token')}` },
+          body: formData,
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Error ${res.status}`);
+        }
+        const data = await res.json();
+        setEstadoSync('idle');
+        manejarRespuesta(data);
+      } catch (err) {
+        setEstadoSync('idle');
+        console.error('[AsistenteVoz] procesar audio:', err);
+        toastRef.current.error('Error', err.message || 'No se pudo procesar el audio. Intentá de nuevo.');
+      }
+    };
+
+    try {
+      mediaRecorder.start();
+    } catch (err) {
+      console.error('[AsistenteVoz] start():', err);
+      liberarRecursos();
+      setEstadoSync('idle');
+      toastRef.current.error('Error', 'No se pudo iniciar la grabación. Intentá de nuevo.');
+      return;
+    }
+
+    setEstadoSync('grabando');
+
+    // Watchdog: si por cualquier motivo la grabación queda colgada,
+    // la cerramos automáticamente para procesar lo capturado (máx. 60s).
+    limpiarWatchdog();
+    watchdogRef.current = setTimeout(() => {
+      if (estadoRef.current === 'grabando') detenerGrabacion();
+    }, 60000);
   }
 
   function ejecutarAccion(intencion, rawParams) {
@@ -428,7 +534,11 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       if (e.key === 'Escape' && estadoRef.current === 'grabando') detenerGrabacion();
     }
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      liberarRecursos(); // liberar micrófono si el componente se desmonta grabando
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -436,7 +546,19 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       <SiriBorder activo={activo} />
 
       {/* Botón flotante */}
-      <div className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-[9997]">
+      <div className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-[9997] flex flex-col items-center gap-2">
+        {/* Botón secundario: escribir el pedido (sin voz, va directo a DeepSeek) */}
+        {estado === 'idle' && (
+          <button
+            onClick={() => setModalTexto(true)}
+            aria-label="Escribir el pedido"
+            title="Escribir el pedido"
+            className="w-11 h-11 rounded-full shadow-lg flex items-center justify-center border-2 border-white/30 bg-white dark:bg-slate-800 text-pink-500 dark:text-teal-400 hover:scale-110 hover:shadow-xl transition-all duration-300"
+          >
+            <Keyboard size={18} />
+          </button>
+        )}
+        <div className="relative">
         {estado === 'grabando' && (
           <>
             <div className="absolute inset-0 rounded-full bg-pink-400 dark:bg-teal-400 opacity-30 animate-ping" />
@@ -467,7 +589,15 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
             </span>
           </div>
         )}
+        </div>
       </div>
+
+      {modalTexto && (
+        <ModalTexto
+          onEnviar={clasificarTexto}
+          onClose={() => setModalTexto(false)}
+        />
+      )}
 
       {modalConfirm && (
         <ModalConfirmacion
