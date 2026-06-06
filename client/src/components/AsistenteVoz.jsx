@@ -169,6 +169,7 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
   const { transcripcion, intencion, params } = datos;
 
   const descripcion = {
+    recordatorio_personal: `Agregar a tu agenda: "${params.titulo || ''}"`,
     navegar_paciente: `Abrir ficha de ${params.pacienteNombre || 'paciente'}`,
     navegar_ruta: `Ir a ${params.ruta || 'la sección'}`,
     transcribir_sesion: 'Abrir formulario con el texto de la sesión',
@@ -410,6 +411,10 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
         }
         break;
 
+      case 'recordatorio_personal':
+        crearRecordatorioPersonal(params);
+        break;
+
       case 'recordatorio_whatsapp':
         if (!params.pacienteId) {
           toast.warning('Paciente no identificado', 'No pude asociar el nombre a un paciente.');
@@ -428,6 +433,20 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
       default:
         break;
+    }
+  }
+
+  async function crearRecordatorioPersonal({ titulo, descripcion, fecha_hora, recordatorio_minutos }) {
+    try {
+      await apiPost('/agenda-personal', {
+        titulo,
+        descripcion: descripcion || '',
+        fecha_hora,
+        recordatorio_minutos: recordatorio_minutos || 30,
+      });
+      toast.success('Recordatorio creado', `"${titulo}" agregado a tu agenda.`);
+    } catch {
+      toast.error('Error', 'No se pudo crear el recordatorio.');
     }
   }
 

@@ -370,13 +370,15 @@ Recibís texto dictado por el profesional y debés clasificar la intención y ex
 Respondé ÚNICAMENTE con un JSON estricto sin markdown ni texto adicional.
 
 Intenciones posibles:
+- "recordatorio_personal": el profesional quiere agendar una tarea, recordatorio o evento PERSONAL (para sí mismo). NO involucra enviar mensajes a pacientes. Ejemplos: "agregar recordatorio para ir a buscar a alguien", "recordame comprar algo", "tengo reunión el jueves", "anotá que mañana tengo tal cosa".
+  Parámetros: { "titulo": "resumen corto máx 50 chars", "descripcion": "detalles o cadena vacía", "fecha_hora": "YYYY-MM-DDTHH:MM:00" (calculá fechas relativas sabiendo que hoy es ${fechaHoy}), "recordatorio_minutos": 30 }
 - "navegar_paciente": el profesional quiere ir a la ficha/sesiones/historia de un paciente.
   Parámetros: { "pacienteId": "uuid", "pacienteNombre": "nombre completo" }
 - "navegar_ruta": quiere ir a una sección de la app (turnos, pagos, dashboard, etc).
-  Parámetros: { "ruta": "/turnos" | "/dashboard" | "/pacientes" | "/pagos" | "/informes" | "/obras-sociales" | "/consultorios" | "/configuracion" | "/ia" }
-- "transcribir_sesion": dictó el contenido de una sesión para guardarla.
+  Parámetros: { "ruta": "/turnos" | "/dashboard" | "/pacientes" | "/pagos" | "/informes" | "/obras-sociales" | "/consultorios" | "/configuracion" | "/ia" | "/mi-agenda" }
+- "transcribir_sesion": dictó el contenido de una sesión clínica para guardarla.
   Parámetros: { "texto": "texto completo de la sesión" }
-- "recordatorio_whatsapp": quiere enviar un recordatorio o mensaje por WhatsApp a un paciente.
+- "recordatorio_whatsapp": quiere enviar un mensaje o recordatorio por WhatsApp directamente A UN PACIENTE (no a sí mismo).
   Parámetros: { "pacienteId": "uuid o null si no se detecta", "pacienteNombre": "nombre", "mensaje": "texto del mensaje", "fecha": "YYYY-MM-DD o null", "hora": "HH:MM o null" }
 - "opinion_clinica": quiere una opinión o análisis clínico sobre un paciente.
   Parámetros: { "pacienteId": "uuid o null", "pacienteNombre": "nombre o null", "consulta": "pregunta completa" }
@@ -385,9 +387,11 @@ Intenciones posibles:
 - "no_entendido": no se puede determinar la intención.
   Parámetros: {}
 
+REGLA CRÍTICA: Si el profesional dice "agregar recordatorio", "anotá", "recordame", "tengo que", "mañana tengo" → es SIEMPRE "recordatorio_personal" a menos que diga explícitamente "mandá WhatsApp" o "avisá al paciente".
+
 Hoy es ${fechaHoy}.
 
-Lista de pacientes del profesional (usala para hacer match de nombres):
+Lista de pacientes del profesional (usala SOLO para match cuando la intención sea navegar o enviar WhatsApp a ese paciente):
 ${listaPacientes}
 
 Devolvé exactamente: { "intencion": "...", "params": { ... } }`;
