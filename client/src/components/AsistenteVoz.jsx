@@ -232,6 +232,7 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function AsistenteVoz({ onTranscripcionSesion }) {
   const [estado, setEstado] = useState('idle'); // idle | grabando | procesando
+  const estadoRef = useRef('idle'); // ref para acceder al estado actual dentro de callbacks
   const [modalConfirm, setModalConfirm] = useState(null);
   const [modalOpinion, setModalOpinion] = useState(null);
   const recognitionRef = useRef(null);
@@ -239,6 +240,12 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   const chunksRef = useRef([]);
   const navigate = useNavigate();
   const toast = useToast();
+
+  // Mantener estadoRef sincronizado
+  const setEstadoSync = useCallback((nuevoEstado) => {
+    estadoRef.current = nuevoEstado;
+    setEstado(nuevoEstado);
+  }, []);
 
   const activo = estado === 'grabando' || estado === 'procesando';
 
@@ -248,16 +255,18 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
   const detenerGrabacion = useCallback(() => {
     if (recognitionRef.current) {
-      recognitionRef.current.stop();
+      recognitionRef.current.abort(); // abort cancela sin disparar onresult
+      recognitionRef.current = null;
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
-  }, []);
+    setEstadoSync('idle');
+  }, [setEstadoSync]);
 
   // ── Enviar texto ya transcripto al servidor para clasificar intención ──
   const clasificarTexto = useCallback(async (transcripcion) => {
-    setEstado('procesando');
+    setEstadoSync('procesando');
     try {
       const res = await fetch(`${API_URL}/ia/clasificar-intencion`, {
         method: 'POST',
@@ -270,10 +279,10 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       });
       if (!res.ok) throw new Error('Error del servidor');
       const data = await res.json();
-      setEstado('idle');
+      setEstadoSync('idle');
       manejarRespuesta({ ...data, transcripcion });
     } catch (err) {
-      setEstado('idle');
+      setEstadoSync('idle');
       toast.error('Error', 'No se pudo procesar el comando. Intentá de nuevo.');
       console.error('[AsistenteVoz]', err);
     }
@@ -301,7 +310,8 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       };
 
       recognition.onerror = (e) => {
-        setEstado('idle');
+        if (e.error === 'aborted') return; // cancelación manual, no es error
+        setEstadoSync('idle');
         if (e.error === 'not-allowed') {
           toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
         } else if (e.error === 'no-speech') {
@@ -312,11 +322,12 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       };
 
       recognition.onend = () => {
-        if (estado === 'grabando') setEstado('idle');
+        // Solo volver a idle si no fue abortado manualmente (detenerGrabacion ya lo hace)
+        if (estadoRef.current === 'grabando') setEstadoSync('idle');
       };
 
       recognition.start();
-      setEstado('grabando');
+      setEstadoSync('grabando');
       return;
     }
 
@@ -340,12 +351,12 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
         const blob = new Blob(chunksRef.current, { type: mediaRecorder.mimeType });
 
         if (blob.size < 1000) {
-          setEstado('idle');
+          setEstadoSync('idle');
           toast.warning('Audio muy corto', 'Mantené presionado mientras hablás.');
           return;
         }
 
-        setEstado('procesando');
+        setEstadoSync('procesando');
 
         try {
           const formData = new FormData();
@@ -362,17 +373,17 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
           if (!res.ok) throw new Error(`Error ${res.status}`);
           const data = await res.json();
-          setEstado('idle');
+          setEstadoSync('idle');
           manejarRespuesta(data);
         } catch (err) {
-          setEstado('idle');
+          setEstadoSync('idle');
           toast.error('Error', 'No se pudo procesar el audio. Intentá de nuevo.');
           console.error('[AsistenteVoz]', err);
         }
       };
 
       mediaRecorder.start();
-      setEstado('grabando');
+      setEstadoSync('grabando');
     } catch {
       toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
     }
