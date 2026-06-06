@@ -118,7 +118,7 @@ export default function Sidebar({ isOpen, onClose }) {
         className={`
           /* Mobile: fixed drawer con transición */
           fixed md:static inset-y-0 left-0 z-50
-          w-52 flex flex-col h-screen shrink-0
+          w-60 flex flex-col h-screen shrink-0
           bg-purple-100 dark:bg-slate-950
           border-r border-pink-200 dark:border-slate-800
           transition-all duration-300 ease-in-out
