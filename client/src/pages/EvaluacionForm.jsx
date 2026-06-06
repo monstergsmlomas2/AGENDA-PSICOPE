@@ -4,6 +4,7 @@ import { getPacienteById } from '../services/pacientesService';
 import { getEvaluaciones, crearEvaluacion, actualizarEvaluacion } from '../services/evaluacionesService';
 import { ArrowLeft, Save, Loader2, ClipboardCheck, CheckCircle2 } from 'lucide-react';
 import { useToast } from '../components/ui';
+import { useVoiceDictation } from '../hooks/useVoiceDictation';
 
 const tiposTest = [
   { value: 'bender', label: 'Test de Bender (visomotriz)' },
@@ -32,6 +33,13 @@ export default function EvaluacionForm() {
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const autoSaveTimer = useRef(null);
   const isFirstLoad = useRef(true);
+
+  const { VoiceButton: VoiceResultados } = useVoiceDictation((texto) =>
+    setResultados(prev => prev ? `${prev} ${texto}` : texto)
+  );
+  const { VoiceButton: VoiceObservaciones } = useVoiceDictation((texto) =>
+    setObservaciones(prev => prev ? `${prev} ${texto}` : texto)
+  );
 
   useEffect(() => {
     async function cargar() {
@@ -177,7 +185,10 @@ export default function EvaluacionForm() {
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Resultados (descripción cualitativa)</label>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Resultados (descripción cualitativa)</label>
+              <VoiceResultados />
+            </div>
             <textarea value={resultados} onChange={(e) => setResultados(e.target.value)} rows="5"
               placeholder="Describí los resultados obtenidos..."
               className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent" />
@@ -191,7 +202,10 @@ export default function EvaluacionForm() {
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones</label>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones</label>
+              <VoiceObservaciones />
+            </div>
             <textarea value={observaciones} onChange={(e) => setObservaciones(e.target.value)} rows="4"
               placeholder="Notas adicionales..."
               className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500 focus:border-transparent" />

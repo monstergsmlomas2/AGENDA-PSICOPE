@@ -5,6 +5,7 @@ import { getPacienteById } from '../services/pacientesService';
 import { resumirSesion } from '../services/iaService';
 import { ArrowLeft, Save, Loader2, ClipboardList, CheckCircle2, Sparkles } from 'lucide-react';
 import { useToast } from '../components/ui';
+import { useVoiceDictation } from '../hooks/useVoiceDictation';
 
 export default function SesionForm() {
   const { id, sesionId } = useParams(); // sesionId presente solo al editar
@@ -25,6 +26,13 @@ export default function SesionForm() {
   const [generandoResumen, setGenerandoResumen] = useState(false);
   const autoSaveTimer = useRef(null);
   const isFirstLoad = useRef(true);
+
+  const { VoiceButton: VoiceActividades } = useVoiceDictation((texto) =>
+    setActividades(prev => prev ? `${prev} ${texto}` : texto)
+  );
+  const { VoiceButton: VoiceObservaciones } = useVoiceDictation((texto) =>
+    setObservaciones(prev => prev ? `${prev} ${texto}` : texto)
+  );
 
   useEffect(() => {
     async function cargar() {
@@ -180,7 +188,10 @@ export default function SesionForm() {
           </div>
 
           <div>
-            <label className="block mb-2 text-xs font-bold text-slate-900 uppercase tracking-wider">Actividades Realizadas *</label>
+            <div className="flex items-center gap-2 mb-2">
+              <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Actividades Realizadas *</label>
+              <VoiceActividades />
+            </div>
             <textarea
               value={actividades}
               onChange={(e) => setActividades(e.target.value)}
@@ -192,8 +203,9 @@ export default function SesionForm() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2 mb-2">
               <label className="text-xs font-bold text-slate-900 uppercase tracking-wider">Observaciones / Evolución</label>
+              <VoiceObservaciones />
             </div>
             <textarea
               value={observaciones}

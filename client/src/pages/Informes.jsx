@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect } from 'react';
 import { FileText, Plus, Search, Edit, Trash2, X, Filter, Printer, Download, CheckCircle, Clock, Eye, ArrowLeft, AlertTriangle, Sparkles, Loader2 } from 'lucide-react';
+import { useVoiceDictation } from '../hooks/useVoiceDictation';
 import { getInformes, getInforme, getInformesProximosVencer, crearInforme, actualizarInforme, eliminarInforme } from '../services/informesService';
 import { getPacientes } from '../services/pacientesService';
 import { generarInforme as generarInformeIA } from '../services/iaService';
@@ -54,6 +55,27 @@ const seccionesPorTipo = {
     { key: 'observaciones_asistencia', label: 'Observaciones' },
   ],
 };
+
+function TextareaConVoz({ label, value, onChange, rows = 4, placeholder }) {
+  const { VoiceButton } = useVoiceDictation((texto) =>
+    onChange(value ? `${value} ${texto}` : texto)
+  );
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-2">
+        <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">{label}</label>
+        <VoiceButton />
+      </div>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        rows={rows}
+        placeholder={placeholder}
+        className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
+      />
+    </div>
+  );
+}
 
 export default function Informes() {
   const [informes, setInformes] = useState([]);
@@ -500,16 +522,14 @@ export default function Informes() {
                   </div>
                   <div className="space-y-5">
                     {seccionesActuales.map(sec => (
-                      <div key={sec.key}>
-                        <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">{sec.label}</label>
-                        <textarea
-                          value={contenido[sec.key] || ''}
-                          onChange={(e) => handleContenidoChange(sec.key, e.target.value)}
-                          rows="4"
-                          className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
-                          placeholder={`Escribí ${sec.label.toLowerCase()}...`}
-                        ></textarea>
-                      </div>
+                      <TextareaConVoz
+                        key={sec.key}
+                        label={sec.label}
+                        value={contenido[sec.key] || ''}
+                        onChange={(val) => handleContenidoChange(sec.key, val)}
+                        rows={4}
+                        placeholder={`Escribí ${sec.label.toLowerCase()}...`}
+                      />
                     ))}
                   </div>
                 </div>
