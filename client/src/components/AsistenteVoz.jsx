@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mic, MicOff, X, Loader2, MessageSquare, Stethoscope, Send } from 'lucide-react';
 import { apiPost } from '../services/api.js';
@@ -9,90 +9,27 @@ import API_URL from '../config/api.js';
 function SiriBorder({ activo }) {
   if (!activo) return null;
 
-  const baseStyle = {
-    backgroundSize: '300% 100%',
-  };
-  const baseStyleV = {
-    backgroundSize: '100% 300%',
-  };
+  const baseStyle = { backgroundSize: '300% 100%' };
+  const baseStyleV = { backgroundSize: '100% 300%' };
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[9998]" aria-hidden>
-      {/* Borde superior — capa sólida */}
-      <div
-        className="absolute inset-x-0 top-0 h-[6px] animate-siri-border"
-        style={{
-          ...baseStyle,
-          background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
-        }}
-      />
-      {/* Borde superior — glow difuso */}
-      <div
-        className="absolute inset-x-0 top-0 h-[40px] animate-siri-border"
-        style={{
-          ...baseStyle,
-          background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
-          opacity: 0.35,
-          filter: 'blur(12px)',
-        }}
-      />
-
-      {/* Borde inferior — capa sólida */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[6px] animate-siri-border-reverse"
-        style={{
-          ...baseStyle,
-          background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
-        }}
-      />
-      {/* Borde inferior — glow difuso */}
-      <div
-        className="absolute inset-x-0 bottom-0 h-[40px] animate-siri-border-reverse"
-        style={{
-          ...baseStyle,
-          background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
-          opacity: 0.35,
-          filter: 'blur(12px)',
-        }}
-      />
-
-      {/* Borde izquierdo — capa sólida */}
-      <div
-        className="absolute inset-y-0 left-0 w-[6px] animate-siri-border-v"
-        style={{
-          ...baseStyleV,
-          background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
-        }}
-      />
-      {/* Borde izquierdo — glow difuso */}
-      <div
-        className="absolute inset-y-0 left-0 w-[40px] animate-siri-border-v"
-        style={{
-          ...baseStyleV,
-          background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
-          opacity: 0.35,
-          filter: 'blur(12px)',
-        }}
-      />
-
-      {/* Borde derecho — capa sólida */}
-      <div
-        className="absolute inset-y-0 right-0 w-[6px] animate-siri-border-v-reverse"
-        style={{
-          ...baseStyleV,
-          background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
-        }}
-      />
-      {/* Borde derecho — glow difuso */}
-      <div
-        className="absolute inset-y-0 right-0 w-[40px] animate-siri-border-v-reverse"
-        style={{
-          ...baseStyleV,
-          background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
-          opacity: 0.35,
-          filter: 'blur(12px)',
-        }}
-      />
+      <div className="absolute inset-x-0 top-0 h-[6px] animate-siri-border"
+        style={{ ...baseStyle, background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)' }} />
+      <div className="absolute inset-x-0 top-0 h-[40px] animate-siri-border"
+        style={{ ...baseStyle, background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)', opacity: 0.35, filter: 'blur(12px)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-[6px] animate-siri-border-reverse"
+        style={{ ...baseStyle, background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)' }} />
+      <div className="absolute inset-x-0 bottom-0 h-[40px] animate-siri-border-reverse"
+        style={{ ...baseStyle, background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)', opacity: 0.35, filter: 'blur(12px)' }} />
+      <div className="absolute inset-y-0 left-0 w-[6px] animate-siri-border-v"
+        style={{ ...baseStyleV, background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)' }} />
+      <div className="absolute inset-y-0 left-0 w-[40px] animate-siri-border-v"
+        style={{ ...baseStyleV, background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)', opacity: 0.35, filter: 'blur(12px)' }} />
+      <div className="absolute inset-y-0 right-0 w-[6px] animate-siri-border-v-reverse"
+        style={{ ...baseStyleV, background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)' }} />
+      <div className="absolute inset-y-0 right-0 w-[40px] animate-siri-border-v-reverse"
+        style={{ ...baseStyleV, background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)', opacity: 0.35, filter: 'blur(12px)' }} />
     </div>
   );
 }
@@ -104,20 +41,10 @@ function ModalOpinionClinica({ datos, onClose }) {
 
   useEffect(() => {
     let cancelado = false;
-    async function cargar() {
-      try {
-        const res = await apiPost('/ia/buscar-historia', {
-          pacienteId: datos.pacienteId,
-          consulta: datos.consulta,
-        });
-        if (!cancelado) setRespuesta(res.respuesta || 'Sin respuesta.');
-      } catch {
-        if (!cancelado) setRespuesta('No se pudo obtener la opinión clínica.');
-      } finally {
-        if (!cancelado) setCargando(false);
-      }
-    }
-    cargar();
+    apiPost('/ia/buscar-historia', { pacienteId: datos.pacienteId, consulta: datos.consulta })
+      .then(res => { if (!cancelado) setRespuesta(res.respuesta || 'Sin respuesta.'); })
+      .catch(() => { if (!cancelado) setRespuesta('No se pudo obtener la opinión clínica.'); })
+      .finally(() => { if (!cancelado) setCargando(false); });
     return () => { cancelado = true; };
   }, [datos]);
 
@@ -129,14 +56,12 @@ function ModalOpinionClinica({ datos, onClose }) {
             <Stethoscope size={18} className="text-pink-500 dark:text-teal-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">
-              Opinión clínica
-            </p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">Opinión clínica</p>
             {datos.pacienteNombre && (
               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{datos.pacienteNombre}</p>
             )}
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-slate-800 text-slate-400 transition-colors">
             <X size={16} />
           </button>
         </div>
@@ -152,10 +77,7 @@ function ModalOpinionClinica({ datos, onClose }) {
           )}
         </div>
         <div className="px-5 py-3 border-t border-pink-100 dark:border-slate-700 flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl text-sm font-medium bg-pink-500 hover:bg-pink-600 dark:bg-teal-500 dark:hover:bg-teal-600 text-white transition-colors"
-          >
+          <button onClick={onClose} className="px-4 py-2 rounded-xl text-sm font-medium bg-pink-500 hover:bg-pink-600 dark:bg-teal-500 dark:hover:bg-teal-600 text-white transition-colors">
             Cerrar
           </button>
         </div>
@@ -208,17 +130,11 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
           )}
         </div>
         <div className="flex gap-2 px-5 py-4">
-          <button
-            onClick={onCancelar}
-            className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors"
-          >
+          <button onClick={onCancelar} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
             Cancelar
           </button>
           {intencion !== 'no_entendido' && intencion !== 'respuesta_directa' && (
-            <button
-              onClick={onConfirmar}
-              className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-pink-500 hover:bg-pink-600 dark:bg-teal-500 dark:hover:bg-teal-600 text-white transition-colors flex items-center justify-center gap-1.5"
-            >
+            <button onClick={onConfirmar} className="flex-1 py-2.5 rounded-xl text-sm font-medium bg-pink-500 hover:bg-pink-600 dark:bg-teal-500 dark:hover:bg-teal-600 text-white transition-colors flex items-center justify-center gap-1.5">
               <Send size={14} />
               Ejecutar
             </button>
@@ -232,40 +148,52 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
 // ─── Componente principal ────────────────────────────────────────────────────
 export default function AsistenteVoz({ onTranscripcionSesion }) {
   const [estado, setEstado] = useState('idle'); // idle | grabando | procesando
-  const estadoRef = useRef('idle'); // ref para acceder al estado actual dentro de callbacks
   const [modalConfirm, setModalConfirm] = useState(null);
   const [modalOpinion, setModalOpinion] = useState(null);
+
+  // Refs para acceso estable dentro de callbacks del navegador
+  const estadoRef = useRef('idle');
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const navigateRef = useRef(null);
+  const toastRef = useRef(null);
+  const onTranscripcionRef = useRef(onTranscripcionSesion);
+
   const navigate = useNavigate();
   const toast = useToast();
 
-  // Mantener estadoRef sincronizado
-  const setEstadoSync = useCallback((nuevoEstado) => {
-    estadoRef.current = nuevoEstado;
-    setEstado(nuevoEstado);
-  }, []);
+  // Mantener refs actualizadas
+  navigateRef.current = navigate;
+  toastRef.current = toast;
+  onTranscripcionRef.current = onTranscripcionSesion;
 
   const activo = estado === 'grabando' || estado === 'procesando';
 
-  // Detectar si Web Speech API está disponible (Chrome/Edge/Safari)
   const tieneSpeechAPI = typeof window !== 'undefined' &&
     ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 
-  const detenerGrabacion = useCallback(() => {
+  function setEstadoSync(nuevoEstado) {
+    estadoRef.current = nuevoEstado;
+    setEstado(nuevoEstado);
+  }
+
+  function detenerGrabacion() {
     if (recognitionRef.current) {
-      recognitionRef.current.abort(); // abort cancela sin disparar onresult
+      recognitionRef.current.abort();
       recognitionRef.current = null;
     }
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
     setEstadoSync('idle');
-  }, [setEstadoSync]);
+  }
 
-  // ── Enviar texto ya transcripto al servidor para clasificar intención ──
-  const clasificarTexto = useCallback(async (transcripcion) => {
+  function manejarRespuesta(data) {
+    setModalConfirm({ transcripcion: data.transcripcion, intencion: data.intencion, params: data.params });
+  }
+
+  async function clasificarTexto(transcripcion) {
     setEstadoSync('procesando');
     try {
       const res = await fetch(`${API_URL}/ia/clasificar-intencion`, {
@@ -283,18 +211,18 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       manejarRespuesta({ ...data, transcripcion });
     } catch (err) {
       setEstadoSync('idle');
-      toast.error('Error', 'No se pudo procesar el comando. Intentá de nuevo.');
+      toastRef.current.error('Error', 'No se pudo procesar el comando. Intentá de nuevo.');
       console.error('[AsistenteVoz]', err);
     }
-  }, [toast]);
+  }
 
-  const iniciarGrabacion = useCallback(async () => {
-    if (estado !== 'idle') {
+  async function iniciarGrabacion() {
+    if (estadoRef.current !== 'idle') {
       detenerGrabacion();
       return;
     }
 
-    // ── Opción 1: Web Speech API (gratis, nativa, instantánea) ──
+    // ── Opción 1: Web Speech API ──
     if (tieneSpeechAPI) {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       const recognition = new SpeechRecognition();
@@ -305,24 +233,23 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       recognition.maxAlternatives = 1;
 
       recognition.onresult = (e) => {
-        const transcripcion = e.results[0][0].transcript;
-        clasificarTexto(transcripcion);
+        const texto = e.results[0][0].transcript;
+        clasificarTexto(texto);
       };
 
       recognition.onerror = (e) => {
-        if (e.error === 'aborted') return; // cancelación manual, no es error
+        if (e.error === 'aborted') return;
         setEstadoSync('idle');
         if (e.error === 'not-allowed') {
-          toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
+          toastRef.current.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
         } else if (e.error === 'no-speech') {
-          toast.warning('No se escuchó nada', 'Hablá después de presionar el botón.');
+          toastRef.current.warning('No se escuchó nada', 'Hablá después de presionar el botón.');
         } else {
-          toast.error('Error de micrófono', `Error: ${e.error}`);
+          toastRef.current.error('Error de micrófono', `Error: ${e.error}`);
         }
       };
 
       recognition.onend = () => {
-        // Solo volver a idle si no fue abortado manualmente (detenerGrabacion ya lo hace)
         if (estadoRef.current === 'grabando') setEstadoSync('idle');
       };
 
@@ -331,13 +258,11 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       return;
     }
 
-    // ── Opción 2: Groq Whisper vía servidor (fallback) ──
+    // ── Opción 2: Groq Whisper vía servidor ──
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-          ? 'audio/webm;codecs=opus'
-          : 'audio/webm',
+        mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm',
       });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
@@ -352,32 +277,26 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
         if (blob.size < 1000) {
           setEstadoSync('idle');
-          toast.warning('Audio muy corto', 'Mantené presionado mientras hablás.');
+          toastRef.current.warning('Audio muy corto', 'Mantené presionado mientras hablás.');
           return;
         }
 
         setEstadoSync('procesando');
-
         try {
           const formData = new FormData();
           formData.append('archivo', blob, 'audio.webm');
-
           const res = await fetch(`${API_URL}/ia/asistente`, {
             method: 'POST',
-            headers: {
-              'Accept': 'application/json',
-              Authorization: `Bearer ${localStorage.getItem('psicope_token')}`,
-            },
+            headers: { 'Accept': 'application/json', Authorization: `Bearer ${localStorage.getItem('psicope_token')}` },
             body: formData,
           });
-
           if (!res.ok) throw new Error(`Error ${res.status}`);
           const data = await res.json();
           setEstadoSync('idle');
           manejarRespuesta(data);
         } catch (err) {
           setEstadoSync('idle');
-          toast.error('Error', 'No se pudo procesar el audio. Intentá de nuevo.');
+          toastRef.current.error('Error', 'No se pudo procesar el audio. Intentá de nuevo.');
           console.error('[AsistenteVoz]', err);
         }
       };
@@ -385,63 +304,45 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       mediaRecorder.start();
       setEstadoSync('grabando');
     } catch {
-      toast.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
+      toastRef.current.error('Sin micrófono', 'Habilitá el acceso al micrófono en el navegador.');
     }
-  }, [estado, detenerGrabacion, tieneSpeechAPI, clasificarTexto, toast]);
-
-  function manejarRespuesta(data) {
-    const { intencion, params, transcripcion } = data;
-
-    if (intencion === 'respuesta_directa' || intencion === 'no_entendido') {
-      setModalConfirm({ transcripcion, intencion, params });
-      return;
-    }
-
-    setModalConfirm({ transcripcion, intencion, params });
   }
 
   function ejecutarAccion(intencion, params) {
     setModalConfirm(null);
-
     switch (intencion) {
       case 'navegar_paciente':
-        if (params.pacienteId) navigate(`/pacientes/${params.pacienteId}`);
-        else toast.warning('Paciente no encontrado', 'No pude identificar al paciente.');
+        if (params.pacienteId) navigateRef.current(`/pacientes/${params.pacienteId}`);
+        else toastRef.current.warning('Paciente no encontrado', 'No pude identificar al paciente.');
         break;
-
       case 'navegar_ruta':
-        if (params.ruta) navigate(params.ruta);
+        if (params.ruta) navigateRef.current(params.ruta);
         break;
-
       case 'transcribir_sesion':
-        if (onTranscripcionSesion) {
-          onTranscripcionSesion(params.texto);
+        if (onTranscripcionRef.current) {
+          onTranscripcionRef.current(params.texto);
         } else {
-          navigate('/pacientes', { state: { dictado: params.texto } });
-          toast.info('Texto listo', 'Seleccioná un paciente para usar el dictado.');
+          navigateRef.current('/pacientes', { state: { dictado: params.texto } });
+          toastRef.current.info('Texto listo', 'Seleccioná un paciente para usar el dictado.');
         }
         break;
-
       case 'recordatorio_personal':
         crearRecordatorioPersonal(params);
         break;
-
       case 'recordatorio_whatsapp':
         if (!params.pacienteId) {
-          toast.warning('Paciente no identificado', 'No pude asociar el nombre a un paciente.');
+          toastRef.current.warning('Paciente no identificado', 'No pude asociar el nombre a un paciente.');
           return;
         }
         enviarRecordatorio(params);
         break;
-
       case 'opinion_clinica':
         if (!params.pacienteId) {
-          toast.warning('Paciente no identificado', 'Mencioná el nombre del paciente en tu consulta.');
+          toastRef.current.warning('Paciente no identificado', 'Mencioná el nombre del paciente en tu consulta.');
           return;
         }
         setModalOpinion({ pacienteId: params.pacienteId, pacienteNombre: params.pacienteNombre, consulta: params.consulta });
         break;
-
       default:
         break;
     }
@@ -449,94 +350,68 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
 
   async function crearRecordatorioPersonal({ titulo, descripcion, fecha_hora, recordatorio_minutos }) {
     try {
-      await apiPost('/agenda-personal', {
-        titulo,
-        descripcion: descripcion || '',
-        fecha_hora,
-        recordatorio_minutos: recordatorio_minutos || 30,
-      });
-      toast.success('Recordatorio creado', `"${titulo}" agregado a tu agenda.`);
+      await apiPost('/agenda-personal', { titulo, descripcion: descripcion || '', fecha_hora, recordatorio_minutos: recordatorio_minutos || 30 });
+      toastRef.current.success('Recordatorio creado', `"${titulo}" agregado a tu agenda.`);
     } catch {
-      toast.error('Error', 'No se pudo crear el recordatorio.');
+      toastRef.current.error('Error', 'No se pudo crear el recordatorio.');
     }
   }
 
   async function enviarRecordatorio({ pacienteId, pacienteNombre, mensaje }) {
     try {
       await apiPost('/whatsapp/enviar-recordatorio-individual', { pacienteId, mensaje });
-      toast.success('Recordatorio enviado', `WhatsApp enviado a ${pacienteNombre}.`);
+      toastRef.current.success('Recordatorio enviado', `WhatsApp enviado a ${pacienteNombre}.`);
     } catch {
-      toast.error('Error', 'No se pudo enviar el WhatsApp. Verificá la conexión.');
+      toastRef.current.error('Error', 'No se pudo enviar el WhatsApp. Verificá la conexión.');
     }
   }
 
-  // Tecla Escape para cancelar grabación
   useEffect(() => {
     function onKey(e) {
-      if (e.key === 'Escape' && estado === 'grabando') detenerGrabacion();
+      if (e.key === 'Escape' && estadoRef.current === 'grabando') detenerGrabacion();
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [estado, detenerGrabacion]);
+  }, []);
 
   return (
     <>
-      {/* Bordes animados */}
       <SiriBorder activo={activo} />
 
       {/* Botón flotante */}
       <div className="fixed bottom-24 right-5 md:bottom-8 md:right-8 z-[9997]">
-        {/* Anillos pulsantes cuando está grabando */}
         {estado === 'grabando' && (
           <>
             <div className="absolute inset-0 rounded-full bg-pink-400 dark:bg-teal-400 opacity-30 animate-ping" />
             <div className="absolute -inset-2 rounded-full bg-pink-300 dark:bg-teal-500 opacity-20 animate-pulse" />
           </>
         )}
-
         <button
           onClick={iniciarGrabacion}
           disabled={estado === 'procesando'}
-          aria-label={
-            estado === 'grabando' ? 'Detener grabación' :
-            estado === 'procesando' ? 'Procesando…' :
-            'Abrir asistente de voz'
-          }
-          className={`
-            relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center
-            transition-all duration-300 border-2
+          aria-label={estado === 'grabando' ? 'Detener grabación' : estado === 'procesando' ? 'Procesando…' : 'Abrir asistente de voz'}
+          className={`relative w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 border-2
             ${estado === 'idle'
-              ? 'bg-gradient-to-br from-pink-400 to-purple-500 dark:from-teal-500 dark:to-blue-500 border-white/30 hover:scale-110 hover:shadow-pink-300/50 dark:hover:shadow-teal-400/30 hover:shadow-2xl'
+              ? 'bg-gradient-to-br from-pink-400 to-purple-500 dark:from-teal-500 dark:to-blue-500 border-white/30 hover:scale-110 hover:shadow-2xl'
               : estado === 'grabando'
               ? 'bg-gradient-to-br from-red-400 to-pink-500 dark:from-red-500 dark:to-pink-600 border-white/30 scale-110'
               : 'bg-slate-300 dark:bg-slate-700 border-slate-400/30 cursor-not-allowed'
-            }
-          `}
+            }`}
         >
-          {estado === 'procesando' ? (
-            <Loader2 size={22} className="text-white animate-spin" />
-          ) : estado === 'grabando' ? (
-            <MicOff size={22} className="text-white" />
-          ) : (
-            <Mic size={22} className="text-white" />
-          )}
+          {estado === 'procesando' ? <Loader2 size={22} className="text-white animate-spin" />
+            : estado === 'grabando' ? <MicOff size={22} className="text-white" />
+            : <Mic size={22} className="text-white" />}
         </button>
-
-        {/* Etiqueta de estado */}
         {estado !== 'idle' && (
           <div className="absolute -top-8 left-1/2 -translate-x-1/2 whitespace-nowrap">
             <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shadow
-              ${estado === 'grabando'
-                ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400'
-                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
-              }`}>
+              ${estado === 'grabando' ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'}`}>
               {estado === 'grabando' ? '● Grabando' : '⟳ Procesando…'}
             </span>
           </div>
         )}
       </div>
 
-      {/* Modal de confirmación */}
       {modalConfirm && (
         <ModalConfirmacion
           datos={modalConfirm}
@@ -545,29 +420,18 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
         />
       )}
 
-      {/* Modal de opinión clínica */}
       {modalOpinion && (
-        <ModalOpinionClinica
-          datos={modalOpinion}
-          onClose={() => setModalOpinion(null)}
-        />
+        <ModalOpinionClinica datos={modalOpinion} onClose={() => setModalOpinion(null)} />
       )}
+
       {/* Logo centrado mientras está activo */}
       {activo && (
         <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9996]">
-          <div className={`relative flex items-center justify-center transition-all duration-500 ${activo ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-            {/* Anillos pulsantes detrás del logo */}
+          <div className="relative flex items-center justify-center">
             <div className="absolute w-40 h-40 rounded-full bg-pink-400/20 dark:bg-teal-400/20 animate-ping" style={{ animationDuration: '1.5s' }} />
             <div className="absolute w-52 h-52 rounded-full bg-purple-400/10 dark:bg-blue-400/10 animate-ping" style={{ animationDuration: '2s' }} />
             <div className="absolute w-64 h-64 rounded-full bg-blue-400/5 dark:bg-purple-400/5 animate-ping" style={{ animationDuration: '2.5s' }} />
-            {/* Logo */}
-            <img
-              src="/icon-192x192.png"
-              alt="Psicope"
-              className="w-24 h-24 rounded-2xl shadow-2xl shadow-pink-500/30 dark:shadow-teal-400/30 animate-pulse"
-              style={{ animationDuration: '2s' }}
-            />
-            {/* Texto de estado debajo del logo */}
+            <img src="/icon-192x192.png" alt="Psicope" className="w-24 h-24 rounded-2xl shadow-2xl shadow-pink-500/30 dark:shadow-teal-400/30 animate-pulse" style={{ animationDuration: '2s' }} />
             <div className="absolute -bottom-10 whitespace-nowrap">
               <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
                 {estado === 'grabando' ? 'Escuchando…' : 'Procesando…'}
@@ -576,7 +440,6 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
           </div>
         </div>
       )}
-
     </>
   );
 }
