@@ -24,7 +24,7 @@ const navItems = [
     icon: Calendar,
   },
   {
-    label: 'Mi Agenda',
+    label: 'Recordatorios',
     to: '/mi-agenda',
     icon: CalendarDays,
   },
