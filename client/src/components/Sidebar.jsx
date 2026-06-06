@@ -1,9 +1,11 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
-  FileText, DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles, CalendarDays,
+  DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles, CalendarDays, UserCircle,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useEffect, useState } from 'react';
+import { apiGet } from '../services/api.js';
 
 const navItems = [
   {
@@ -44,11 +46,6 @@ const gestionItems = [
     to: '/pagos',
     icon: DollarSign,
   },
-  {
-    label: 'Informes',
-    to: '/informes',
-    icon: FileText,
-  },
 ];
 
 function NavItem({ item, onClick }) {
@@ -88,8 +85,15 @@ function NavItem({ item, onClick }) {
 }
 
 export default function Sidebar({ isOpen, onClose }) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
+  const [nombreProfesional, setNombreProfesional] = useState('');
+
+  useEffect(() => {
+    apiGet('/configuracion').then(data => {
+      if (data?.nombre) setNombreProfesional(data.nombre);
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     await logout();
@@ -142,7 +146,7 @@ export default function Sidebar({ isOpen, onClose }) {
         </div>
 
         {/* ─── Navegación ─── */}
-        <nav className="flex-1 p-2 flex flex-col gap-px">
+        <nav className="flex-1 p-2 flex flex-col gap-px overflow-y-auto">
           {/* Búsqueda rápida */}
           <button
             onClick={() =>
@@ -183,16 +187,27 @@ export default function Sidebar({ isOpen, onClose }) {
 
           <p className="px-3 pt-1 pb-0.5 text-[9px] font-bold text-slate-500 uppercase tracking-[0.15em]">Sistema</p>
           <NavItem item={{ label: 'Configuración', to: '/configuracion', icon: Settings }} onClick={handleNavClick} />
-          <button
-            onClick={handleLogout}
-            title="Cerrar sesión"
-            className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50"
-          >
-            <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
-              <LogOut size={16} />
-            </span>
-          </button>
         </nav>
+
+        {/* ─── Footer: nombre profesional + cerrar sesión ─── */}
+        <div className="p-2 border-t border-pink-200 dark:border-slate-800">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-pink-50 dark:bg-slate-900/50">
+            <UserCircle size={28} className="shrink-0 text-pink-400 dark:text-teal-500" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                {nombreProfesional || 'Profesional'}
+              </p>
+              <p className="text-[10px] text-slate-400 truncate">{user?.email || ''}</p>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión"
+              className="shrink-0 p-1.5 rounded-lg hover:bg-pink-200 dark:hover:bg-slate-800 text-slate-500 hover:text-red-500 dark:text-slate-400 dark:hover:text-red-400 transition-colors"
+            >
+              <LogOut size={15} />
+            </button>
+          </div>
+        </div>
       </aside>
     </>
   );
