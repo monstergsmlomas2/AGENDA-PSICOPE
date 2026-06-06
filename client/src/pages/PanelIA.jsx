@@ -727,7 +727,7 @@ export default function PanelIA() {
 
   return (
     <div className="min-h-screen bg-purple-200 dark:bg-[#141414] p-4 md:p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-4">
 
         {/* Header */}
         <div className="flex items-center gap-3">
@@ -740,50 +740,46 @@ export default function PanelIA() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+        {/* Tabs horizontales */}
+        <div className="bg-white dark:bg-slate-900 border border-pink-200 dark:border-slate-800 rounded-2xl p-2">
+          <nav className="flex gap-1 overflow-x-auto scrollbar-none">
+            {HERRAMIENTAS.map(h => {
+              const Icono = h.icon;
+              const activo = tabActivo === h.id;
+              return (
+                <button
+                  key={h.id}
+                  onClick={() => setTabActivo(h.id)}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
+                    activo
+                      ? 'bg-pink-100 dark:bg-teal-500/10 text-pink-700 dark:text-teal-400'
+                      : 'text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                  }`}
+                >
+                  <Icono size={15} className={activo ? 'text-pink-500 dark:text-teal-400' : 'text-slate-400'} />
+                  {h.label}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
 
-          {/* Sidebar de herramientas */}
-          <div className="bg-white dark:bg-slate-900 border border-pink-200 dark:border-slate-800 rounded-2xl p-2 h-fit lg:sticky lg:top-4">
-            <p className="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wide px-3 py-2">Herramientas</p>
-            <nav className="space-y-0.5">
-              {HERRAMIENTAS.map(h => {
-                const Icono = h.icon;
-                const activo = tabActivo === h.id;
-                return (
-                  <button
-                    key={h.id}
-                    onClick={() => setTabActivo(h.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all text-left ${
-                      activo
-                        ? 'bg-pink-100 dark:bg-teal-500/10 text-pink-700 dark:text-teal-400'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    <Icono size={16} className={activo ? 'text-pink-500 dark:text-teal-400' : 'text-slate-400'} />
-                    {h.label}
-                  </button>
-                );
-              })}
-            </nav>
+        {/* Panel activo — ancho completo */}
+        <div className="bg-white dark:bg-slate-900 border border-pink-200 dark:border-slate-800 rounded-2xl p-5">
+          <div className="flex items-start gap-3 mb-5 pb-4 border-b border-pink-100 dark:border-slate-800">
+            {herramienta && (
+              <>
+                <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-teal-500/10 flex items-center justify-center shrink-0">
+                  <herramienta.icon size={18} className="text-pink-500 dark:text-teal-400" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{herramienta.label}</h2>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">{herramienta.desc}</p>
+                </div>
+              </>
+            )}
           </div>
-
-          {/* Panel activo */}
-          <div className="bg-white dark:bg-slate-900 border border-pink-200 dark:border-slate-800 rounded-2xl p-5">
-            <div className="flex items-start gap-3 mb-5 pb-4 border-b border-pink-100 dark:border-slate-800">
-              {herramienta && (
-                <>
-                  <div className="w-9 h-9 rounded-xl bg-pink-50 dark:bg-teal-500/10 flex items-center justify-center shrink-0">
-                    <herramienta.icon size={18} className="text-pink-500 dark:text-teal-400" />
-                  </div>
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{herramienta.label}</h2>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{herramienta.desc}</p>
-                  </div>
-                </>
-              )}
-            </div>
-            {renderContenido()}
-          </div>
+          {renderContenido()}
         </div>
       </div>
     </div>
