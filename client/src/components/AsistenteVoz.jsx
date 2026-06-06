@@ -7,35 +7,90 @@ import { useToast } from '../hooks/useToast.js';
 // ─── Bordes animados tipo Siri ───────────────────────────────────────────────
 function SiriBorder({ activo }) {
   if (!activo) return null;
+
+  const baseStyle = {
+    backgroundSize: '300% 100%',
+  };
+  const baseStyleV = {
+    backgroundSize: '100% 300%',
+  };
+
   return (
     <div className="fixed inset-0 pointer-events-none z-[9998]" aria-hidden>
-      {/* Borde superior */}
-      <div className="absolute inset-x-0 top-0 h-1.5 rounded-none
-        bg-gradient-to-r from-pink-500 via-purple-400 via-blue-400 to-pink-500
-        dark:from-teal-400 dark:via-blue-400 dark:via-purple-500 dark:to-teal-400
-        animate-siri-border"
-        style={{ backgroundSize: '200% 100%' }}
+      {/* Borde superior — capa sólida */}
+      <div
+        className="absolute inset-x-0 top-0 h-[6px] animate-siri-border"
+        style={{
+          ...baseStyle,
+          background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
+        }}
       />
-      {/* Borde inferior */}
-      <div className="absolute inset-x-0 bottom-0 h-1.5
-        bg-gradient-to-r from-pink-500 via-purple-400 via-blue-400 to-pink-500
-        dark:from-teal-400 dark:via-blue-400 dark:via-purple-500 dark:to-teal-400
-        animate-siri-border-reverse"
-        style={{ backgroundSize: '200% 100%' }}
+      {/* Borde superior — glow difuso */}
+      <div
+        className="absolute inset-x-0 top-0 h-[40px] animate-siri-border"
+        style={{
+          ...baseStyle,
+          background: 'linear-gradient(90deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
+          opacity: 0.35,
+          filter: 'blur(12px)',
+        }}
       />
-      {/* Borde izquierdo */}
-      <div className="absolute inset-y-0 left-0 w-1.5
-        bg-gradient-to-b from-pink-500 via-purple-400 to-blue-400
-        dark:from-teal-400 dark:via-blue-400 dark:to-purple-500
-        animate-siri-border-v"
-        style={{ backgroundSize: '100% 200%' }}
+
+      {/* Borde inferior — capa sólida */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[6px] animate-siri-border-reverse"
+        style={{
+          ...baseStyle,
+          background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
+        }}
       />
-      {/* Borde derecho */}
-      <div className="absolute inset-y-0 right-0 w-1.5
-        bg-gradient-to-b from-blue-400 via-purple-400 to-pink-500
-        dark:from-purple-500 dark:via-blue-400 dark:to-teal-400
-        animate-siri-border-v-reverse"
-        style={{ backgroundSize: '100% 200%' }}
+      {/* Borde inferior — glow difuso */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[40px] animate-siri-border-reverse"
+        style={{
+          ...baseStyle,
+          background: 'linear-gradient(90deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
+          opacity: 0.35,
+          filter: 'blur(12px)',
+        }}
+      />
+
+      {/* Borde izquierdo — capa sólida */}
+      <div
+        className="absolute inset-y-0 left-0 w-[6px] animate-siri-border-v"
+        style={{
+          ...baseStyleV,
+          background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
+        }}
+      />
+      {/* Borde izquierdo — glow difuso */}
+      <div
+        className="absolute inset-y-0 left-0 w-[40px] animate-siri-border-v"
+        style={{
+          ...baseStyleV,
+          background: 'linear-gradient(180deg, #ec4899, #a855f7, #3b82f6, #06b6d4, #a855f7, #ec4899)',
+          opacity: 0.35,
+          filter: 'blur(12px)',
+        }}
+      />
+
+      {/* Borde derecho — capa sólida */}
+      <div
+        className="absolute inset-y-0 right-0 w-[6px] animate-siri-border-v-reverse"
+        style={{
+          ...baseStyleV,
+          background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
+        }}
+      />
+      {/* Borde derecho — glow difuso */}
+      <div
+        className="absolute inset-y-0 right-0 w-[40px] animate-siri-border-v-reverse"
+        style={{
+          ...baseStyleV,
+          background: 'linear-gradient(180deg, #06b6d4, #a855f7, #ec4899, #a855f7, #3b82f6, #06b6d4)',
+          opacity: 0.35,
+          filter: 'blur(12px)',
+        }}
       />
     </div>
   );

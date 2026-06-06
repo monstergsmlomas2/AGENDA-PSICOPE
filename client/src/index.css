@@ -221,42 +221,38 @@ select::placeholder {
 
 @keyframes siri-border {
   0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
 }
 
 @keyframes siri-border-reverse {
-  0%   { background-position: 100% 50%; }
-  50%  { background-position: 0% 50%; }
-  100% { background-position: 100% 50%; }
+  0%   { background-position: 300% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 @keyframes siri-border-v {
   0%   { background-position: 50% 0%; }
-  50%  { background-position: 50% 100%; }
-  100% { background-position: 50% 0%; }
+  100% { background-position: 50% 300%; }
 }
 
 @keyframes siri-border-v-reverse {
-  0%   { background-position: 50% 100%; }
-  50%  { background-position: 50% 0%; }
-  100% { background-position: 50% 100%; }
+  0%   { background-position: 50% 300%; }
+  100% { background-position: 50% 0%; }
 }
 
 .animate-siri-border {
-  animation: siri-border 2.5s ease infinite;
+  animation: siri-border 2s linear infinite;
 }
 
 .animate-siri-border-reverse {
-  animation: siri-border-reverse 2.5s ease infinite;
+  animation: siri-border-reverse 2s linear infinite;
 }
 
 .animate-siri-border-v {
-  animation: siri-border-v 2.5s ease infinite;
+  animation: siri-border-v 2s linear infinite;
 }
 
 .animate-siri-border-v-reverse {
-  animation: siri-border-v-reverse 2.5s ease infinite;
+  animation: siri-border-v-reverse 2s linear infinite;
 }
 
 /* animate-fade-in para ProtectedLayout */
