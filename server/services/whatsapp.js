@@ -22,6 +22,7 @@ let intentionalDisconnect = false; // evita reconexión automática tras cerrar 
 const mensajesProcesados = new Set(); // ids de mensajes ya procesados (anti-duplicado / anti-loop)
 let sessionOwnerUserId = null; // usuario que conectó este WhatsApp — dueño de los mensajes propios
 let sessionLoadedFromDB = false; // la sesión se carga del disco solo una vez (evita re-sync en reconexiones)
+let WA_VERSION_CACHE = null; // versión de protocolo WA fijada en la 1ª conexión del proceso
 
 // ── Cola de mensajes con rate limit ──────────────────────────────────────────
 const messageQueue = [];
@@ -262,13 +263,23 @@ export async function iniciarWhatsApp(userId = null) {
   }
   const { state, saveCreds } = await useMultiFileAuthState(AUTH_PATH);
 
-  let version;
-  try {
-    ({ version } = await fetchLatestBaileysVersion());
-    console.log(`[WhatsApp] Versión WA: ${version.join(".")}`);
-  } catch (err) {
-    version = [2, 3000, 1015901307];
-    console.warn("[WhatsApp] No se pudo obtener versión de WA — usando fallback:", version.join("."));
+  // Versión de protocolo FIJA. Si cambia entre reconexiones, WhatsApp fuerza un
+  // re-handshake del companion device → notificación "Finalizó sincronización" en
+  // el móvil. Solo consultamos la versión más reciente la PRIMERA vez de este
+  // proceso (cuando no hay sesión previa, p.ej. tras escanear QR); en reconexiones
+  // reusamos exactamente la misma versión para que sea un resume, no un re-registro.
+  let version = WA_VERSION_CACHE;
+  if (!version) {
+    try {
+      ({ version } = await fetchLatestBaileysVersion());
+      console.log(`[WhatsApp] Versión WA: ${version.join(".")}`);
+    } catch (err) {
+      version = [2, 3000, 1015901307];
+      console.warn("[WhatsApp] No se pudo obtener versión de WA — usando fallback:", version.join("."));
+    }
+    WA_VERSION_CACHE = version;
+  } else {
+    console.log(`[WhatsApp] Reusando versión WA cacheada: ${version.join(".")}`);
   }
 
   status = "CONNECTING";
@@ -294,9 +305,18 @@ export async function iniciarWhatsApp(userId = null) {
     syncFullHistory: false,
     shouldSyncHistoryMessage: () => false,
     markOnlineOnConnect: false,
+    // fireInitQueries: false → no ejecutar el app-state resync al conectar.
+    // Ese resync es EXACTAMENTE lo que dispara la notificación "Finalizó la
+    // sincronización con WhatsApp Business" en el móvil cada vez que reconectamos.
+    // Este cliente solo envía/recibe mensajes; no necesita sincronizar el estado
+    // de chats/contactos, así que lo desactivamos y el aviso desaparece.
+    fireInitQueries: false,
     connectTimeoutMs: 60000,
     defaultQueryTimeoutMs: 60000,
-    keepAliveIntervalMs: 20000,
+    // 30s = default de Baileys. Un keep-alive más agresivo (20s) aumentaba los
+    // falsos "connection lost" en redes con latencia variable (Render) → cada
+    // pérdida fuerza una reconexión. Menos reconexiones = menos ruido en el móvil.
+    keepAliveIntervalMs: 30000,
     retryRequestDelayMs: 2000,
     maxMsgRetryCount: 5,
   });
@@ -370,10 +390,10 @@ export async function iniciarWhatsApp(userId = null) {
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB();
 
-      // NO enviar presence updates: un WhatsApp Web normal no los manda de
-      // forma activa. Mandar "unavailable"/"available" marca este cliente como
-      // presente y hace que WhatsApp desvíe las notificaciones del teléfono.
-      // Sin presence, el móvil sigue sonando como con WhatsApp Web normal.
+      // Baileys envía un presence "unavailable" al abrir la conexión (lo hace
+      // internamente porque markOnlineOnConnect=false). Eso es lo correcto: marca
+      // este companion como NO presente, por lo que el móvil sigue recibiendo
+      // notificaciones. No agregamos presence updates periódicos propios.
       if (presenceTimer) {
         clearInterval(presenceTimer);
         presenceTimer = null;

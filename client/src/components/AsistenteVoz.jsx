@@ -270,9 +270,25 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
     }
   }
 
+  // Acciones de bajo riesgo que se ejecutan al instante, sin pedir confirmación:
+  // son navegación pura (reversible, no escriben datos ni envían nada a terceros).
+  // La confirmación se reserva para acciones que modifican datos o disparan envíos.
+  const INTENCIONES_DIRECTAS = new Set([
+    'navegar_ruta',
+    'navegar_paciente',
+    'transcribir_sesion',
+  ]);
+
   function manejarRespuesta(data) {
     const intencion = data.intencion || 'no_entendido';
     const params = data.params && typeof data.params === 'object' ? data.params : {};
+
+    // Navegación → ejecutar directo, sin modal de confirmación.
+    if (INTENCIONES_DIRECTAS.has(intencion)) {
+      ejecutarAccion(intencion, params);
+      return;
+    }
+
     setModalConfirm({ transcripcion: data.transcripcion || '', intencion, params });
   }
 
@@ -430,11 +446,18 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
     setModalConfirm(null);
     switch (intencion) {
       case 'navegar_paciente':
-        if (params.pacienteId) navigateRef.current(`/pacientes/${params.pacienteId}`);
-        else toastRef.current.warning('Paciente no encontrado', 'No pude identificar al paciente.');
+        if (params.pacienteId) {
+          navigateRef.current(`/pacientes/${params.pacienteId}`);
+          toastRef.current.info('Abriendo ficha', params.pacienteNombre || 'Paciente');
+        } else {
+          toastRef.current.warning('Paciente no encontrado', 'No pude identificar al paciente.');
+        }
         break;
       case 'navegar_ruta':
-        if (params.ruta) navigateRef.current(params.ruta);
+        if (params.ruta) {
+          navigateRef.current(params.ruta);
+          toastRef.current.info('Listo', `Te llevé a ${params.ruta}`);
+        }
         break;
       case 'transcribir_sesion':
         if (onTranscripcionRef.current) {
