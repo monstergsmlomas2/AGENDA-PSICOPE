@@ -88,15 +88,16 @@ function ModalOpinionClinica({ datos, onClose }) {
 
 // ─── Modal de confirmación de acción ────────────────────────────────────────
 function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
-  const { transcripcion, intencion, params } = datos;
+  const { transcripcion, intencion, params = {} } = datos;
+  const p = params || {};
 
   const descripcion = {
-    recordatorio_personal: `Agregar a tu agenda: "${params.titulo || ''}"`,
-    navegar_paciente: `Abrir ficha de ${params.pacienteNombre || 'paciente'}`,
-    navegar_ruta: `Ir a ${params.ruta || 'la sección'}`,
+    recordatorio_personal: `Agregar a tu agenda: "${p.titulo || '(sin título)'}"${p.fecha_hora ? ` — ${p.fecha_hora.replace('T', ' ').slice(0, 16)}` : ''}`,
+    navegar_paciente: `Abrir ficha de ${p.pacienteNombre || 'paciente'}`,
+    navegar_ruta: `Ir a ${p.ruta || 'la sección'}`,
     transcribir_sesion: 'Abrir formulario con el texto de la sesión',
-    recordatorio_whatsapp: `Enviar WhatsApp a ${params.pacienteNombre || 'paciente'}`,
-    opinion_clinica: `Consulta clínica sobre ${params.pacienteNombre || 'paciente'}`,
+    recordatorio_whatsapp: `Enviar WhatsApp a ${p.pacienteNombre || 'paciente'}`,
+    opinion_clinica: `Consulta clínica sobre ${p.pacienteNombre || 'paciente'}`,
     respuesta_directa: null,
     no_entendido: null,
   }[intencion];
@@ -118,13 +119,13 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
           {intencion === 'no_entendido' ? (
             <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">No pude entender la acción. ¿Podés repetirlo?</p>
           ) : intencion === 'respuesta_directa' ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{params.respuesta}</p>
+            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{p.respuesta}</p>
           ) : (
             <div className="bg-purple-50 dark:bg-teal-500/5 rounded-xl p-3">
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Acción:</p>
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{descripcion}</p>
-              {intencion === 'recordatorio_whatsapp' && params.mensaje && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">"{params.mensaje}"</p>
+              {intencion === 'recordatorio_whatsapp' && p.mensaje && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">"{p.mensaje}"</p>
               )}
             </div>
           )}
@@ -191,7 +192,9 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   }
 
   function manejarRespuesta(data) {
-    setModalConfirm({ transcripcion: data.transcripcion, intencion: data.intencion, params: data.params });
+    const intencion = data.intencion || 'no_entendido';
+    const params = data.params && typeof data.params === 'object' ? data.params : {};
+    setModalConfirm({ transcripcion: data.transcripcion || '', intencion, params });
   }
 
   async function clasificarTexto(transcripcion) {
@@ -212,8 +215,8 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
       manejarRespuesta({ ...data, transcripcion });
     } catch (err) {
       setEstadoSync('idle');
-      toastRef.current.error('Error', 'No se pudo procesar el comando. Intentá de nuevo.');
-      console.error('[AsistenteVoz]', err);
+      toastRef.current.error('Error', `No se pudo clasificar: ${err.message}`);
+      console.error('[AsistenteVoz] clasificarTexto:', err);
     }
   }
 
@@ -316,7 +319,8 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
     }
   }
 
-  function ejecutarAccion(intencion, params) {
+  function ejecutarAccion(intencion, rawParams) {
+    const params = rawParams && typeof rawParams === 'object' ? rawParams : {};
     setModalConfirm(null);
     switch (intencion) {
       case 'navegar_paciente':
@@ -328,9 +332,9 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
         break;
       case 'transcribir_sesion':
         if (onTranscripcionRef.current) {
-          onTranscripcionRef.current(params.texto);
+          onTranscripcionRef.current(params.texto || '');
         } else {
-          navigateRef.current('/pacientes', { state: { dictado: params.texto } });
+          navigateRef.current('/pacientes', { state: { dictado: params.texto || '' } });
           toastRef.current.info('Texto listo', 'Seleccioná un paciente para usar el dictado.');
         }
         break;
@@ -349,7 +353,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
           toastRef.current.warning('Paciente no identificado', 'Mencioná el nombre del paciente en tu consulta.');
           return;
         }
-        setModalOpinion({ pacienteId: params.pacienteId, pacienteNombre: params.pacienteNombre, consulta: params.consulta });
+        setModalOpinion({ pacienteId: params.pacienteId, pacienteNombre: params.pacienteNombre, consulta: params.consulta || '' });
         break;
       default:
         break;
@@ -357,19 +361,64 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
   }
 
   async function crearRecordatorioPersonal({ titulo, descripcion, fecha_hora, recordatorio_minutos }) {
+    if (!titulo) {
+      toastRef.current.error('Sin título', 'No se pudo extraer el título del recordatorio.');
+      return;
+    }
+    // Validar y normalizar fecha_hora
+    let fechaFinal = fecha_hora;
+    if (!fechaFinal || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(fechaFinal)) {
+      // Si no tiene formato válido, usar mañana a las 9:00
+      const manana = new Date();
+      manana.setDate(manana.getDate() + 1);
+      const y = manana.getFullYear();
+      const m = String(manana.getMonth() + 1).padStart(2, '0');
+      const d = String(manana.getDate()).padStart(2, '0');
+      fechaFinal = `${y}-${m}-${d}T09:00:00`;
+    }
     try {
-      await apiPost('/agenda-personal', { titulo, descripcion: descripcion || '', fecha_hora, recordatorio_minutos: recordatorio_minutos || 30 });
+      const token = localStorage.getItem('psicope_token');
+      const res = await fetch(`${API_URL}/agenda-personal`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          titulo,
+          descripcion: descripcion || '',
+          fecha_hora: fechaFinal,
+          recordatorio_minutos: recordatorio_minutos || 30,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `Error ${res.status}`);
+      }
       toastRef.current.success('Recordatorio creado', `"${titulo}" agregado a tu agenda.`);
-    } catch {
-      toastRef.current.error('Error', 'No se pudo crear el recordatorio.');
+    } catch (err) {
+      console.error('[AsistenteVoz] crearRecordatorio:', err);
+      toastRef.current.error('Error', `No se pudo crear el recordatorio: ${err.message}`);
     }
   }
 
   async function enviarRecordatorio({ pacienteId, pacienteNombre, mensaje }) {
     try {
-      await apiPost('/whatsapp/enviar-recordatorio-individual', { pacienteId, mensaje });
+      const token = localStorage.getItem('psicope_token');
+      const res = await fetch(`${API_URL}/whatsapp/enviar-recordatorio-individual`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ pacienteId, mensaje }),
+      });
+      if (!res.ok) throw new Error(`Error ${res.status}`);
       toastRef.current.success('Recordatorio enviado', `WhatsApp enviado a ${pacienteNombre}.`);
-    } catch {
+    } catch (err) {
+      console.error('[AsistenteVoz] enviarRecordatorio:', err);
       toastRef.current.error('Error', 'No se pudo enviar el WhatsApp. Verificá la conexión.');
     }
   }
