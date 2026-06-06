@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
 import { getEvaluaciones, eliminarEvaluacion } from '../services/evaluacionesService';
-import { getInformes, getInforme, crearInforme, actualizarInforme, eliminarInforme } from '../services/informesService';
+import { getInformes, getInforme, crearInforme, actualizarInforme, eliminarInforme, getVersionesInforme, restaurarVersionInforme } from '../services/informesService';
 import { getObrasSociales } from '../services/obrasSocialesService';
 import { getTurnos, crearTurno, actualizarTurno, eliminarTurno } from '../services/turnosService';
 import { getConsultorios } from '../services/consultoriosService';
@@ -359,6 +359,11 @@ export default function PacienteDetalle() {
   const [informeContenido, setInformeContenido] = useState({});
   const [informeEstado, setInformeEstado] = useState('borrador');
   const [submittingInforme, setSubmittingInforme] = useState(false);
+
+  // Versiones de informes
+  const [versionesInforme, setVersionesInforme] = useState([]);
+  const [loadingVersiones, setLoadingVersiones] = useState(false);
+  const [versionPreview, setVersionPreview] = useState(null);
 
   // Archivos adjuntos (Google Drive) — compartido entre secciones
   const [showAdjuntos, setShowAdjuntos] = useState(false);
@@ -1613,31 +1618,36 @@ export default function PacienteDetalle() {
           ) : viewingInforme ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <button onClick={() => setViewingInforme(null)} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-400 hover:text-pink-500 transition-colors">
+                <button onClick={() => { setViewingInforme(null); setVersionesInforme([]); setVersionPreview(null); }} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-400 hover:text-pink-500 transition-colors">
                   <ArrowLeft size={16} /> Volver a la lista
                 </button>
                 <div className="flex gap-2">
                   <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
                     <Printer size={15} /> Imprimir
                   </button>
-                  <button onClick={() => { setViewingInforme(null); setEditandoInforme(viewingInforme.id); setInformeTipo(viewingInforme.tipo); setInformeFecha(viewingInforme.fecha); setInformeContenido(typeof viewingInforme.contenido === 'object' ? viewingInforme.contenido : {}); setInformeEstado(viewingInforme.estado); setShowInformeModal(true); }} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors">
+                  <button onClick={() => { setVersionPreview(null); setVersionesInforme([]); setViewingInforme(null); setEditandoInforme(viewingInforme.id); setInformeTipo(viewingInforme.tipo); setInformeFecha(viewingInforme.fecha); setInformeContenido(typeof viewingInforme.contenido === 'object' ? viewingInforme.contenido : {}); setInformeEstado(viewingInforme.estado); setShowInformeModal(true); }} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors">
                     <Edit size={15} /> Editar
                   </button>
                 </div>
               </div>
               <div className="bg-purple-50 dark:bg-slate-950 border border-purple-300 dark:border-slate-800 rounded-xl p-6 space-y-4">
                 <div className="border-b border-purple-300 dark:border-slate-800 pb-4">
-                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">{tiposInforme.find(t => t.value === viewingInforme.tipo)?.label}</h4>
+                  <h4 className="text-lg font-bold text-slate-900 dark:text-white">{tiposInforme.find(t => t.value === (versionPreview || viewingInforme).tipo)?.label}</h4>
                   <p className="text-sm text-slate-500 mt-1">
-                    {new Date(viewingInforme.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
+                    {new Date(((versionPreview || viewingInforme).fecha || '') + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     {' · '}
-                    <span className={`font-bold ${viewingInforme.estado === 'finalizado' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
-                      {viewingInforme.estado === 'finalizado' ? 'Finalizado' : 'Borrador'}
+                    <span className={`font-bold ${(versionPreview || viewingInforme).estado === 'finalizado' ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                      {(versionPreview || viewingInforme).estado === 'finalizado' ? 'Finalizado' : 'Borrador'}
                     </span>
+                    {versionPreview && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 text-xs font-bold border border-amber-200 dark:border-amber-500/30">
+                        Vista previa — v{versionPreview.version}
+                      </span>
+                    )}
                   </p>
                 </div>
-                {(seccionesPorTipo[viewingInforme.tipo] || []).map(sec => {
-                  const valor = viewingInforme.contenido?.[sec.key];
+                {(seccionesPorTipo[(versionPreview || viewingInforme).tipo] || []).map(sec => {
+                  const valor = (versionPreview || viewingInforme).contenido?.[sec.key];
                   if (!valor) return null;
                   return (
                     <div key={sec.key}>
@@ -1647,11 +1657,61 @@ export default function PacienteDetalle() {
                   );
                 })}
               </div>
+
+              {/* Historial de versiones */}
+              {loadingVersiones ? (
+                <div className="h-8 bg-pink-100 dark:bg-slate-800 rounded-xl animate-pulse" />
+              ) : versionesInforme.length > 0 && (
+                <div className="border border-purple-200 dark:border-slate-800 rounded-xl overflow-hidden">
+                  <div className="px-4 py-2 bg-purple-50 dark:bg-slate-900 border-b border-purple-200 dark:border-slate-800">
+                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Historial de versiones</p>
+                  </div>
+                  <div className="divide-y divide-purple-100 dark:divide-slate-800">
+                    {versionesInforme.map(v => (
+                      <div key={v.id} className={`flex items-center justify-between px-4 py-2.5 transition-colors ${versionPreview?.id === v.id ? 'bg-amber-50 dark:bg-amber-500/5' : 'hover:bg-purple-50 dark:hover:bg-slate-900'}`}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 w-6">v{v.version}</span>
+                          <span className="text-xs text-slate-600 dark:text-slate-400">
+                            {new Date(v.guardado_en).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                            {' '}
+                            {new Date(v.guardado_en).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setVersionPreview(versionPreview?.id === v.id ? null : v)}
+                            className="text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-purple-100 dark:hover:bg-slate-800 transition-colors"
+                          >
+                            {versionPreview?.id === v.id ? 'Cerrar' : 'Ver'}
+                          </button>
+                          <button
+                            onClick={() => confirm({ title: `Restaurar v${v.version}`, message: 'El contenido actual se guardará como nueva versión. ¿Restaurar esta versión?', confirmLabel: 'Restaurar', variant: 'warning' }).then(async ok => {
+                              if (!ok) return;
+                              const restaurado = await restaurarVersionInforme(viewingInforme.id, v.id);
+                              if (restaurado) {
+                                setVersionPreview(null);
+                                setViewingInforme(restaurado);
+                                const vs = await getVersionesInforme(viewingInforme.id);
+                                setVersionesInforme(vs);
+                                await cargarInformes();
+                                toast.success('Versión restaurada', `Se restauró v${v.version} correctamente.`);
+                              }
+                            })}
+                            className="text-xs font-bold px-2.5 py-1 rounded-lg border border-amber-300 dark:border-amber-500/40 text-amber-700 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-colors"
+                          >
+                            Restaurar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
               {informesPaciente.map(inf => (
-                <div key={inf.id} className="flex items-center justify-between bg-purple-50 dark:bg-slate-950 border border-purple-300 dark:border-slate-800 rounded-xl px-4 py-3 hover:bg-pink-50 dark:hover:bg-slate-900 transition-colors cursor-pointer" onClick={() => setViewingInforme(inf)}>
+                <div key={inf.id} className="flex items-center justify-between bg-purple-50 dark:bg-slate-950 border border-purple-300 dark:border-slate-800 rounded-xl px-4 py-3 hover:bg-pink-50 dark:hover:bg-slate-900 transition-colors cursor-pointer" onClick={async () => { setViewingInforme(inf); setVersionPreview(null); setLoadingVersiones(true); const vs = await getVersionesInforme(inf.id); setVersionesInforme(vs); setLoadingVersiones(false); }}>
                   <div className="flex items-center gap-3">
                     <FileText size={16} className="text-pink-500 shrink-0" />
                     <div>

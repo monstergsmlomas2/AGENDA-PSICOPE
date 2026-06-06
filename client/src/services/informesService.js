@@ -55,3 +55,21 @@ export const eliminarInforme = async (id) => {
     return null;
   }
 };
+
+export const getVersionesInforme = async (id) => {
+  try {
+    return await apiGet(`/informes/${id}/versiones`);
+  } catch (error) {
+    console.error("Error al obtener versiones:", error);
+    return [];
+  }
+};
+
+export const restaurarVersionInforme = async (informeId, versionId) => {
+  try {
+    return await apiPost(`/informes/${informeId}/versiones/${versionId}/restaurar`, {});
+  } catch (error) {
+    console.error("Error al restaurar versión:", error);
+    return null;
+  }
+};

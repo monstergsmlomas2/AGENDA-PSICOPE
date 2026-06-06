@@ -91,26 +91,140 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 4. ACTUALIZAR INFORME
+// 4. ACTUALIZAR INFORME (guarda versión anterior antes de sobrescribir)
 router.put("/:id", async (req, res) => {
   const { id } = req.params;
   const { tipo, fecha, contenido, estado, fecha_vencimiento } = req.body;
 
+  const client = await pool.connect();
   try {
-    const result = await pool.query(
+    await client.query('BEGIN');
+
+    // Obtener versión actual para archivarla
+    const actual = await client.query(
+      `SELECT i.* FROM informes i
+       JOIN pacientes p ON i.paciente_id = p.id
+       WHERE i.id = $1 AND p.usuario_id = $2`,
+      [id, req.userId]
+    );
+    if (actual.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: "Informe no encontrado" });
+    }
+
+    const inf = actual.rows[0];
+
+    // Calcular siguiente número de versión
+    const versionRes = await client.query(
+      `SELECT COALESCE(MAX(version), 0) + 1 AS next FROM informes_versiones WHERE informe_id = $1`,
+      [id]
+    );
+    const nextVersion = versionRes.rows[0].next;
+
+    // Archivar versión anterior
+    await client.query(
+      `INSERT INTO informes_versiones (informe_id, version, tipo, fecha, contenido, estado)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, nextVersion, inf.tipo, inf.fecha, inf.contenido, inf.estado]
+    );
+
+    // Actualizar informe
+    const result = await client.query(
       `UPDATE informes i SET tipo = $1, fecha = $2, contenido = $3, estado = $4, fecha_vencimiento = $5
        FROM pacientes p
        WHERE i.id = $6 AND i.paciente_id = p.id AND p.usuario_id = $7
        RETURNING i.*`,
       [tipo, fecha, JSON.stringify(contenido || {}), estado, fecha_vencimiento || null, id, req.userId]
     );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Informe no encontrado" });
-    }
+
+    await client.query('COMMIT');
     res.json(result.rows[0]);
   } catch (error) {
+    await client.query('ROLLBACK');
     console.error("Error al actualizar informe:", error);
     res.status(500).json({ error: "Error al actualizar informe" });
+  } finally {
+    client.release();
+  }
+});
+
+// 4b. LISTAR VERSIONES DE UN INFORME
+router.get("/:id/versiones", async (req, res) => {
+  const { id } = req.params;
+  try {
+    // Verificar que el informe pertenece al usuario
+    const check = await pool.query(
+      `SELECT i.id FROM informes i JOIN pacientes p ON i.paciente_id = p.id WHERE i.id = $1 AND p.usuario_id = $2`,
+      [id, req.userId]
+    );
+    if (check.rows.length === 0) return res.status(404).json({ error: "Informe no encontrado" });
+
+    const result = await pool.query(
+      `SELECT * FROM informes_versiones WHERE informe_id = $1 ORDER BY version DESC`,
+      [id]
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error al obtener versiones:", error);
+    res.status(500).json({ error: "Error al obtener versiones" });
+  }
+});
+
+// 4c. RESTAURAR UNA VERSIÓN
+router.post("/:id/versiones/:versionId/restaurar", async (req, res) => {
+  const { id, versionId } = req.params;
+
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Verificar ownership
+    const actual = await client.query(
+      `SELECT i.* FROM informes i JOIN pacientes p ON i.paciente_id = p.id WHERE i.id = $1 AND p.usuario_id = $2`,
+      [id, req.userId]
+    );
+    if (actual.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: "Informe no encontrado" });
+    }
+
+    const version = await client.query(
+      `SELECT * FROM informes_versiones WHERE id = $1 AND informe_id = $2`,
+      [versionId, id]
+    );
+    if (version.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: "Versión no encontrada" });
+    }
+
+    const v = version.rows[0];
+    const inf = actual.rows[0];
+
+    // Archivar estado actual antes de restaurar
+    const versionRes = await client.query(
+      `SELECT COALESCE(MAX(version), 0) + 1 AS next FROM informes_versiones WHERE informe_id = $1`,
+      [id]
+    );
+    await client.query(
+      `INSERT INTO informes_versiones (informe_id, version, tipo, fecha, contenido, estado)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [id, versionRes.rows[0].next, inf.tipo, inf.fecha, inf.contenido, inf.estado]
+    );
+
+    // Restaurar
+    const result = await client.query(
+      `UPDATE informes SET tipo = $1, fecha = $2, contenido = $3, estado = $4 WHERE id = $5 RETURNING *`,
+      [v.tipo, v.fecha, v.contenido, v.estado, id]
+    );
+
+    await client.query('COMMIT');
+    res.json(result.rows[0]);
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error("Error al restaurar versión:", error);
+    res.status(500).json({ error: "Error al restaurar versión" });
+  } finally {
+    client.release();
   }
 });
 
