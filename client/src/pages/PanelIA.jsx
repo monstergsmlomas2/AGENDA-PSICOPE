@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Sparkles, FileText, Target, UserX, TrendingDown, Mic, Search, Loader2, ChevronDown, Copy, Check, AlertTriangle, MicOff, Upload, StopCircle } from 'lucide-react';
+import { Sparkles, FileText, Target, UserX, TrendingDown, Mic, Search, Loader2, ChevronDown, Copy, Check, AlertTriangle, MicOff, Upload, StopCircle, Bot, Send, Trash2, User } from 'lucide-react';
 import { getPacientes } from '../services/pacientesService.js';
 import {
   resumirSesion,
@@ -9,10 +9,12 @@ import {
   alertasEstancamiento,
   buscarEnHistoria,
   transcribirAudio,
+  chatClinico,
 } from '../services/iaService.js';
 import { useToast } from '../hooks/useToast.js';
 
 const HERRAMIENTAS = [
+  { id: 'asistente', label: 'Asistente Clínico', icon: Bot, desc: 'Chat con IA especializada en psicopedagogía, con contexto del paciente' },
   { id: 'resumen', label: 'Resumen de Sesión', icon: Sparkles, desc: 'Transforma notas crudas en un resumen clínico estructurado' },
   { id: 'informe', label: 'Generar Informe', icon: FileText, desc: 'Genera un informe psicopedagógico completo del paciente' },
   { id: 'objetivos', label: 'Sugerir Objetivos', icon: Target, desc: 'Sugiere objetivos terapéuticos basados en la historia del paciente' },
@@ -63,6 +65,166 @@ function PacienteSelect({ pacientes, value, onChange, placeholder = 'Seleccioná
         ))}
       </select>
       <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+    </div>
+  );
+}
+
+// ─── HERRAMIENTA: Asistente Clínico ───
+function AsistenteChat({ pacientes }) {
+  const [pacienteId, setPacienteId] = useState('');
+  const [input, setInput] = useState('');
+  const [mensajes, setMensajes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [mensajes, loading]);
+
+  const pacienteSeleccionado = pacientes.find(p => String(p.id) === String(pacienteId));
+
+  const handleEnviar = async () => {
+    const texto = input.trim();
+    if (!texto || loading) return;
+
+    const nuevosMensajes = [...mensajes, { role: 'user', content: texto }];
+    setMensajes(nuevosMensajes);
+    setInput('');
+    setLoading(true);
+
+    try {
+      const historial = nuevosMensajes.map(m => ({ role: m.role, content: m.content }));
+      const data = await chatClinico(historial, pacienteId || null);
+      setMensajes(prev => [...prev, { role: 'assistant', content: data.respuesta }]);
+    } catch (e) {
+      showToast(e.message || 'Error al consultar al asistente', 'error');
+      setMensajes(prev => prev.slice(0, -1));
+      setInput(texto);
+    } finally {
+      setLoading(false);
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleEnviar();
+    }
+  };
+
+  const handleLimpiar = () => {
+    setMensajes([]);
+    setInput('');
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Selector de paciente */}
+      <div className="flex items-center gap-3">
+        <div className="flex-1">
+          <PacienteSelect
+            pacientes={pacientes}
+            value={pacienteId}
+            onChange={(val) => { setPacienteId(val); setMensajes([]); }}
+            placeholder="Sin paciente (consulta general)"
+          />
+        </div>
+        {mensajes.length > 0 && (
+          <button
+            onClick={handleLimpiar}
+            className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-pink-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:text-red-500 hover:border-red-300 text-xs font-semibold transition-colors shrink-0"
+          >
+            <Trash2 size={13} /> Limpiar
+          </button>
+        )}
+      </div>
+
+      {/* Chip de contexto activo */}
+      {pacienteSeleccionado && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-pink-50 dark:bg-teal-500/10 border border-pink-200 dark:border-teal-500/30 rounded-xl text-xs text-pink-700 dark:text-teal-400 font-medium">
+          <Bot size={13} />
+          Contexto cargado: <span className="font-bold">{pacienteSeleccionado.apellido}, {pacienteSeleccionado.nombre}</span>
+          <span className="text-pink-400 dark:text-teal-600">— el asistente tiene acceso a sus sesiones y evaluaciones</span>
+        </div>
+      )}
+
+      {/* Área de chat */}
+      <div className="min-h-[320px] max-h-[420px] overflow-y-auto flex flex-col gap-3 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-xl p-4">
+        {mensajes.length === 0 && (
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-10 gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-pink-100 dark:bg-teal-500/10 flex items-center justify-center">
+              <Bot size={24} className="text-pink-400 dark:text-teal-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Asistente clínico en psicopedagogía</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+                {pacienteSeleccionado
+                  ? `Consultá sobre ${pacienteSeleccionado.nombre}. El asistente conoce su historia.`
+                  : 'Seleccioná un paciente para dar contexto, o hacé una consulta general.'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {mensajes.map((m, i) => (
+          <div key={i} className={`flex gap-2.5 ${m.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+            <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center ${
+              m.role === 'user'
+                ? 'bg-pink-500 dark:bg-teal-600'
+                : 'bg-purple-100 dark:bg-slate-800'
+            }`}>
+              {m.role === 'user'
+                ? <User size={14} className="text-white" />
+                : <Bot size={14} className="text-pink-500 dark:text-teal-400" />
+              }
+            </div>
+            <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+              m.role === 'user'
+                ? 'bg-pink-500 dark:bg-teal-600 text-white rounded-tr-sm'
+                : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-pink-100 dark:border-slate-700 rounded-tl-sm'
+            }`}>
+              {m.content}
+            </div>
+          </div>
+        ))}
+
+        {loading && (
+          <div className="flex gap-2.5 flex-row">
+            <div className="shrink-0 w-7 h-7 rounded-full bg-purple-100 dark:bg-slate-800 flex items-center justify-center">
+              <Bot size={14} className="text-pink-500 dark:text-teal-400" />
+            </div>
+            <div className="px-4 py-3 rounded-2xl rounded-tl-sm bg-white dark:bg-slate-900 border border-pink-100 dark:border-slate-700 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-pink-400 dark:bg-teal-400 rounded-full animate-bounce [animation-delay:0ms]" />
+              <span className="w-1.5 h-1.5 bg-pink-400 dark:bg-teal-400 rounded-full animate-bounce [animation-delay:150ms]" />
+              <span className="w-1.5 h-1.5 bg-pink-400 dark:bg-teal-400 rounded-full animate-bounce [animation-delay:300ms]" />
+            </div>
+          </div>
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div className="flex gap-2">
+        <textarea
+          ref={inputRef}
+          rows={2}
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Escribí tu consulta clínica... (Enter para enviar, Shift+Enter para nueva línea)"
+          className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 resize-none placeholder-slate-400"
+        />
+        <button
+          onClick={handleEnviar}
+          disabled={!input.trim() || loading}
+          className="flex items-center justify-center w-11 shrink-0 bg-pink-500 dark:bg-teal-600 hover:bg-pink-600 dark:hover:bg-teal-700 text-white rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Send size={16} />
+        </button>
+      </div>
     </div>
   );
 }
@@ -537,7 +699,7 @@ function BusquedaHistoria({ pacientes }) {
 
 // ─── COMPONENTE PRINCIPAL ───
 export default function PanelIA() {
-  const [tabActivo, setTabActivo] = useState('resumen');
+  const [tabActivo, setTabActivo] = useState('asistente');
   const [pacientes, setPacientes] = useState([]);
   const { showToast } = useToast();
 
@@ -551,6 +713,7 @@ export default function PanelIA() {
 
   const renderContenido = () => {
     switch (tabActivo) {
+      case 'asistente': return <AsistenteChat pacientes={pacientes} />;
       case 'resumen': return <ResumenSesion pacientes={pacientes} />;
       case 'informe': return <GenerarInforme pacientes={pacientes} />;
       case 'objetivos': return <SugerirObjetivos pacientes={pacientes} />;

@@ -10,6 +10,36 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const DEEPSEEK_MODEL = 'deepseek-chat'; // DeepSeek V3
 
 /**
+ * Llama a DeepSeek con mensajes completos (para conversaciones multi-turno).
+ */
+async function llamarDeepSeekConMensajes(messages, opciones = {}) {
+  const apiKey = process.env.DEEPSEEK_API_KEY;
+  if (!apiKey) throw new Error('DEEPSEEK_API_KEY no configurada en .env');
+
+  const response = await fetch(DEEPSEEK_API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: opciones.model || DEEPSEEK_MODEL,
+      messages,
+      temperature: opciones.temperature ?? 0.5,
+      max_tokens: opciones.maxTokens ?? 1000,
+    }),
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`DeepSeek API error ${response.status}: ${err}`);
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content.trim();
+}
+
+/**
  * Llama a DeepSeek con un system prompt y un user prompt.
  * Devuelve el texto de la respuesta.
  */
@@ -404,6 +434,39 @@ Devolvé exactamente: { "intencion": "...", "params": { ... } }`;
   } catch {
     return { intencion: 'no_entendido', params: {} };
   }
+}
+
+// ─────────────────────────────────────────────
+// 9. ASISTENTE CLÍNICO CONVERSACIONAL
+// ─────────────────────────────────────────────
+export async function asistenteChatClinico({ historial, paciente, sesiones, evaluaciones }) {
+  const contextoPaciente = paciente ? `
+CONTEXTO DEL PACIENTE CON EL QUE ESTÁS TRABAJANDO:
+Nombre: ${paciente.nombre} ${paciente.apellido}
+Edad: ${paciente.fecha_nacimiento ? Math.floor((new Date() - new Date(paciente.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) + ' años' : 'no registrada'}
+Diagnóstico: ${paciente.diagnostico || 'no especificado'}
+Motivo de consulta: ${paciente.motivo || 'no especificado'}
+Escolaridad: ${paciente.escolaridad || 'no especificada'}
+Total de sesiones registradas: ${sesiones?.length || 0}
+${sesiones?.length > 0 ? `Última sesión: ${new Date(sesiones[sesiones.length - 1].fecha).toLocaleDateString('es-AR')}
+Resumen sesiones recientes:
+${sesiones.slice(-5).map((s, i) => `  Sesión ${sesiones.length - 4 + i}: ${s.observaciones || ''} ${s.actividades_realizadas || ''}`.trim()).join('\n')}` : ''}
+${evaluaciones?.length > 0 ? `Evaluaciones realizadas: ${evaluaciones.map(e => e.nombre_test || e.tipo || 'Evaluación').join(', ')}` : ''}` : '';
+
+  const systemPrompt = `Sos un asistente clínico especializado en psicopedagogía, que acompaña al profesional en su práctica diaria.
+Tu rol es ser un colega experto: respondés consultas clínicas, sugerís estrategias de intervención, interpretás síntomas y señales, y ayudás a reflexionar sobre el proceso terapéutico.
+Respondé SIEMPRE en español rioplatense, con lenguaje técnico pero cálido.
+Sé conciso y directo. Si no tenés información suficiente, decilo claramente.
+NUNCA inventés datos que no estén en el contexto provisto.
+NUNCA diagnosticás de forma definitiva — siempre usá lenguaje probabilístico y recordá que la decisión clínica final es del profesional.
+${contextoPaciente}`;
+
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    ...historial,
+  ];
+
+  return llamarDeepSeekConMensajes(messages, { temperature: 0.5, maxTokens: 1000 });
 }
 
 export async function extraerEventoDeTexto(textoLibre, fechaHoy) {

@@ -25,6 +25,10 @@ export async function buscarEnHistoria(pacienteId, consulta) {
   return apiPost('/ia/buscar-historia', { pacienteId, consulta });
 }
 
+export async function chatClinico(historial, pacienteId = null) {
+  return apiPost('/ia/chat', { historial, pacienteId: pacienteId || undefined });
+}
+
 export async function transcribirAudio(archivo) {
   const formData = new FormData();
   formData.append('archivo', archivo);

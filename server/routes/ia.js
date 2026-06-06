@@ -9,6 +9,7 @@ import {
   detectarEstancamiento,
   buscarEnHistoria,
   clasificarIntencionAsistente,
+  asistenteChatClinico,
 } from '../services/aiService.js';
 
 const router = express.Router();
@@ -350,6 +351,44 @@ router.post('/asistente', upload.single('archivo'), async (req, res) => {
     console.error('[Asistente] clasificar intención:', err.message);
     // Aunque falle la clasificación, devolvemos la transcripción
     res.json({ transcripcion, intencion: 'no_entendido', params: {}, proveedorTranscripcion });
+  }
+});
+
+// ─────────────────────────────────────────────
+// 10. ASISTENTE CLÍNICO CONVERSACIONAL (chat)
+// POST /ia/chat
+// Body: { historial: [{role, content}], pacienteId? }
+// ─────────────────────────────────────────────
+router.post('/chat', async (req, res) => {
+  const { historial, pacienteId } = req.body;
+
+  if (!historial || !Array.isArray(historial) || historial.length === 0) {
+    return res.status(400).json({ error: 'historial es requerido y debe ser un array' });
+  }
+
+  try {
+    let paciente = null;
+    let sesiones = [];
+    let evaluaciones = [];
+
+    if (pacienteId) {
+      const [pacResult, sesResult, evalResult] = await Promise.all([
+        pool.query('SELECT * FROM pacientes WHERE id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
+        pool.query('SELECT fecha, observaciones, actividades_realizadas FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha ASC', [pacienteId, req.userId]),
+        pool.query('SELECT nombre_test, tipo, observaciones FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
+      ]);
+      if (pacResult.rows.length > 0) {
+        paciente = pacResult.rows[0];
+        sesiones = sesResult.rows;
+        evaluaciones = evalResult.rows;
+      }
+    }
+
+    const respuesta = await asistenteChatClinico({ historial, paciente, sesiones, evaluaciones });
+    res.json({ respuesta });
+  } catch (error) {
+    console.error('[IA] chat:', error.message);
+    res.status(500).json({ error: error.message });
   }
 });
 

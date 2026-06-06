@@ -399,7 +399,7 @@ Funcionalidades planificadas organizadas por área. Las marcadas con ⭐ son **p
 | Alertas de evolución estancada | ✅ Implementado | Panel IA → pestaña "Alertas de Evolución". Llama a `POST /ia/alertas-estancamiento`. |
 | Transcripción de audios a texto | ✅ Implementado | Panel IA → pestaña "Transcribir Audio". Grabación en vivo + subida de archivo. Groq Whisper gratis. |
 | Búsqueda inteligente en historias clínicas | ✅ Implementado | Panel IA → pestaña "Buscar en Historia". Llama a `POST /ia/buscar-historia`. |
-| Asistente IA especializado en psicopedagogía | Pendiente | Chatbot interno que responde preguntas clínicas con contexto del paciente |
+| Asistente IA especializado en psicopedagogía | ✅ Implementado | Panel IA → pestaña "Asistente Clínico" (tab por defecto). Chat multi-turno con contexto del paciente seleccionado. Llama a `POST /ia/chat`. |
 
 ### Turnos
 
