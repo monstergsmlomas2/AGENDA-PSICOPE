@@ -1,4 +1,10 @@
-import { X, ExternalLink, Download, Users, BookOpen } from 'lucide-react';
+import { useState } from 'react';
+import { X, ExternalLink, Download, Users, BookOpen, Calculator, ArrowLeft } from 'lucide-react';
+import RavenCorreccion from './correctores/RavenCorreccion';
+
+const CORRECTORES = {
+  raven: RavenCorreccion,
+};
 
 function edadLabel(min, max) {
   const fmt = v => (v === 0 ? '0' : `${v}`);
@@ -19,8 +25,10 @@ const COLOR_MAP = {
 };
 
 export default function TestModal({ test, colorKey, onClose }) {
+  const [modoCorreccion, setModoCorreccion] = useState(false);
   if (!test) return null;
   const c = COLOR_MAP[colorKey] || COLOR_MAP.blue;
+  const Corrector = CORRECTORES[test.id];
 
   return (
     <div
@@ -32,10 +40,21 @@ export default function TestModal({ test, colorKey, onClose }) {
         <div className={`${c.bg} ${c.border} border-b rounded-t-2xl px-6 py-5`}>
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-start gap-3">
-              <div className={`mt-0.5 w-3 h-3 rounded-full ${c.dot} shrink-0`} />
+              {modoCorreccion && (
+                <button
+                  onClick={() => setModoCorreccion(false)}
+                  className="mt-0.5 p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-slate-800 transition-colors shrink-0"
+                  title="Volver al detalle del test"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+              )}
+              {!modoCorreccion && <div className={`mt-0.5 w-3 h-3 rounded-full ${c.dot} shrink-0`} />}
               <div>
                 <h2 className={`text-xl font-black ${c.title}`}>{test.nombre}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">{test.nombreCompleto}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                  {modoCorreccion ? 'Corrección automática de resultados' : test.nombreCompleto}
+                </p>
               </div>
             </div>
             <button
@@ -47,12 +66,21 @@ export default function TestModal({ test, colorKey, onClose }) {
           </div>
 
           {/* Rango de edad */}
-          <div className={`mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${c.badge}`}>
-            <Users size={12} />
-            {edadLabel(test.edadMin, test.edadMax)}
-          </div>
+          {!modoCorreccion && (
+            <div className={`mt-3 inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ${c.badge}`}>
+              <Users size={12} />
+              {edadLabel(test.edadMin, test.edadMax)}
+            </div>
+          )}
         </div>
 
+        {/* Modo corrección */}
+        {modoCorreccion && Corrector ? (
+          <div className="px-6 py-5">
+            <Corrector />
+          </div>
+        ) : (
+        <>
         {/* Body */}
         <div className="px-6 py-5 space-y-5">
           {/* Descripción */}
@@ -63,6 +91,17 @@ export default function TestModal({ test, colorKey, onClose }) {
             </div>
             <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{test.descripcion}</p>
           </div>
+
+          {/* Corrección automática disponible */}
+          {Corrector && (
+            <button
+              onClick={() => setModoCorreccion(true)}
+              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-colors ${c.badge} hover:opacity-80`}
+            >
+              <Calculator size={15} />
+              Corregir resultados y generar percentil
+            </button>
+          )}
 
           {/* Áreas que evalúa — keywords como chips */}
           {test.keywords && test.keywords.length > 0 && (
@@ -123,6 +162,8 @@ export default function TestModal({ test, colorKey, onClose }) {
             </button>
           )}
         </div>
+        </>
+        )}
       </div>
     </div>
   );

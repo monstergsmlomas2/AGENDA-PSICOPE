@@ -47,6 +47,7 @@ export const CATEGORIAS_TESTS = [
         keywords: ['inteligencia', 'razonamiento', 'cognitivo', 'no verbal', 'abstracto', 'capacidad intelectual'],
         urlOficial: 'https://www.pearsonclinical.com/psychology/products/100000649/ravens-progressive-matrices.html',
         urlDescarga: null,
+        corregible: true,
       },
       {
         id: 'kaufman',
