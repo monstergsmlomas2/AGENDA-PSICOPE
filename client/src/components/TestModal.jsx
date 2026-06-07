@@ -103,6 +103,14 @@ export default function TestModal({ test, colorKey, onClose }) {
             </button>
           )}
 
+          {/* Corrección automática planificada pero aún no disponible */}
+          {!Corrector && test.corregible && (
+            <div className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold text-sm bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500">
+              <Calculator size={15} />
+              Corrección automática: próximamente
+            </div>
+          )}
+
           {/* Áreas que evalúa — keywords como chips */}
           {test.keywords && test.keywords.length > 0 && (
             <div>
