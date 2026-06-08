@@ -251,6 +251,7 @@ export function generarHtmlEntrevista(paciente, entrevista = {}) {
       <span class="check-item"><span class="check-symbol">${check(e.apoyo_adaptaciones)}</span> Adaptaciones Curriculares</span>
       <span class="check-item"><span class="check-symbol">${check(e.apoyo_cud)}</span> Posee CUD</span>
     </div>
+    ${e.apoyo_cud ? field('Diagnóstico del CUD', e.cud_diagnostico) : ''}
   </section>
 
   <!-- HÁBITOS Y PROCESAMIENTO SENSORIAL -->

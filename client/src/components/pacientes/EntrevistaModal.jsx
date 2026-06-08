@@ -11,6 +11,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
+  const [tieneCud, setTieneCud] = useState(!!entrevista?.apoyo_cud);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -183,8 +184,14 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
               <label className="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="apoyo_maestra" defaultChecked={entrevista?.apoyo_maestra} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Maestra de Inclusión</label>
               <label className="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="apoyo_die" defaultChecked={entrevista?.apoyo_die} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Dispositivo (DIE)</label>
               <label className="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="apoyo_adaptaciones" defaultChecked={entrevista?.apoyo_adaptaciones} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Adaptaciones Curriculares</label>
-              <label className="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="apoyo_cud" defaultChecked={entrevista?.apoyo_cud} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Posee CUD</label>
+              <label className="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="apoyo_cud" checked={tieneCud} onChange={(e) => setTieneCud(e.target.checked)} className="accent-teal-600 dark:accent-teal-500 w-4 h-4" /> Posee CUD</label>
             </div>
+            {tieneCud && (
+              <div>
+                <label className="text-slate-900 font-bold dark:text-slate-400 text-xs uppercase font-semibold">Diagnóstico del CUD</label>
+                <input type="text" name="cud_diagnostico" defaultValue={entrevista?.cud_diagnostico} placeholder="Indique el diagnóstico que figura en el Certificado Único de Discapacidad" className="w-full bg-white dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-lg p-2 mt-1 outline-none focus:border-teal-500 dark:focus:border-teal-500 text-slate-900 dark:text-white" />
+              </div>
+            )}
           </section>
 
           <section className="space-y-4">
