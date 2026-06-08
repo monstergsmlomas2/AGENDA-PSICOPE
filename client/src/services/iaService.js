@@ -26,7 +26,18 @@ export async function buscarEnHistoria(pacienteId, consulta) {
 }
 
 export async function chatClinico(historial, pacienteId = null) {
-  return apiPost('/ia/chat', { historial, pacienteId: pacienteId || undefined });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+  try {
+    return await apiPost('/ia/chat', { historial, pacienteId: pacienteId || undefined }, { signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('El asistente tardó demasiado en responder. Probá de nuevo en unos segundos (el servidor puede estar "despertando").');
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export async function transcribirAudio(archivo) {

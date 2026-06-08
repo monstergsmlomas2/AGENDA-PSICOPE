@@ -69,10 +69,11 @@ export async function apiGet(endpoint) {
   return handleResponse(res);
 }
 
-export async function apiPost(endpoint, data) {
+export async function apiPost(endpoint, data, extra = {}) {
   const res = await apiFetch(endpoint, {
     method: 'POST',
     body: data ? JSON.stringify(data) : undefined,
+    ...extra,
   });
   return handleResponse(res);
 }
