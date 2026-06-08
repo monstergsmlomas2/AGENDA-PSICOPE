@@ -3,11 +3,13 @@ import { X, ExternalLink, Download, Users, BookOpen, Calculator, ArrowLeft } fro
 import RavenCorreccion from './correctores/RavenCorreccion';
 import ProlecCorreccion from './correctores/ProlecCorreccion';
 import VmiCorreccion from './correctores/VmiCorreccion';
+import WiscCorreccion from './correctores/WiscCorreccion';
 
 const CORRECTORES = {
   raven:  RavenCorreccion,
   prolec: ProlecCorreccion,
   vmi:    VmiCorreccion,
+  wisc5:  WiscCorreccion,
 };
 
 function edadLabel(min, max) {

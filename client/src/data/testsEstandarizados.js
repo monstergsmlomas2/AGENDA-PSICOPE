@@ -8,6 +8,7 @@ export const CATEGORIAS_TESTS = [
         id: 'wisc5',
         nombre: 'WISC-V',
         nombreCompleto: 'Wechsler Intelligence Scale for Children – 5ª edición',
+        corregible: true,
         edadMin: 6,
         edadMax: 16,
         descripcion: 'Evalúa la inteligencia general y cinco índices primarios: comprensión verbal, visoespacial, razonamiento fluido, memoria de trabajo y velocidad de procesamiento.',
