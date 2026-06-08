@@ -24,7 +24,6 @@ const EvaluacionDetalle       = lazy(() => import('./pages/EvaluacionDetalle'));
 const EvaluacionForm          = lazy(() => import('./pages/EvaluacionForm'));
 const Turnos                  = lazy(() => import('./pages/Turnos'));
 const ObrasSociales           = lazy(() => import('./pages/ObrasSociales'));
-const Informes                = lazy(() => import('./pages/Informes'));
 const Pagos                   = lazy(() => import('./pages/Pagos'));
 const Consultorios            = lazy(() => import('./pages/Consultorios'));
 const Configuracion           = lazy(() => import('./pages/Configuracion'));
@@ -156,7 +155,6 @@ function AppRoutes() {
                 <Route path="/turnos" element={<Turnos />} />
                 <Route path="/mi-agenda" element={<MiAgenda />} />
                 <Route path="/obras-sociales" element={<ObrasSociales />} />
-                <Route path="/informes" element={<Informes />} />
                 <Route path="/pagos" element={<Pagos />} />
                 <Route path="/configuracion" element={<Configuracion />} />
                 <Route path="/herramientas" element={<HerramientasEstandarizadas />} />
