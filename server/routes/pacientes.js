@@ -1,15 +1,13 @@
 import express from "express";
 import pool from "../config/db.js";
+import { validateBody } from "../middleware/validate.js";
+import { crearPacienteSchema, actualizarPacienteSchema } from "../schemas/pacientes.js";
 
 const router = express.Router();
 
 // 1. CREAR PACIENTE
-router.post("/", async (req, res) => {
+router.post("/", validateBody(crearPacienteSchema), async (req, res) => {
   const { nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones } = req.body;
-
-  if (!nombre || !apellido) {
-    return res.status(400).json({ error: "Los campos nombre y apellido son obligatorios" });
-  }
 
   try {
     const result = await pool.query(
@@ -125,7 +123,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // 6. ACTUALIZAR DATOS DEL PACIENTE
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateBody(actualizarPacienteSchema), async (req, res) => {
   const { id } = req.params;
   const { nombre, apellido, dni, fecha_nacimiento, sexo, domicilio, telefono, email, obra_social, nro_afiliado, motivo, derivada_por, diagnostico, cud, contacto_emergencia, inicio_sesiones } = req.body;
   try {

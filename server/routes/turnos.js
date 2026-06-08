@@ -5,6 +5,8 @@ import {
   actualizarEventoCalendar,
   eliminarEventoCalendar,
 } from "../services/googleCalendar.js";
+import { validateBody } from "../middleware/validate.js";
+import { crearTurnoSchema, actualizarTurnoSchema } from "../schemas/turnos.js";
 
 const ESTADOS_VALIDOS = ['pendiente', 'confirmado', 'inasistencia', 'cancelado'];
 const TIPOS_TURNO_VALIDOS = ['tratamiento', 'evaluacion'];
@@ -17,19 +19,18 @@ router.get("/", async (req, res) => {
   try {
     const conditions = ['t.usuario_id = $1'];
     const params = [req.userId];
-    let paramIndex = 1;
 
     if (paciente_id) {
       params.push(paciente_id);
-      conditions.push(`t.paciente_id = $${++paramIndex}`);
+      conditions.push(`t.paciente_id = $${params.length}`);
     }
     if (desde) {
       params.push(desde);
-      conditions.push(`t.fecha >= $${++paramIndex}`);
+      conditions.push(`t.fecha >= $${params.length}`);
     }
     if (hasta) {
       params.push(hasta);
-      conditions.push(`t.fecha <= $${++paramIndex}`);
+      conditions.push(`t.fecha <= $${params.length}`);
     }
 
     const where = `WHERE ${conditions.join(' AND ')}`;
@@ -91,22 +92,11 @@ router.get("/sin-pago", async (req, res) => {
 });
 
 // 3. CREAR UN TURNO
-router.post("/", async (req, res) => {
+router.post("/", validateBody(crearTurnoSchema), async (req, res) => {
   const { paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom } = req.body;
 
-  if (!paciente_id || !fecha || !hora || !consultorio) {
-    return res.status(400).json({ error: "Los campos paciente, fecha, hora y consultorio son obligatorios" });
-  }
-
   const estadoFinal = estado || 'pendiente';
-  if (!ESTADOS_VALIDOS.includes(estadoFinal)) {
-    return res.status(400).json({ error: "Estado no válido. Usar: pendiente, confirmado, inasistencia o cancelado" });
-  }
-
   const tipoTurnoFinal = tipo_turno || 'tratamiento';
-  if (!TIPOS_TURNO_VALIDOS.includes(tipoTurnoFinal)) {
-    return res.status(400).json({ error: "Tipo de turno no válido. Usar: tratamiento o evaluacion" });
-  }
 
   try {
     const result = await pool.query(
@@ -191,13 +181,9 @@ router.patch("/:id/estado", async (req, res) => {
 });
 
 // 5. ACTUALIZAR TURNO COMPLETO
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateBody(actualizarTurnoSchema), async (req, res) => {
   const { id } = req.params;
   const { fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom } = req.body;
-
-  if (estado && !ESTADOS_VALIDOS.includes(estado)) {
-    return res.status(400).json({ error: "Estado no válido. Usar: pendiente, confirmado, inasistencia o cancelado" });
-  }
 
   try {
     const result = await pool.query(
