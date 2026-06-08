@@ -370,21 +370,24 @@ router.post('/chat', async (req, res) => {
     let paciente = null;
     let sesiones = [];
     let evaluaciones = [];
+    let informes = [];
 
     if (pacienteId) {
-      const [pacResult, sesResult, evalResult] = await Promise.all([
+      const [pacResult, sesResult, evalResult, infResult] = await Promise.all([
         pool.query('SELECT * FROM pacientes WHERE id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
-        pool.query('SELECT fecha, observaciones, actividades_realizadas FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha ASC', [pacienteId, req.userId]),
-        pool.query('SELECT tipo_test, observaciones FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
+        pool.query('SELECT fecha, observaciones, actividades_realizadas, recomendaciones, resumen_ia FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha ASC', [pacienteId, req.userId]),
+        pool.query('SELECT tipo_test, fecha_administracion, resultados, puntaje_obtenido, observaciones FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha_administracion ASC', [pacienteId, req.userId]),
+        pool.query('SELECT tipo, fecha, contenido, estado FROM informes WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha ASC', [pacienteId, req.userId]),
       ]);
       if (pacResult.rows.length > 0) {
         paciente = pacResult.rows[0];
         sesiones = sesResult.rows;
         evaluaciones = evalResult.rows;
+        informes = infResult.rows;
       }
     }
 
-    const respuesta = await asistenteChatClinico({ historial, paciente, sesiones, evaluaciones });
+    const respuesta = await asistenteChatClinico({ historial, paciente, sesiones, evaluaciones, informes });
     res.json({ respuesta });
   } catch (error) {
     console.error('[IA] chat:', error.message);

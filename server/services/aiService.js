@@ -10,6 +10,27 @@ const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 const DEEPSEEK_MODEL = 'deepseek-chat'; // DeepSeek V3
 
 /**
+ * Convierte un objeto JSON (ej: entrevista de admisión) en texto plano legible
+ * tipo "clave: valor", recorriendo de forma recursiva, para incluirlo en prompts.
+ */
+function formatearJSONLegible(obj, indent = '') {
+  if (obj === null || obj === undefined || obj === '') return null;
+  if (typeof obj !== 'object') return String(obj);
+
+  const lineas = [];
+  for (const [clave, valor] of Object.entries(obj)) {
+    if (valor === null || valor === undefined || valor === '' || valor === false) continue;
+    if (typeof valor === 'object') {
+      const sub = formatearJSONLegible(valor, indent + '  ');
+      if (sub) lineas.push(`${indent}${clave}:\n${sub}`);
+    } else {
+      lineas.push(`${indent}${clave}: ${valor}`);
+    }
+  }
+  return lineas.length > 0 ? lineas.join('\n') : null;
+}
+
+/**
  * Llama a DeepSeek con mensajes completos (para conversaciones multi-turno).
  */
 async function llamarDeepSeekConMensajes(messages, opciones = {}) {
@@ -439,19 +460,59 @@ Devolvé exactamente: { "intencion": "...", "params": { ... } }`;
 // ─────────────────────────────────────────────
 // 9. ASISTENTE CLÍNICO CONVERSACIONAL
 // ─────────────────────────────────────────────
-export async function asistenteChatClinico({ historial, paciente, sesiones, evaluaciones }) {
-  const contextoPaciente = paciente ? `
-CONTEXTO DEL PACIENTE CON EL QUE ESTÁS TRABAJANDO:
+export async function asistenteChatClinico({ historial, paciente, sesiones, evaluaciones, informes }) {
+  let contextoPaciente = '';
+
+  if (paciente) {
+    const edad = paciente.fecha_nacimiento
+      ? Math.floor((new Date() - new Date(paciente.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) + ' años'
+      : 'no registrada';
+
+    contextoPaciente = `
+CONTEXTO DEL PACIENTE CON EL QUE ESTÁS TRABAJANDO (información completa de su ficha):
+
+== DATOS GENERALES ==
 Nombre: ${paciente.nombre} ${paciente.apellido}
-Edad: ${paciente.fecha_nacimiento ? Math.floor((new Date() - new Date(paciente.fecha_nacimiento)) / (365.25 * 24 * 60 * 60 * 1000)) + ' años' : 'no registrada'}
+DNI: ${paciente.dni || 'no registrado'}
+Edad: ${edad}
+Sexo: ${paciente.sexo || 'no registrado'}
 Diagnóstico: ${paciente.diagnostico || 'no especificado'}
 Motivo de consulta: ${paciente.motivo || 'no especificado'}
-Escolaridad: ${paciente.escolaridad || 'no especificada'}
-Total de sesiones registradas: ${sesiones?.length || 0}
-${sesiones?.length > 0 ? `Última sesión: ${new Date(sesiones[sesiones.length - 1].fecha).toLocaleDateString('es-AR')}
-Resumen sesiones recientes:
-${sesiones.slice(-5).map((s, i) => `  Sesión ${sesiones.length - 4 + i}: ${s.observaciones || ''} ${s.actividades_realizadas || ''}`.trim()).join('\n')}` : ''}
-${evaluaciones?.length > 0 ? `Evaluaciones realizadas: ${evaluaciones.map(e => e.tipo_test || 'Evaluación').join(', ')}` : ''}` : '';
+Escolaridad / Escuela: ${paciente.escolaridad || paciente.escuela || 'no especificada'}
+Obra social: ${paciente.obra_social || 'no registrada'} (N° afiliado: ${paciente.nro_afiliado || 's/d'})
+Responsable: ${paciente.responsable || 'no registrado'}
+Derivado por: ${paciente.derivada_por || 'no registrado'}
+Inicio de tratamiento: ${paciente.inicio_sesiones ? new Date(paciente.inicio_sesiones).toLocaleDateString('es-AR') : 'no registrado'}
+Posee CUD (Certificado Único de Discapacidad): ${paciente.cud ? 'Sí' : 'No'}
+Consentimiento informado: ${paciente.consentimiento ? 'Firmado' : 'No registrado'}
+
+== ENTREVISTA DE ADMISIÓN ==
+${paciente.entrevista ? formatearJSONLegible(paciente.entrevista) : 'No se registró entrevista de admisión.'}
+
+== SESIONES (total: ${sesiones?.length || 0}) ==
+${sesiones?.length > 0
+  ? sesiones.map((s, i) => `Sesión ${i + 1} (${new Date(s.fecha).toLocaleDateString('es-AR')}):
+  Observaciones: ${s.observaciones || 's/d'}
+  Actividades realizadas: ${s.actividades_realizadas || 's/d'}
+  Recomendaciones: ${s.recomendaciones || 's/d'}
+  Resumen IA: ${s.resumen_ia || 's/d'}`).join('\n\n')
+  : 'No hay sesiones registradas.'}
+
+== EVALUACIONES (total: ${evaluaciones?.length || 0}) ==
+${evaluaciones?.length > 0
+  ? evaluaciones.map((e, i) => `Evaluación ${i + 1} — ${e.tipo_test || 'Test'} (${e.fecha_administracion ? new Date(e.fecha_administracion).toLocaleDateString('es-AR') : 's/f'}):
+  Puntaje obtenido: ${e.puntaje_obtenido ?? 's/d'}
+  Resultados: ${e.resultados || 's/d'}
+  Observaciones: ${e.observaciones || 's/d'}`).join('\n\n')
+  : 'No hay evaluaciones registradas.'}
+
+== INFORMES (total: ${informes?.length || 0}) ==
+${informes?.length > 0
+  ? informes.map((inf, i) => `Informe ${i + 1} — ${inf.tipo || 'Informe'} (${inf.fecha ? new Date(inf.fecha).toLocaleDateString('es-AR') : 's/f'}, estado: ${inf.estado || 's/d'}):
+${inf.contenido || 's/d'}`).join('\n\n')
+  : 'No hay informes registrados.'}
+`;
+  }
 
   const systemPrompt = `Sos un asistente clínico especializado en psicopedagogía, que acompaña al profesional en su práctica diaria.
 Tu rol es ser un colega experto: respondés consultas clínicas, sugerís estrategias de intervención, interpretás síntomas y señales, y ayudás a reflexionar sobre el proceso terapéutico.
