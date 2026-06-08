@@ -277,7 +277,11 @@ const seccionesPorTipo = {
     { key: 'conclusiones', label: 'Conclusiones' },
   ],
   escolar: [
-    { key: 'datos_institucionales', label: 'Datos del Alumno y la Institución (escuela, dirección, año, turno, teléfono)' },
+    { key: 'escuela', label: 'Escuela', short: true },
+    { key: 'direccion_escuela', label: 'Dirección', short: true },
+    { key: 'anio', label: 'Año', short: true },
+    { key: 'turno', label: 'Turno', short: true },
+    { key: 'telefono_escuela', label: 'Teléfono', short: true },
     { key: 'logico_matematico', label: '1. Lógico-Matemático (descripción de dificultades, logros alcanzados, etc.)' },
     { key: 'lengua_oral_escrita', label: '2. Lengua Oral y Escrita (descripción de dificultades en la lectoescritura y expresión oral, logros alcanzados, etc.)' },
     { key: 'ciencias_naturales_sociales', label: '3. Ciencias Naturales y Ciencias Sociales (descripción de dificultades, logros alcanzados, etc.)' },
@@ -1779,13 +1783,23 @@ export default function PacienteDetalle() {
                 {(seccionesPorTipo[informeTipo] || []).map(sec => (
                   <div key={sec.key}>
                     <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">{sec.label}</label>
-                    <textarea
-                      value={informeContenido[sec.key] || ''}
-                      onChange={e => setInformeContenido(prev => ({ ...prev, [sec.key]: e.target.value }))}
-                      rows={3}
-                      className="w-full rounded-xl p-3 outline-none resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500"
-                      placeholder={`${sec.label}...`}
-                    />
+                    {sec.short ? (
+                      <input
+                        type="text"
+                        value={informeContenido[sec.key] || ''}
+                        onChange={e => setInformeContenido(prev => ({ ...prev, [sec.key]: e.target.value }))}
+                        className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500"
+                        placeholder={`${sec.label}...`}
+                      />
+                    ) : (
+                      <textarea
+                        value={informeContenido[sec.key] || ''}
+                        onChange={e => setInformeContenido(prev => ({ ...prev, [sec.key]: e.target.value }))}
+                        rows={3}
+                        className="w-full rounded-xl p-3 outline-none resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500"
+                        placeholder={`${sec.label}...`}
+                      />
+                    )}
                   </div>
                 ))}
               </div>
