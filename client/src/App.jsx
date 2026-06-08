@@ -13,6 +13,7 @@ import GlobalSearch from './components/GlobalSearch';
 import InstallPrompt from './components/InstallPrompt'
 import UpdatePrompt from './components/UpdatePrompt';
 import AsistenteVoz from './components/AsistenteVoz';
+import ChunkErrorBoundary from './components/ChunkErrorBoundary';
 
 const Dashboard               = lazy(() => import('./pages/Dashboard'));
 const Pacientes               = lazy(() => import('./pages/Pacientes'));
@@ -101,13 +102,15 @@ function ProtectedLayout({ children }) {
         <Sidebar />
       </div>
       <main className="flex-1 p-4 lg:p-6 overflow-y-auto relative animate-fade-in pb-20 md:pb-6">
-        <Suspense fallback={
-          <div className="flex items-center justify-center h-full min-h-[300px]">
-            <Loader2 size={28} className="animate-spin text-pink-500" />
-          </div>
-        }>
-          {children}
-        </Suspense>
+        <ChunkErrorBoundary>
+          <Suspense fallback={
+            <div className="flex items-center justify-center h-full min-h-[300px]">
+              <Loader2 size={28} className="animate-spin text-pink-500" />
+            </div>
+          }>
+            {children}
+          </Suspense>
+        </ChunkErrorBoundary>
       </main>
       {/* Bottom navigation — solo en móvil */}
       <BottomNav />
