@@ -262,6 +262,7 @@ export const CATEGORIAS_TESTS = [
         id: 'vmi',
         nombre: 'VMI (Beery)',
         nombreCompleto: 'Beery-Buktenica Developmental Test of Visual-Motor Integration',
+        corregible: true,
         edadMin: 2,
         edadMax: 18,
         descripcion: 'Evalúa la integración visomotora mediante la copia de figuras geométricas. Incluye subpruebas de percepción visual y coordinación motora fina.',
