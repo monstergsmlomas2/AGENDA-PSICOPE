@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
@@ -48,7 +48,7 @@ const getAvatarColor = (str) => {
 const getIniciales = (nombre, apellido) =>
   ((nombre || '')[0] || '') + ((apellido || '')[0] || '');
 
-function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
+const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [dni, setDni] = useState("");
@@ -90,8 +90,10 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
   }, [show, paciente]);
 
   useEffect(() => {
-    getObrasSociales().then(data => setObrasSocialesList(Array.isArray(data) ? data : []));
-  }, []);
+    if (show && obrasSocialesList.length === 0) {
+      getObrasSociales().then(data => setObrasSocialesList(Array.isArray(data) ? data : []));
+    }
+  }, [show]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -251,7 +253,7 @@ function EditarPacienteModal({ show, onClose, paciente, onSaved }) {
       </div>
     </div>
   );
-}
+});
 const tiposInforme = [
   { value: 'diagnostico', label: 'Informe Diagnóstico Psicopedagógico' },
   { value: 'evolucion', label: 'Informe de Evolución (periódico)' },
@@ -435,12 +437,15 @@ export default function PacienteDetalle() {
     cargarSesiones();
   }, [id]);
 
-  useEffect(() => {
-    if (tabActivo === 'sesiones') { cargarSesiones(); cargarArchivosPorSeccion('Sesiones'); }
-  }, [tabActivo]);
+  const tabsCargadosRef = useRef(new Set());
 
   useEffect(() => {
+    if (tabsCargadosRef.current.has(tabActivo)) return;
+    tabsCargadosRef.current.add(tabActivo);
+
+    if (tabActivo === 'sesiones') { cargarSesiones(); cargarArchivosPorSeccion('Sesiones'); cargarTurnos(); }
     if (tabActivo === 'evaluaciones') { cargarEvaluaciones(); cargarArchivosPorSeccion('Evaluaciones'); }
+    if (tabActivo === 'turnos') cargarTurnos();
   }, [tabActivo]);
 
   const cargarInformes = async () => {
@@ -473,9 +478,6 @@ export default function PacienteDetalle() {
     }
   };
 
-  useEffect(() => {
-    if (tabActivo === 'turnos' || tabActivo === 'sesiones') cargarTurnos();
-  }, [tabActivo]);
 
   const handleGuardarTurno = async () => {
     if (!turnoForm.fecha || !turnoForm.hora || !turnoForm.consultorio) {

@@ -26,6 +26,15 @@ router.post("/", async (req, res) => {
 // 2. LISTAR PACIENTES
 router.get("/", async (req, res) => {
   try {
+    const limit = Math.min(parseInt(req.query.limit) || 0, 200) || null;
+    const offset = parseInt(req.query.offset) || 0;
+    const params = [req.userId];
+    let limitClause = '';
+    if (limit) {
+      params.push(limit, offset);
+      limitClause = `LIMIT $2 OFFSET $3`;
+    }
+
     const result = await pool.query(`
       SELECT
         id, nombre, apellido, dni, telefono, email,
@@ -35,7 +44,8 @@ router.get("/", async (req, res) => {
       FROM pacientes
       WHERE usuario_id = $1
       ORDER BY id DESC
-    `, [req.userId]);
+      ${limitClause}
+    `, params);
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: "Error al obtener pacientes" });

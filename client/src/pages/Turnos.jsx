@@ -7,14 +7,23 @@ import { getConsultorios } from '../services/consultoriosService';
 import { useToast, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
 import TimePicker from '../components/ui/TimePicker';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'moment/locale/es';
+import { Calendar, dayjsLocalizer } from 'react-big-calendar';
+import dayjs from 'dayjs';
+import 'dayjs/locale/es';
+import isBetween from 'dayjs/plugin/isBetween';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import localizedFormat from 'dayjs/plugin/localizedFormat';
+
+dayjs.extend(isBetween);
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
+dayjs.extend(localizedFormat);
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import '../calendar-overrides.css';
 
-moment.locale('es');
-const localizer = momentLocalizer(moment);
+dayjs.locale('es');
+const localizer = dayjsLocalizer(dayjs);
 
 const estadoConfig = {
   pendiente:   { label: 'Pendiente',   color: 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/30',   icon: Clock, bg: '#3b82f6' },

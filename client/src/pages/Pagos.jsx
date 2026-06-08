@@ -6,7 +6,6 @@ import { getPacientes } from '../services/pacientesService';
 import { getTurnosSinPago } from '../services/turnosService';
 import { useToast, Badge, SkeletonTable, ErrorState, EmptyState, Button } from '../components/ui';
 import { useConfirm } from '../hooks/useConfirm';
-import { generarReciboPDF } from '../utils/generarReciboPDF';
 import { getConfiguracion } from '../services/configuracionService';
 
 
@@ -205,7 +204,10 @@ export default function Pagos() {
   const handleDownloadPDF = async (pago) => {
     setDownloadLoading(pago.id);
     try {
-      const config = await getConfiguracion();
+      const [{ generarReciboPDF }, config] = await Promise.all([
+        import('../utils/generarReciboPDF'),
+        getConfiguracion(),
+      ]);
       generarReciboPDF(pago, config);
       toast.success('PDF generado', 'El recibo se descargó correctamente.');
     } catch {

@@ -110,16 +110,18 @@ router.post("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom, usuario_id)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      `WITH nuevo_turno AS (
+         INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom, usuario_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *
+       )
+       SELECT nt.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
+       FROM nuevo_turno nt
+       JOIN pacientes p ON p.id = nt.paciente_id`,
       [paciente_id, fecha, hora, consultorio, observaciones, estadoFinal, tipo_cobertura || 'particular', tipoTurnoFinal, importe_custom || null, req.userId]
     );
     const turno = result.rows[0];
 
-    // Obtener nombre del paciente para el evento de Calendar
-    const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [paciente_id]);
-    const paciente = pacienteRow.rows[0] || {};
-    const eventId = await crearEventoCalendar(req.userId, { ...turno, paciente_nombre: paciente.nombre, paciente_apellido: paciente.apellido });
+    const eventId = await crearEventoCalendar(req.userId, turno);
     if (eventId) {
       await pool.query('UPDATE turnos SET google_calendar_event_id = $1 WHERE id = $2', [eventId, turno.id]);
       turno.google_calendar_event_id = eventId;
@@ -143,7 +145,15 @@ router.patch("/:id/estado", async (req, res) => {
 
   try {
     const result = await pool.query(
-      "UPDATE turnos SET estado = $1 WHERE id = $2 AND usuario_id = $3 RETURNING *",
+      `WITH actualizado AS (
+         UPDATE turnos SET estado = $1 WHERE id = $2 AND usuario_id = $3 RETURNING *
+       )
+       SELECT a.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido,
+              pg.id AS pago_id, c.monto_tratamiento, c.monto_evaluacion
+       FROM actualizado a
+       JOIN pacientes p ON p.id = a.paciente_id
+       LEFT JOIN pagos pg ON pg.turno_id = a.id
+       LEFT JOIN consultorios c ON c.nombre = a.consultorio AND c.usuario_id = a.usuario_id`,
       [estado, id, req.userId]
     );
     if (result.rows.length === 0) {
@@ -152,39 +162,25 @@ router.patch("/:id/estado", async (req, res) => {
     const turno = result.rows[0];
 
     // Al confirmar, crear pago automático si no existe uno vinculado
-    if (estado === 'confirmado') {
-      const pagoExistente = await pool.query(
-        "SELECT id FROM pagos WHERE turno_id = $1",
-        [id]
-      );
-      if (pagoExistente.rowCount === 0) {
-        // Obtener importe: custom o del consultorio según tipo_turno
-        const consultorioData = await pool.query(
-          "SELECT monto_tratamiento, monto_evaluacion FROM consultorios WHERE nombre = $1 AND usuario_id = $2",
-          [turno.consultorio, req.userId]
-        );
-        const c = consultorioData.rows[0];
-        let monto = turno.importe_custom;
-        if (monto == null && c) {
-          monto = turno.tipo_turno === 'evaluacion' ? c.monto_evaluacion : c.monto_tratamiento;
-        }
+    if (estado === 'confirmado' && turno.pago_id == null) {
+      let monto = turno.importe_custom;
+      if (monto == null) {
+        monto = turno.tipo_turno === 'evaluacion' ? turno.monto_evaluacion : turno.monto_tratamiento;
+      }
 
-        if (monto != null) {
-          const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
-          await pool.query(
-            `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, turno_id, usuario_id)
-             VALUES ($1, $2, $3, $4, 'efectivo', 'pendiente', $5, $6)`,
-            [turno.paciente_id, turno.fecha, concepto, monto, turno.id, req.userId]
-          );
-        }
+      if (monto != null) {
+        const concepto = turno.tipo_turno === 'evaluacion' ? 'Evaluación psicopedagógica' : 'Sesión de tratamiento';
+        await pool.query(
+          `INSERT INTO pagos (paciente_id, fecha, concepto, monto, tipo_pago, estado, turno_id, usuario_id)
+           VALUES ($1, $2, $3, $4, 'efectivo', 'pendiente', $5, $6)`,
+          [turno.paciente_id, turno.fecha, concepto, monto, turno.id, req.userId]
+        );
       }
     }
 
     // Sincronizar con Google Calendar
     if (turno.google_calendar_event_id) {
-      const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [turno.paciente_id]);
-      const p = pacienteRow.rows[0] || {};
-      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, { ...turno, paciente_nombre: p.nombre, paciente_apellido: p.apellido });
+      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, turno);
     }
 
     res.json(turno);
@@ -205,9 +201,14 @@ router.put("/:id", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE turnos SET fecha = $1, hora = $2, consultorio = $3, observaciones = $4, estado = $5,
-       tipo_cobertura = $6, tipo_turno = $7, importe_custom = $8
-       WHERE id = $9 AND usuario_id = $10 RETURNING *`,
+      `WITH actualizado AS (
+         UPDATE turnos SET fecha = $1, hora = $2, consultorio = $3, observaciones = $4, estado = $5,
+         tipo_cobertura = $6, tipo_turno = $7, importe_custom = $8
+         WHERE id = $9 AND usuario_id = $10 RETURNING *
+       )
+       SELECT a.*, p.nombre AS paciente_nombre, p.apellido AS paciente_apellido
+       FROM actualizado a
+       JOIN pacientes p ON p.id = a.paciente_id`,
       [fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno || 'tratamiento', importe_custom || null, id, req.userId]
     );
     if (result.rows.length === 0) {
@@ -217,9 +218,7 @@ router.put("/:id", async (req, res) => {
 
     // Sincronizar con Google Calendar
     if (turno.google_calendar_event_id) {
-      const pacienteRow = await pool.query('SELECT nombre, apellido FROM pacientes WHERE id = $1', [turno.paciente_id]);
-      const p = pacienteRow.rows[0] || {};
-      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, { ...turno, paciente_nombre: p.nombre, paciente_apellido: p.apellido });
+      await actualizarEventoCalendar(req.userId, turno.google_calendar_event_id, turno);
     }
 
     res.json(turno);

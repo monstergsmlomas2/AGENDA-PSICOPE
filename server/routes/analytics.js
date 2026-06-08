@@ -160,13 +160,12 @@ router.get("/totales", async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
-        (SELECT COUNT(*)::int FROM turnos t
-          JOIN pacientes p ON t.paciente_id = p.id
-          WHERE p.usuario_id = $1) AS total_turnos,
-        (SELECT COUNT(*)::int FROM turnos t
-          JOIN pacientes p ON t.paciente_id = p.id
-          WHERE p.usuario_id = $1 AND t.estado = 'inasistencia'
-            AND t.fecha >= date_trunc('month', NOW())) AS ausentes_mes
+        COUNT(*)::int AS total_turnos,
+        COUNT(*) FILTER (
+          WHERE estado = 'inasistencia' AND fecha >= date_trunc('month', NOW())
+        )::int AS ausentes_mes
+      FROM turnos
+      WHERE usuario_id = $1
     `, [req.userId]);
     res.json(result.rows[0]);
   } catch (error) {
