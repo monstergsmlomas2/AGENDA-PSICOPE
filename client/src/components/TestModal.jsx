@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { X, ExternalLink, Download, Users, BookOpen, Calculator, ArrowLeft } from 'lucide-react';
 import RavenCorreccion from './correctores/RavenCorreccion';
+import ProlecCorreccion from './correctores/ProlecCorreccion';
 
 const CORRECTORES = {
-  raven: RavenCorreccion,
+  raven:  RavenCorreccion,
+  prolec: ProlecCorreccion,
 };
 
 function edadLabel(min, max) {
