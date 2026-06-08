@@ -1,4 +1,4 @@
-const check = (val) => val ? '☑' : '☐';
+const check = (val) => (val === 'si' || val === true) ? '☑' : '☐';
 
 const field = (label, value) =>
   `<div class="field">

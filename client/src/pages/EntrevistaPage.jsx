@@ -285,17 +285,37 @@ export default function EntrevistaPage() {
                   <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name="motricidad_acorde_edad" value="si" defaultChecked={entrevista?.motricidad_acorde_edad === 'si'} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Sí</label>
                   <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name="motricidad_acorde_edad" value="no" defaultChecked={entrevista?.motricidad_acorde_edad === 'no'} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> No</label>
                 </div>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_dificultad_peso" defaultChecked={entrevista?.motricidad_dificultad_peso} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Dificultad para agarrar objetos pesados</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_coordinado" defaultChecked={entrevista?.motricidad_coordinado} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Movimientos coordinados</label>
+                {[
+                  ['motricidad_dificultad_peso', 'Dificultad para agarrar objetos pesados'],
+                  ['motricidad_coordinado', 'Movimientos coordinados'],
+                ].map(([name, label]) => (
+                  <div key={name} className="flex items-center justify-between gap-4">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-300">{label}</span>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name={name} value="si" defaultChecked={entrevista?.[name] === 'si' || entrevista?.[name] === true} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Sí</label>
+                      <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name={name} value="no" defaultChecked={entrevista?.[name] === 'no' || entrevista?.[name] === false} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> No</label>
+                    </div>
+                  </div>
+                ))}
               </div>
               <div className="space-y-3">
                 <p className="text-slate-900 dark:text-slate-400 text-sm font-bold mb-2">Motricidad Fina</p>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinza" defaultChecked={entrevista?.motricidad_pinza} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Pinza fina / Toma el lápiz en pinza</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_pinta_bien" defaultChecked={entrevista?.motricidad_pinta_bien} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Pinta bien / Sin salirse del contorno</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_tijera" defaultChecked={entrevista?.motricidad_tijera} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Dificultad para cortar con tijera</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_botones" defaultChecked={entrevista?.motricidad_botones} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Abrocha botones</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cierres" defaultChecked={entrevista?.motricidad_cierres} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Cierra y abre cierres</label>
-                <label className="flex items-center gap-3 text-sm font-medium"><input type="checkbox" name="motricidad_cordones" defaultChecked={entrevista?.motricidad_cordones} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Ata cordones</label>
+                {[
+                  ['motricidad_pinza', 'Pinza fina / Toma el lápiz en pinza'],
+                  ['motricidad_pinta_bien', 'Pinta bien / Sin salirse del contorno'],
+                  ['motricidad_tijera', 'Dificultad para cortar con tijera'],
+                  ['motricidad_botones', 'Abrocha botones'],
+                  ['motricidad_cierres', 'Cierra y abre cierres'],
+                  ['motricidad_cordones', 'Ata cordones'],
+                ].map(([name, label]) => (
+                  <div key={name} className="flex items-center justify-between gap-4">
+                    <span className="text-sm font-medium text-slate-900 dark:text-slate-300">{label}</span>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name={name} value="si" defaultChecked={entrevista?.[name] === 'si' || entrevista?.[name] === true} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> Sí</label>
+                      <label className="flex items-center gap-1.5 text-sm font-medium"><input type="radio" name={name} value="no" defaultChecked={entrevista?.[name] === 'no' || entrevista?.[name] === false} className="accent-pink-500 dark:accent-teal-500 w-4 h-4" /> No</label>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </section>
