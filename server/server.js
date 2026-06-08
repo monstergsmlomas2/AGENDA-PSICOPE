@@ -19,7 +19,7 @@ import pushRoutes from "./routes/push.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
 import { iniciarJobPersonal } from "./jobs/recordatoriosPersonales.js";
-import { iniciarWhatsApp } from "./services/whatsapp.js";
+import { reconectarSesionesGuardadas } from "./services/whatsapp.js";
 import authMiddleware from "./middleware/auth.js";
 
 dotenv.config();
@@ -83,5 +83,5 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
   iniciarJob();
   iniciarJobPersonal();
-  iniciarWhatsApp().catch(err => console.error("[WhatsApp] Error al iniciar:", err));
+  reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
 });

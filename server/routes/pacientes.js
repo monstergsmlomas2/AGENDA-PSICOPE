@@ -256,6 +256,7 @@ router.post("/:id/recordatorio-seguimiento", async (req, res) => {
 
     try {
       await enviarMensajeWhatsApp({
+        usuarioId: req.userId,
         telefono: paciente.telefono,
         mensaje,
       });

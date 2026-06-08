@@ -261,6 +261,7 @@ router.post("/:id/recordatorio", async (req, res) => {
 
     try {
       await enviarMensajeWhatsApp({
+        usuarioId: req.userId,
         telefono: turno.telefono,
         mensaje,
       });

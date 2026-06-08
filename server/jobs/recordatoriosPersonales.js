@@ -22,9 +22,6 @@ function formatearFechaArgentina(fechaHora) {
 }
 
 export async function ejecutarJobPersonal() {
-
-  const waEstado = getEstadoWhatsApp();
-
   try {
     // Verificar que la tabla existe antes de operar
     const tableCheck = await pool.query(
@@ -96,9 +93,11 @@ export async function ejecutarJobPersonal() {
         // El recordatorio ya fue marcado enviado=true de forma atómica en el
         // UPDATE ... RETURNING de arriba, así que acá solo encolamos el envío.
 
-        // WhatsApp (si está conectado)
-        if (waEstado.conectado) {
+        // WhatsApp (si la sesión de ESTE profesional está conectada — cada
+        // usuario tiene su propio socket, aislado del resto)
+        if (getEstadoWhatsApp(row.profesional_id).conectado) {
           await enviarMensajeWhatsApp({
+            usuarioId: row.profesional_id,
             telefono: row.telefono_profesional,
             mensaje: partes.join("\n"),
           });

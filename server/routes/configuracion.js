@@ -1,6 +1,6 @@
 import express from "express";
 import pool from "../config/db.js";
-import { reiniciarJob, ejecutarJob } from "../jobs/recordatorios.js";
+import { ejecutarJob } from "../jobs/recordatorios.js";
 
 const router = express.Router();
 
@@ -82,9 +82,6 @@ router.put("/notificaciones", async (req, res) => {
       ]
     );
 
-    // Reprogramar el cron job con la nueva hora
-    await reiniciarJob();
-
     res.json(result.rows[0]);
   } catch (error) {
     console.error(error);
@@ -95,7 +92,7 @@ router.put("/notificaciones", async (req, res) => {
 // POST /configuracion/notificaciones/test — dispara el job manualmente
 router.post("/notificaciones/test", async (req, res) => {
   try {
-    await ejecutarJob();
+    await ejecutarJob({ usuarioId: req.userId, forzar: true });
     res.json({ ok: true, mensaje: "Job ejecutado manualmente" });
   } catch (error) {
     console.error(error);
