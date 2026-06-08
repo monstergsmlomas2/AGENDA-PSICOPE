@@ -451,7 +451,7 @@ Total de sesiones registradas: ${sesiones?.length || 0}
 ${sesiones?.length > 0 ? `Última sesión: ${new Date(sesiones[sesiones.length - 1].fecha).toLocaleDateString('es-AR')}
 Resumen sesiones recientes:
 ${sesiones.slice(-5).map((s, i) => `  Sesión ${sesiones.length - 4 + i}: ${s.observaciones || ''} ${s.actividades_realizadas || ''}`.trim()).join('\n')}` : ''}
-${evaluaciones?.length > 0 ? `Evaluaciones realizadas: ${evaluaciones.map(e => e.nombre_test || e.tipo || 'Evaluación').join(', ')}` : ''}` : '';
+${evaluaciones?.length > 0 ? `Evaluaciones realizadas: ${evaluaciones.map(e => e.tipo_test || 'Evaluación').join(', ')}` : ''}` : '';
 
   const systemPrompt = `Sos un asistente clínico especializado en psicopedagogía, que acompaña al profesional en su práctica diaria.
 Tu rol es ser un colega experto: respondés consultas clínicas, sugerís estrategias de intervención, interpretás síntomas y señales, y ayudás a reflexionar sobre el proceso terapéutico.

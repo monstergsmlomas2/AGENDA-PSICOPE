@@ -375,7 +375,7 @@ router.post('/chat', async (req, res) => {
       const [pacResult, sesResult, evalResult] = await Promise.all([
         pool.query('SELECT * FROM pacientes WHERE id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
         pool.query('SELECT fecha, observaciones, actividades_realizadas FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2 ORDER BY fecha ASC', [pacienteId, req.userId]),
-        pool.query('SELECT nombre_test, tipo, observaciones FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
+        pool.query('SELECT tipo_test, observaciones FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2', [pacienteId, req.userId]),
       ]);
       if (pacResult.rows.length > 0) {
         paciente = pacResult.rows[0];
