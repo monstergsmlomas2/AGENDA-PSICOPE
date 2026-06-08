@@ -271,7 +271,7 @@ export async function iniciarWhatsApp(usuarioId) {
     auth: state,
     printQRInTerminal: false,
     logger: pino({ level: "silent" }),
-    browser: Browsers.macOS("Desktop"),
+    browser: Browsers.baileys("Chrome"),
     emitOwnEvents: false,
     syncFullHistory: false,
     shouldSyncHistoryMessage: () => false,
