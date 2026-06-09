@@ -1,19 +1,17 @@
 import {
-  GRUPOS_EDAD, BAREMOS, SUMA_PE_A_PC, SUMA_PE_CIT,
+  GRUPOS_EDAD, BAREMOS, SUMA_PE_A_PC_POR_INDICE, SUMA_PE_A_CIT,
   PE_A_PERCENTIL, PC_A_PERCENTIL, CLASIFICACIONES_PC, INDICES, SUBTESTS_PRINCIPALES,
 } from './wiscNormas.js';
 
-// ─── Edad → grupo ─────────────────────────────────────────────────────────────
 export function getGrupoEdad(anios, meses) {
   const totalMeses = parseInt(anios) * 12 + parseInt(meses || 0);
   return GRUPOS_EDAD.find(g => totalMeses >= g.minMeses && totalMeses <= g.maxMeses) || null;
 }
 
-// ─── PD → PE por subtest y grupo ─────────────────────────────────────────────
 export function pdAPE(subtest, pd, grupoId) {
   const baremo = BAREMOS[subtest];
   if (!baremo || !baremo[grupoId]) return null;
-  const tabla = baremo[grupoId]; // array de 19 valores, tabla[i] = PD mínima para PE i+1
+  const tabla = baremo[grupoId];
   let pe = 1;
   for (let i = 0; i < tabla.length; i++) {
     if (pd >= tabla[i]) pe = i + 1;
@@ -21,34 +19,33 @@ export function pdAPE(subtest, pd, grupoId) {
   return pe;
 }
 
-// ─── Suma de 2 PE → PC de índice ─────────────────────────────────────────────
-export function sumaAPCIndice(suma) {
-  const tabla = SUMA_PE_A_PC;
-  // encontrar el par más cercano
-  for (let i = tabla.length - 1; i >= 0; i--) {
-    if (suma >= tabla[i][0]) return tabla[i][1];
+export function sumaAPCIndice(indiceId, suma) {
+  const tabla = SUMA_PE_A_PC_POR_INDICE[indiceId];
+  if (!tabla) return null;
+  // buscar la suma más cercana hacia abajo
+  const keys = Object.keys(tabla).map(Number).sort((a, b) => a - b);
+  let pc = tabla[keys[0]];
+  for (const k of keys) {
+    if (suma >= k) pc = tabla[k];
   }
-  return tabla[0][1];
+  return pc;
 }
 
-// ─── Suma de 10 PE → CIT ─────────────────────────────────────────────────────
 export function sumaAPCCIT(suma) {
-  const tabla = SUMA_PE_CIT;
-  for (let i = tabla.length - 1; i >= 0; i--) {
-    if (suma >= tabla[i][0]) return tabla[i][1];
+  const keys = Object.keys(SUMA_PE_A_CIT).map(Number).sort((a, b) => a - b);
+  let pc = SUMA_PE_A_CIT[keys[0]];
+  for (const k of keys) {
+    if (suma >= k) pc = SUMA_PE_A_CIT[k];
   }
-  return tabla[0][1];
+  return pc;
 }
 
-// ─── PE → percentil (subtest) ────────────────────────────────────────────────
 export function peAPercentil(pe) {
   return PE_A_PERCENTIL[pe] ?? null;
 }
 
-// ─── PC → percentil (índice / CIT) ───────────────────────────────────────────
 export function pcAPercentil(pc) {
   const keys = Object.keys(PC_A_PERCENTIL).map(Number).sort((a, b) => a - b);
-  // interpolación lineal
   if (pc <= keys[0]) return PC_A_PERCENTIL[keys[0]];
   if (pc >= keys[keys.length - 1]) return PC_A_PERCENTIL[keys[keys.length - 1]];
   for (let i = 0; i < keys.length - 1; i++) {
@@ -61,12 +58,10 @@ export function pcAPercentil(pc) {
   return null;
 }
 
-// ─── PC → clasificación ───────────────────────────────────────────────────────
 export function getClasificacion(pc) {
   return CLASIFICACIONES_PC.find(c => pc >= c.minPC) || CLASIFICACIONES_PC[CLASIFICACIONES_PC.length - 1];
 }
 
-// ─── Cálculo principal ────────────────────────────────────────────────────────
 export function calcularWISC({ anios, meses, scores }) {
   const grupo = getGrupoEdad(anios, meses);
   if (!grupo) return null;
@@ -84,13 +79,14 @@ export function calcularWISC({ anios, meses, scores }) {
     resultadosSubtest[sub.id] = { pd: pdClamped, pe, percentil };
   }
 
-  // 2. Índices primarios: suma de PE → PC
+  // 2. Índices primarios: suma de 2 PE → PC (tabla específica por índice)
   const resultadosIndices = {};
   for (const idx of INDICES) {
     const pes = idx.subtests.map(s => resultadosSubtest[s]?.pe).filter(v => v != null);
-    if (pes.length !== 2) continue; // necesita los 2 subtests del índice
+    if (pes.length !== 2) continue;
     const suma = pes[0] + pes[1];
-    const pc = sumaAPCIndice(suma);
+    const pc = sumaAPCIndice(idx.id, suma);
+    if (pc == null) continue;
     const percentil = pcAPercentil(pc);
     const clasificacion = getClasificacion(pc);
     resultadosIndices[idx.id] = { suma, pc, percentil, clasificacion };
@@ -108,7 +104,6 @@ export function calcularWISC({ anios, meses, scores }) {
   return { resultadosSubtest, resultadosIndices, cit, grupo };
 }
 
-// ─── Párrafo clínico ──────────────────────────────────────────────────────────
 export function generarParagrafoWISC(calc, nombrePaciente) {
   const { resultadosSubtest, resultadosIndices, cit, grupo } = calc;
   const nombre = nombrePaciente?.trim() || 'El/la evaluado/a';
@@ -129,7 +124,6 @@ export function generarParagrafoWISC(calc, nombrePaciente) {
       return `${s.label} (PE ${r.pe}, Pc ${r.percentil})`;
     }).join(', ');
 
-  // Detectar fortalezas y debilidades (PE ≥ 12 = fortaleza, PE ≤ 8 = debilidad)
   const fortalezas = SUBTESTS_PRINCIPALES.filter(s => resultadosSubtest[s.id]?.pe >= 12).map(s => s.label);
   const debilidades = SUBTESTS_PRINCIPALES.filter(s => resultadosSubtest[s.id]?.pe <= 8).map(s => s.label);
 
@@ -148,7 +142,7 @@ export function generarParagrafoWISC(calc, nombrePaciente) {
   return [
     `En la administración de la Escala de Inteligencia de Wechsler para Niños – 5ª edición (WISC-V), ${nombre} (${grupo.label}) obtuvo ${citTexto}.`,
     indicesTexto ? `Resultados por índice primario: ${indicesTexto}.` : '',
-    subtestsTexto ? `Puntuaciones escalares por subtest: ${subtestsTexto}.` : '',
+    subtestsTexto ? `Puntajes escala por subtest: ${subtestsTexto}.` : '',
     perfilTexto.trim(),
     recomendacion.trim(),
   ].filter(Boolean).join(' ').trim();
