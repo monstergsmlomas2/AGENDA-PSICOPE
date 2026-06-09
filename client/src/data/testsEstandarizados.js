@@ -71,7 +71,6 @@ export const CATEGORIAS_TESTS = [
         id: 'prolec',
         nombre: 'PROLEC-R',
         nombreCompleto: 'Prueba de Evaluación de los Procesos Lectores – Revisada',
-        corregible: true,
         edadMin: 6,
         edadMax: 12,
         descripcion: 'Evalúa los procesos cognitivos que intervienen en la lectura: identificación de letras, reconocimiento de palabras, procesos sintácticos y semánticos.',
