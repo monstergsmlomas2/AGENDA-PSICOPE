@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { X, ExternalLink, Download, Users, BookOpen, Calculator, ArrowLeft } from 'lucide-react';
-import RavenCorreccion from './correctores/RavenCorreccion';
-
-const CORRECTORES = {
-  raven: RavenCorreccion,
-};
+const CORRECTORES = {};
 
 function edadLabel(min, max) {
   const fmt = v => (v === 0 ? '0' : `${v}`);
