@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import pool from "../config/db.js";
-import { enviarMensajeWhatsApp, getEstadoWhatsApp, getUsuariosConectados } from "../services/whatsapp.js";
+import { enviarMensajeWhatsApp, getEstadoWhatsApp, getUsuariosConectados, sistemaDisponible, SISTEMA_ID } from "../services/whatsapp.js";
 
 const DIAS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
 const MESES_ES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
@@ -52,7 +52,12 @@ export async function ejecutarJob({ usuarioId, forzar = false, soloPacientes = t
 
     const notificacionesPacientes = soloPacientes && (forzar || config.notificaciones_pacientes !== false);
     const notificacionesProfesional = soloProf && (forzar || config.notificaciones_profesional !== false);
-    const telefonoProfesional = config.telefono_profesional || "";
+    // Destino del resumen: el número del profesional. Si está disponible el número
+    // central del sistema, el resumen se ENVÍA desde ese número (distinto del profe)
+    // → suena. Si no, cae al envío por el propio número del profe (no suena, pero
+    // conserva el comportamiento previo). telefono_resumen sigue funcionando como
+    // override opcional del destino (por si quiere recibirlo en otro celular).
+    const telefonoProfesional = (config.telefono_resumen || config.telefono_profesional || "").trim();
     const mensajePacienteTexto = config.mensaje_paciente ||
 `👋 ¡Hola {nombre}!
 
@@ -113,28 +118,45 @@ Tenés *{cantidad} turno(s)* programado(s):
           consultorio: turno.consultorio || "el consultorio",
         });
 
-        try {
-          const envioResult = await enviarMensajeWhatsApp({ usuarioId, telefono: turno.telefono, mensaje });
-          console.log(`[Recordatorios:${usuarioId}] Envío a ${turno.nombre} ${turno.apellido} (${turno.telefono}): ${JSON.stringify(envioResult)}`);
-
-          if (envioResult.ok) {
+        // onResult se dispara cuando el mensaje se ENTREGA de verdad (o se descarta
+        // definitivamente), no al encolarlo. Recién ahí registramos 'enviado'/'error'.
+        // Esto evita el bug por el que un mensaje encolado-pero-nunca-entregado quedaba
+        // marcado como 'enviado' y nunca se reintentaba → "solo llegaban algunos".
+        const registrarResultado = async ({ ok, error }) => {
+          if (ok) {
             await pool.query(
               `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'enviado')`,
               [turno.id, turno.paciente_id, turno.telefono, mensaje]
             );
-            enviados++;
+            console.log(`[Recordatorios:${usuarioId}] ✓ Entregado a ${turno.nombre} ${turno.apellido} (${turno.telefono})`);
           } else {
             await pool.query(
               `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado, error_detalle) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'error', $5)`,
-              [turno.id, turno.paciente_id, turno.telefono, mensaje, envioResult.error || "No encolado"]
+              [turno.id, turno.paciente_id, turno.telefono, mensaje, error || "Fallo de entrega"]
             );
+            console.warn(`[Recordatorios:${usuarioId}] ✗ Falló entrega a ${turno.nombre} ${turno.apellido} (${turno.telefono}): ${error}`);
+          }
+        };
+
+        try {
+          const envioResult = await enviarMensajeWhatsApp({
+            usuarioId,
+            telefono: turno.telefono,
+            mensaje,
+            onResult: registrarResultado,
+          });
+          console.log(`[Recordatorios:${usuarioId}] Encolado a ${turno.nombre} ${turno.apellido} (${turno.telefono}): ${JSON.stringify(envioResult)}`);
+
+          if (envioResult.ok) {
+            // Encolado correctamente. El registro 'enviado' lo hace onResult al entregarse.
+            enviados++;
+          } else {
+            // No se pudo ni encolar (no conectado / teléfono inválido / cola llena).
+            await registrarResultado({ ok: false, error: envioResult.error || "No encolado" });
           }
         } catch (error) {
           console.error(`[Recordatorios:${usuarioId}] Error enviando a ${turno.nombre}:`, error.message);
-          await pool.query(
-            `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado, error_detalle) VALUES ($1, $2, $3, $4, 'recordatorio_turno', 'error', $5)`,
-            [turno.id, turno.paciente_id, turno.telefono, mensaje, error.message]
-          );
+          await registrarResultado({ ok: false, error: error.message });
         }
       }
     } else {
@@ -160,19 +182,45 @@ Tenés *{cantidad} turno(s)* programado(s):
         lista_turnos: listaTurnos,
       });
 
+      // El resumen al profesional sale del NÚMERO CENTRAL DEL SISTEMA cuando está
+      // disponible (así suena: viene de un número distinto al del profe). Si el
+      // sistema no está activo/conectado, se envía por el propio número del profe
+      // como antes (failsafe — el profe igual recibe su resumen, aunque sin sonido).
+      const usarSistema = sistemaDisponible();
+      const remitenteId = usarSistema ? SISTEMA_ID : usuarioId;
+      const telDestino = telefonoProfesional.trim();
+
+      // Registrar el estado real recién al entregarse (mismo criterio que pacientes).
+      const registrarResumenProf = async ({ ok, error }) => {
+        if (ok) {
+          await pool.query(
+            `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado) VALUES (NULL, NULL, $1, $2, 'recordatorio_profesional', 'enviado')`,
+            [telDestino, mensajeProfesional]
+          );
+          console.log(`[Recordatorios:${usuarioId}] ✓ Resumen entregado al profesional (${telDestino}) vía ${usarSistema ? "SISTEMA" : "número propio"}`);
+        } else {
+          await pool.query(
+            `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado, error_detalle) VALUES (NULL, NULL, $1, $2, 'recordatorio_profesional', 'error', $3)`,
+            [telDestino, mensajeProfesional, error || "Fallo de entrega"]
+          );
+          console.warn(`[Recordatorios:${usuarioId}] ✗ Falló resumen al profesional (${telDestino}): ${error}`);
+        }
+      };
+
       try {
-        const envioProf = await enviarMensajeWhatsApp({ usuarioId, telefono: telefonoProfesional.trim(), mensaje: mensajeProfesional });
-        console.log(`[Recordatorios:${usuarioId}] Envío profesional (${telefonoProfesional}): ${JSON.stringify(envioProf)}`);
-        await pool.query(
-          `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado) VALUES (NULL, NULL, $1, $2, 'recordatorio_profesional', 'enviado')`,
-          [telefonoProfesional.trim(), mensajeProfesional]
-        );
+        const envioProf = await enviarMensajeWhatsApp({
+          usuarioId: remitenteId,
+          telefono: telDestino,
+          mensaje: mensajeProfesional,
+          onResult: registrarResumenProf,
+        });
+        console.log(`[Recordatorios:${usuarioId}] Resumen encolado vía ${usarSistema ? "SISTEMA" : "propio"} → ${telDestino}: ${JSON.stringify(envioProf)}`);
+        if (!envioProf.ok) {
+          await registrarResumenProf({ ok: false, error: envioProf.error || "No encolado" });
+        }
       } catch (error) {
         console.error(`[Recordatorios:${usuarioId}] Error al enviar al profesional:`, error.message);
-        await pool.query(
-          `INSERT INTO notificaciones (turno_id, paciente_id, telefono, mensaje, tipo, estado, error_detalle) VALUES (NULL, NULL, $1, $2, 'recordatorio_profesional', 'error', $3)`,
-          [telefonoProfesional.trim(), mensajeProfesional, error.message]
-        );
+        await registrarResumenProf({ ok: false, error: error.message });
       }
     }
 

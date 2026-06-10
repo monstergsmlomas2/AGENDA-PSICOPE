@@ -8,7 +8,7 @@ const router = express.Router();
 router.get("/", async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional, email,
+      `SELECT id, nombre_profesional, especialidad, matricula, telefono_profesional, telefono_resumen, email,
               notificaciones_pacientes, notificaciones_profesional, hora_envio,
               mensaje_paciente, mensaje_profesional,
               plantilla_cancelacion, plantilla_cambio_horario, plantilla_aviso_libre,
@@ -52,6 +52,7 @@ router.put("/notificaciones", async (req, res) => {
     notificaciones_pacientes,
     notificaciones_profesional,
     telefono_profesional,
+    telefono_resumen,
     hora_envio,
     mensaje_paciente,
     mensaje_profesional,
@@ -60,21 +61,23 @@ router.put("/notificaciones", async (req, res) => {
   try {
     const result = await pool.query(
       `INSERT INTO configuracion_notificaciones
-        (usuario_id, notificaciones_pacientes, notificaciones_profesional, telefono_profesional, hora_envio, mensaje_paciente, mensaje_profesional, actualizado_en)
-       VALUES ($7, $1, $2, $3, $4, $5, $6, NOW())
+        (usuario_id, notificaciones_pacientes, notificaciones_profesional, telefono_profesional, telefono_resumen, hora_envio, mensaje_paciente, mensaje_profesional, actualizado_en)
+       VALUES ($8, $1, $2, $3, $4, $5, $6, $7, NOW())
        ON CONFLICT (usuario_id) DO UPDATE SET
         notificaciones_pacientes = COALESCE($1, configuracion_notificaciones.notificaciones_pacientes),
         notificaciones_profesional = COALESCE($2, configuracion_notificaciones.notificaciones_profesional),
         telefono_profesional = COALESCE($3, configuracion_notificaciones.telefono_profesional),
-        hora_envio = COALESCE($4, configuracion_notificaciones.hora_envio),
-        mensaje_paciente = COALESCE($5, configuracion_notificaciones.mensaje_paciente),
-        mensaje_profesional = COALESCE($6, configuracion_notificaciones.mensaje_profesional),
+        telefono_resumen = $4,
+        hora_envio = COALESCE($5, configuracion_notificaciones.hora_envio),
+        mensaje_paciente = COALESCE($6, configuracion_notificaciones.mensaje_paciente),
+        mensaje_profesional = COALESCE($7, configuracion_notificaciones.mensaje_profesional),
         actualizado_en = NOW()
        RETURNING *`,
       [
         notificaciones_pacientes,
         notificaciones_profesional,
         telefono_profesional,
+        telefono_resumen ?? null,
         hora_envio,
         mensaje_paciente,
         mensaje_profesional,

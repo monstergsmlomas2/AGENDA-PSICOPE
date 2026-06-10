@@ -18,6 +18,7 @@ import whatsappRoutes from "./routes/whatsapp.js";
 import iaRoutes from "./routes/ia.js";
 import agendaPersonalRoutes from "./routes/agendaPersonal.js";
 import pushRoutes from "./routes/push.js";
+import adminRoutes from "./routes/admin.js";
 import pool from "./config/db.js";
 import { iniciarJob } from "./jobs/recordatorios.js";
 import { iniciarJobPersonal } from "./jobs/recordatoriosPersonales.js";
@@ -103,6 +104,9 @@ app.use("/whatsapp", authMiddleware, limiterWhatsapp, whatsappRoutes);
 app.use("/ia", authMiddleware, limiterIA, iaRoutes);
 app.use("/agenda-personal", authMiddleware, agendaPersonalRoutes);
 app.use("/push", authMiddleware, pushRoutes);
+// Rutas de admin del número central del sistema. NO usan authMiddleware: tienen su
+// propio guard por ADMIN_SECRET (header x-admin-secret). Invisibles para los usuarios.
+app.use("/admin", adminRoutes);
 app.get("/auth/google/callback", handleGoogleCallback);
 
 // Middleware global de errores — última línea de defensa para excepciones no capturadas en rutas
