@@ -133,9 +133,52 @@ export async function ejecutarJobPersonal() {
   }
 }
 
+// ── Limpieza automática de recordatorios vencidos ────────────────────────────
+// Borra los eventos de agenda personal cuyo momento ya pasó hace más de 3 días.
+// Al borrar la fila de agenda_personal, sus filas en agenda_personal_recordatorios
+// se eliminan en cascada (FK ON DELETE CASCADE de la migración 018), así que no
+// hace falta borrarlas aparte. El umbral se mide contra fecha_hora (la fecha del
+// evento), no contra cuándo se creó: el recordatorio queda visible unos días tras
+// ocurrir y recién entonces se limpia solo.
+const DIAS_RETENCION = 3;
+
+export async function limpiarRecordatoriosVencidos() {
+  try {
+    const tableCheck = await pool.query(
+      `SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'agenda_personal')`
+    );
+    if (!tableCheck.rows[0].exists) {
+      console.warn("[AgendaPersonal] Tabla agenda_personal no existe — se omite la limpieza.");
+      return;
+    }
+
+    const result = await pool.query(
+      `DELETE FROM agenda_personal
+       WHERE fecha_hora < (NOW() - ($1 || ' days')::INTERVAL)
+       RETURNING id`,
+      [DIAS_RETENCION]
+    );
+
+    if (result.rowCount > 0) {
+      console.log(`[AgendaPersonal] Limpieza: ${result.rowCount} evento(s) vencido(s) (>${DIAS_RETENCION} días) eliminado(s).`);
+    }
+  } catch (err) {
+    console.error("[AgendaPersonal] Error en limpieza de recordatorios vencidos:", err.message);
+  }
+}
+
 export function iniciarJobPersonal() {
   cron.schedule("*/5 * * * *", ejecutarJobPersonal, {
     timezone: "America/Argentina/Buenos_Aires",
   });
   console.log("[AgendaPersonal] Job de recordatorios personales iniciado (cada 5 min).");
+
+  // Limpieza diaria a las 03:00 (hora baja de uso) de eventos vencidos hace +3 días.
+  cron.schedule("0 3 * * *", limpiarRecordatoriosVencidos, {
+    timezone: "America/Argentina/Buenos_Aires",
+  });
+  console.log("[AgendaPersonal] Job de limpieza de vencidos iniciado (diario 03:00).");
+
+  // Correr una limpieza al arrancar, por si el server estuvo caído al pasar las 03:00.
+  limpiarRecordatoriosVencidos();
 }

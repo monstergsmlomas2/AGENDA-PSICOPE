@@ -36,6 +36,32 @@ const savingSessionFlags = new Map(); // usuarioId -> boolean (anti-concurrencia
 let WA_VERSION_CACHE = null; // versión de protocolo Baileys — global al proceso, no depende del usuario
 const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
 
+// ── Número central del sistema (Agenda Psicope) ───────────────────────────────
+// Sesión de WhatsApp ESPECIAL, propiedad de los desarrolladores, NO de un usuario.
+// Se modela como "un usuario más" con un ID reservado, así reutiliza toda la
+// maquinaria existente (socket, cola, auth por carpeta, reconexión, guardado en DB)
+// sin duplicar lógica.
+//
+// ALCANCE: este número envía ÚNICAMENTE el RESUMEN DIARIO AL PROFESIONAL. Los
+// recordatorios A PACIENTES siguen saliendo del número del propio profesional
+// (así el paciente reconoce a su psicopedagoga). Esto mantiene el volumen del
+// número central bajísimo (1 resumen por usuario por día) → mínimo riesgo de baneo.
+//
+// Por qué para el profesional: si el resumen sale del mismo número del profe,
+// WhatsApp lo trata como "mensaje contigo mismo" y NO suena. Saliendo del número
+// del sistema (distinto), sí suena.
+// Los usuarios no lo ven, no lo editan y no escanean ningún QR: lo conecta el admin.
+export const SISTEMA_ID = "__sistema__";
+export function modoSistemaActivo() {
+  return process.env.WHATSAPP_SISTEMA_ENABLED === "true";
+}
+// El número del sistema está disponible para enviar solo si el modo está activo
+// Y la sesión central está efectivamente conectada. Si no, el llamador cae al
+// comportamiento por-usuario (cada uno con su propio número) — failsafe.
+export function sistemaDisponible() {
+  return modoSistemaActivo() && getStatus(SISTEMA_ID) === "CONNECTED";
+}
+
 function getStatus(usuarioId) {
   return statuses.get(usuarioId) || "DISCONNECTED";
 }
@@ -80,6 +106,11 @@ setInterval(async () => {
         await sock.sendMessage(targetJid, { text: job.message });
         lastSendTimes.set(usuarioId, Date.now());
         console.log(`[WhatsApp:${usuarioId}] Mensaje enviado a ${job.phone}`);
+        // Confirmar ENTREGA REAL al que encoló (recordatorios marca 'enviado' recién acá,
+        // no al encolar, para no dar por enviado un mensaje que después la cola descarta).
+        if (typeof job.onResult === "function") {
+          try { await job.onResult({ ok: true }); } catch (_) {}
+        }
       } catch (err) {
         console.error(`[WhatsApp:${usuarioId}] Error enviando a ${job.phone}:`, err.message);
         // Reintentar hasta 3 veces antes de descartar
@@ -89,6 +120,11 @@ setInterval(async () => {
           queue.unshift({ ...job, reintentos });
         } else {
           console.error(`[WhatsApp:${usuarioId}] Descartado tras 3 intentos: ${job.phone}`);
+          // Avisar el fallo definitivo para que se registre como 'error' (y se reintente
+          // en la próxima corrida del cron, en lugar de quedar como 'enviado' fantasma).
+          if (typeof job.onResult === "function") {
+            try { await job.onResult({ ok: false, error: `Descartado tras 3 intentos: ${err.message}` }); } catch (_) {}
+          }
         }
       }
     }
@@ -378,6 +414,10 @@ export async function iniciarWhatsApp(usuarioId) {
 
   // ── Escuchar mensajes ────────────────────────────────────────────────────────
   sock.ev.on("messages.upsert", async ({ messages, type }) => {
+    // El número del sistema solo ENVÍA resúmenes; no tiene agenda personal ni
+    // procesa mensajes entrantes (evita que un mensaje al número central dispare
+    // la lógica de agenda_personal, que no le corresponde).
+    if (usuarioId === SISTEMA_ID) return;
     // "notify" = mensajes entrantes nuevos; "append" = mensajes propios sincronizados
     if (type !== "notify" && type !== "append") return;
 
@@ -426,12 +466,20 @@ export async function iniciarWhatsApp(usuarioId) {
       const propioNumero = rawUserId.split("@")[0].split(":")[0];
       const remoteNumero = remoteJid.replace("@s.whatsapp.net", "").split(":")[0];
 
-      const esMensajePropio =
-        msg.key.fromMe ||
-        (propioNumero && remoteNumero === propioNumero);
+      // Solo es "mensaje propio" (agenda personal) el que está en el CHAT CONSIGO
+      // MISMO: el remoteJid apunta al propio número. NO basta con fromMe, porque
+      // fromMe también es true cuando el profesional le escribe a un contacto
+      // cualquiera (esos mensajes se sincronizan como 'append' con fromMe=true).
+      // Si tomáramos fromMe a secas, cada mensaje privado del profe a sus pacientes
+      // se agendaría como recordatorio. Exigimos remoteNumero === propioNumero.
+      const esChatConsigoMismo =
+        !!propioNumero &&
+        remoteNumero === propioNumero &&
+        // Defensa extra: el JID debe ser un chat individual (no grupo ni broadcast).
+        remoteJid.endsWith("@s.whatsapp.net");
 
-      if (esMensajePropio) {
-        const numParaBuscar = msg.key.fromMe ? propioNumero : remoteNumero;
+      if (esChatConsigoMismo) {
+        const numParaBuscar = propioNumero;
 
         if (esAudio) {
           // Nota de voz propia → transcribir con Groq Whisper → procesar como texto
@@ -448,15 +496,15 @@ export async function iniciarWhatsApp(usuarioId) {
               continue;
             }
             console.log(`[AgendaPersonal:${usuarioId}] Audio transcripto: "${texto.substring(0, 80)}"`);
-            await procesarMensajePropio(usuarioId, numParaBuscar || propioNumero || remoteNumero, texto);
+            await procesarMensajePropio(usuarioId, numParaBuscar, texto);
           } catch (err) {
             console.error(`[AgendaPersonal:${usuarioId}] Error transcribiendo audio: ${err.message}`);
           }
           continue;
         }
 
-        console.log(`[AgendaPersonal:${usuarioId}] Mensaje propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} numBuscar:${numParaBuscar} texto:"${textoRecibido.substring(0, 60)}"`);
-        await procesarMensajePropio(usuarioId, numParaBuscar || propioNumero || remoteNumero, textoRecibido.trim());
+        console.log(`[AgendaPersonal:${usuarioId}] Mensaje en chat propio — type:${type} fromMe:${msg.key.fromMe} jid:${remoteJid} numBuscar:${numParaBuscar} texto:"${textoRecibido.substring(0, 60)}"`);
+        await procesarMensajePropio(usuarioId, numParaBuscar || propioNumero, textoRecibido.trim());
         continue;
       }
 
@@ -488,8 +536,13 @@ export async function reconectarSesionesGuardadas() {
       console.log("[WhatsApp] No hay sesiones guardadas para reconectar.");
       return;
     }
-    console.log(`[WhatsApp] Reconectando ${rows.length} sesión(es) guardada(s)...`);
-    rows.forEach(({ usuario_id }, i) => {
+    // No reconectar el número central del sistema si el modo está apagado: su
+    // sesión queda guardada en DB pero dormida hasta que se active el flag.
+    const aReconectar = rows.filter(
+      ({ usuario_id }) => usuario_id !== SISTEMA_ID || modoSistemaActivo()
+    );
+    console.log(`[WhatsApp] Reconectando ${aReconectar.length} sesión(es) guardada(s)...`);
+    aReconectar.forEach(({ usuario_id }, i) => {
       // Espaciar los arranques para no saturar al bootear con muchos usuarios
       // ni disparar handshakes simultáneos que aumenten avisos de sincronización.
       setTimeout(() => {
@@ -528,7 +581,11 @@ export async function cerrarSesionWhatsApp(usuarioId) {
 }
 
 // ── Enviar mensaje (interfaz pública) ─────────────────────────────────────────
-export async function enviarMensajeWhatsApp({ usuarioId, telefono, mensaje }) {
+// onResult (opcional): callback async que se invoca cuando el mensaje se entrega
+// de verdad ({ ok: true }) o se descarta definitivamente ({ ok: false, error }).
+// Permite a quien encola (p. ej. el job de recordatorios) registrar el estado real
+// en la DB, en lugar de dar por enviado un mensaje recién encolado.
+export async function enviarMensajeWhatsApp({ usuarioId, telefono, mensaje, onResult }) {
   if (!usuarioId) {
     console.warn(`[WhatsApp] enviarMensajeWhatsApp sin usuarioId — mensaje descartado para: ${telefono}`);
     return { ok: false, error: "usuarioId requerido" };
@@ -551,7 +608,7 @@ export async function enviarMensajeWhatsApp({ usuarioId, telefono, mensaje }) {
     console.warn(`[WhatsApp:${usuarioId}] Teléfono inválido: ${telefono}`);
     return { ok: false, error: "Teléfono inválido" };
   }
-  queue.push({ phone: formateado, message: mensaje });
+  queue.push({ phone: formateado, message: mensaje, onResult });
   console.log(`[WhatsApp:${usuarioId}] Mensaje encolado para: ${formateado}`);
   return { ok: true, queued: true };
 }
@@ -568,10 +625,12 @@ export function getQRWhatsApp(usuarioId) {
 
 // Usuarios con sesión de WhatsApp activa ahora mismo — usado por los cron jobs
 // para saber a quiénes procesar (cada uno enviará por su propio socket).
+// El número central del sistema NO es un usuario: se excluye para que el cron no
+// intente procesarle config/turnos (no tiene). Solo actúa como remitente.
 export function getUsuariosConectados() {
   const conectados = [];
   for (const [usuarioId, estado] of statuses) {
-    if (estado === "CONNECTED") conectados.push(usuarioId);
+    if (estado === "CONNECTED" && usuarioId !== SISTEMA_ID) conectados.push(usuarioId);
   }
   return conectados;
 }
