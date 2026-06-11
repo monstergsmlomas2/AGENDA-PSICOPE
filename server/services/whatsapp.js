@@ -463,25 +463,31 @@ export async function iniciarWhatsApp(usuarioId) {
 
       const remoteJid = msg.key.remoteJid || "";
       const rawUserId = sock?.user?.id || state?.creds?.me?.id || "";
-      const rawUserLid = sock?.user?.lid || state?.creds?.me?.lid || "";
       const propioNumero = rawUserId.split("@")[0].split(":")[0];
-      const propioLid = rawUserLid.split("@")[0].split(":")[0];
       const remoteId = remoteJid.split("@")[0].split(":")[0];
 
       // Solo es "mensaje propio" (agenda personal) el que está en el CHAT CONSIGO
       // MISMO ("Note to Self"). NO basta con fromMe, porque fromMe también es true
       // cuando el profesional le escribe a un contacto cualquiera (esos mensajes se
-      // sincronizan como 'append' con fromMe=true). Exigimos que el remoteJid sea el
-      // propio número.
-      // Baileys 7 (sistema LID): el chat consigo mismo puede llegar como
-      // "<numero>@s.whatsapp.net" o como "<lid>@lid" (LID propio), según el cliente.
-      // Comparamos contra ambos identificadores propios (id y lid).
-      const esChatConsigoMismo =
-        (remoteJid.endsWith("@s.whatsapp.net") && !!propioNumero && remoteId === propioNumero) ||
-        (remoteJid.endsWith("@lid") && !!propioLid && remoteId === propioLid);
-
-      if (!esChatConsigoMismo && msg.key.fromMe) {
-        console.log(`[AgendaPersonal:${usuarioId}] fromMe pero no es chat propio — remoteJid:${remoteJid} propioId:${rawUserId} propioLid:${rawUserLid}`);
+      // sincronizan como 'append' con fromMe=true).
+      // Baileys 7 (sistema LID): el chat consigo mismo llega con remoteJid "<lid>@lid",
+      // donde ese LID NO es el LID de la propia cuenta (sock.user.lid) ni tiene
+      // mapeo local confiable a número de teléfono. Por eso NO comparamos JIDs:
+      // tratamos como agenda personal cualquier mensaje fromMe cuyo destino NO sea
+      // el teléfono de un paciente registrado del profesional (excluye el caso real
+      // que rompió antes: escribirle a un paciente).
+      let esChatConsigoMismo = false;
+      if (msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero) {
+        esChatConsigoMismo = true;
+      } else if (msg.key.fromMe) {
+        const remoteNumero = formatearTelefono(remoteId);
+        const pacienteResult = await pool.query(
+          `SELECT 1 FROM pacientes WHERE usuario_id = $1 AND telefono IS NOT NULL
+             AND regexp_replace(telefono, '\\D', '', 'g') LIKE '%' || $2
+           LIMIT 1`,
+          [usuarioId, (remoteNumero || remoteId).slice(-10)]
+        );
+        esChatConsigoMismo = pacienteResult.rowCount === 0;
       }
 
       if (esChatConsigoMismo) {
