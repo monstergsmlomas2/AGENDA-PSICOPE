@@ -32,6 +32,7 @@ const mensajesProcesadosPorUsuario = new Map(); // usuarioId -> Set<msgId> (anti
 const sessionsLoadedFromDB = new Set(); // usuarioId — sesión ya cargada de DB una vez (evita re-sync)
 const reconnectAttemptsMap = new Map(); // usuarioId -> contador backoff exponencial
 const savingSessionFlags = new Map(); // usuarioId -> boolean (anti-concurrencia al guardar)
+const selfChatLidPorUsuario = new Map(); // usuarioId -> "<lid>@lid" del chat "Mensajes a mí mismo" (resuelto por red al conectar)
 
 let WA_VERSION_CACHE = null; // versión de protocolo Baileys — global al proceso, no depende del usuario
 const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
@@ -375,6 +376,7 @@ export async function iniciarWhatsApp(usuarioId) {
         await pool.query(`DELETE FROM whatsapp_session WHERE usuario_id = $1`, [usuarioId]);
         sessionsLoadedFromDB.delete(usuarioId); // forzar recarga limpia en el próximo arranque
         reconnectAttemptsMap.set(usuarioId, 0);
+        selfChatLidPorUsuario.delete(usuarioId);
         setTimeout(() => iniciarWhatsApp(usuarioId), 3000);
       } else if (restartRequired) {
         // Normal post-QR scan: WA pide restart para activar la sesión nueva.
@@ -404,6 +406,30 @@ export async function iniciarWhatsApp(usuarioId) {
 
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB(usuarioId);
+
+      // Resolver el LID del chat "Mensajes a mí mismo" (Note to Self). En Baileys 7
+      // ese chat usa un @lid que NO es el LID de la propia cuenta y no tiene mapeo
+      // local — hay que pedírselo a WhatsApp (USYNC) una vez por sesión y cachearlo.
+      // Es la única forma confiable de distinguir "me escribo a mí mismo" de
+      // "le escribo a un contacto cualquiera" (ambos llegan con fromMe:true).
+      if (usuarioId !== SISTEMA_ID) {
+        try {
+          const propioJid = sock?.user?.id || state?.creds?.me?.id;
+          if (propioJid) {
+            const lid = await sock.signalRepository?.lidMapping?.getLIDForPN(propioJid);
+            if (lid) {
+              selfChatLidPorUsuario.set(usuarioId, lid);
+              console.log(`[AgendaPersonal:${usuarioId}] LID del chat propio resuelto: ${lid}`);
+            } else {
+              console.warn(`[AgendaPersonal:${usuarioId}] No se pudo resolver el LID del chat propio — agenda personal deshabilitada hasta la próxima conexión.`);
+              selfChatLidPorUsuario.delete(usuarioId);
+            }
+          }
+        } catch (err) {
+          console.error(`[AgendaPersonal:${usuarioId}] Error resolviendo LID propio: ${err.message}`);
+          selfChatLidPorUsuario.delete(usuarioId);
+        }
+      }
 
       // Baileys envía un presence "unavailable" al abrir la conexión (lo hace
       // internamente porque markOnlineOnConnect=false). Eso es lo correcto: marca
@@ -471,23 +497,17 @@ export async function iniciarWhatsApp(usuarioId) {
       // cuando el profesional le escribe a un contacto cualquiera (esos mensajes se
       // sincronizan como 'append' con fromMe=true).
       // Baileys 7 (sistema LID): el chat consigo mismo llega con remoteJid "<lid>@lid",
-      // donde ese LID NO es el LID de la propia cuenta (sock.user.lid) ni tiene
-      // mapeo local confiable a número de teléfono. Por eso NO comparamos JIDs:
-      // tratamos como agenda personal cualquier mensaje fromMe cuyo destino NO sea
-      // el teléfono de un paciente registrado del profesional (excluye el caso real
-      // que rompió antes: escribirle a un paciente).
+      // donde ese LID NO es el LID de la propia cuenta (sock.user.lid). Se resolvió
+      // por USYNC al conectar (selfChatLidPorUsuario) y queda cacheado para toda la
+      // sesión. Si todavía no se pudo resolver, NO procesamos nada (fail-safe): es
+      // preferible perder un mensaje de agenda personal a confundir un mensaje a un
+      // contacto real con agenda personal.
+      const selfChatLid = selfChatLidPorUsuario.get(usuarioId);
       let esChatConsigoMismo = false;
       if (msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero) {
         esChatConsigoMismo = true;
-      } else if (msg.key.fromMe) {
-        const remoteNumero = formatearTelefono(remoteId);
-        const pacienteResult = await pool.query(
-          `SELECT 1 FROM pacientes WHERE usuario_id = $1 AND telefono IS NOT NULL
-             AND regexp_replace(telefono, '\\D', '', 'g') LIKE '%' || $2
-           LIMIT 1`,
-          [usuarioId, (remoteNumero || remoteId).slice(-10)]
-        );
-        esChatConsigoMismo = pacienteResult.rowCount === 0;
+      } else if (msg.key.fromMe && selfChatLid && remoteJid === selfChatLid) {
+        esChatConsigoMismo = true;
       }
 
       if (esChatConsigoMismo) {
