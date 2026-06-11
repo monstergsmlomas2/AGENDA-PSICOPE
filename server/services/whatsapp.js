@@ -462,21 +462,27 @@ export async function iniciarWhatsApp(usuarioId) {
       }
 
       const remoteJid = msg.key.remoteJid || "";
-      const rawUserId = sock?.user?.id || "";
+      const rawUserId = sock?.user?.id || state?.creds?.me?.id || "";
+      const rawUserLid = sock?.user?.lid || state?.creds?.me?.lid || "";
       const propioNumero = rawUserId.split("@")[0].split(":")[0];
-      const remoteNumero = remoteJid.replace("@s.whatsapp.net", "").split(":")[0];
+      const propioLid = rawUserLid.split("@")[0].split(":")[0];
+      const remoteId = remoteJid.split("@")[0].split(":")[0];
 
       // Solo es "mensaje propio" (agenda personal) el que está en el CHAT CONSIGO
-      // MISMO: el remoteJid apunta al propio número. NO basta con fromMe, porque
-      // fromMe también es true cuando el profesional le escribe a un contacto
-      // cualquiera (esos mensajes se sincronizan como 'append' con fromMe=true).
-      // Si tomáramos fromMe a secas, cada mensaje privado del profe a sus pacientes
-      // se agendaría como recordatorio. Exigimos remoteNumero === propioNumero.
+      // MISMO ("Note to Self"). NO basta con fromMe, porque fromMe también es true
+      // cuando el profesional le escribe a un contacto cualquiera (esos mensajes se
+      // sincronizan como 'append' con fromMe=true). Exigimos que el remoteJid sea el
+      // propio número.
+      // Baileys 7 (sistema LID): el chat consigo mismo puede llegar como
+      // "<numero>@s.whatsapp.net" o como "<lid>@lid" (LID propio), según el cliente.
+      // Comparamos contra ambos identificadores propios (id y lid).
       const esChatConsigoMismo =
-        !!propioNumero &&
-        remoteNumero === propioNumero &&
-        // Defensa extra: el JID debe ser un chat individual (no grupo ni broadcast).
-        remoteJid.endsWith("@s.whatsapp.net");
+        (remoteJid.endsWith("@s.whatsapp.net") && !!propioNumero && remoteId === propioNumero) ||
+        (remoteJid.endsWith("@lid") && !!propioLid && remoteId === propioLid);
+
+      if (!esChatConsigoMismo && msg.key.fromMe) {
+        console.log(`[AgendaPersonal:${usuarioId}] fromMe pero no es chat propio — remoteJid:${remoteJid} propioId:${rawUserId} propioLid:${rawUserLid}`);
+      }
 
       if (esChatConsigoMismo) {
         const numParaBuscar = propioNumero;
