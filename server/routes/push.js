@@ -7,8 +7,12 @@ const router = Router();
 function initVapid() {
   if (!process.env.VAPID_PUBLIC_KEY || !process.env.VAPID_PRIVATE_KEY) return false;
   try {
+    let subject = process.env.VAPID_MAILTO || "mailto:admin@psicope.app";
+    if (!/^(mailto:|https?:)/.test(subject)) {
+      subject = `mailto:${subject}`;
+    }
     webpush.setVapidDetails(
-      process.env.VAPID_MAILTO || "mailto:admin@psicope.app",
+      subject,
       process.env.VAPID_PUBLIC_KEY,
       process.env.VAPID_PRIVATE_KEY
     );
