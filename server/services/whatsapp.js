@@ -32,7 +32,6 @@ const mensajesProcesadosPorUsuario = new Map(); // usuarioId -> Set<msgId> (anti
 const sessionsLoadedFromDB = new Set(); // usuarioId — sesión ya cargada de DB una vez (evita re-sync)
 const reconnectAttemptsMap = new Map(); // usuarioId -> contador backoff exponencial
 const savingSessionFlags = new Map(); // usuarioId -> boolean (anti-concurrencia al guardar)
-const selfChatLidPorUsuario = new Map(); // usuarioId -> "<lid>@lid" del chat "Mensajes a mí mismo" (resuelto por red al conectar)
 
 let WA_VERSION_CACHE = null; // versión de protocolo Baileys — global al proceso, no depende del usuario
 const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
@@ -495,20 +494,17 @@ export async function iniciarWhatsApp(usuarioId) {
       // Solo es "mensaje propio" (agenda personal) el que está en el CHAT CONSIGO
       // MISMO ("Note to Self"). NO basta con fromMe, porque fromMe también es true
       // cuando el profesional le escribe a un contacto cualquiera (esos mensajes se
-      // sincronizan como 'append' con fromMe=true).
+      // sincronizan como 'append' con fromMe=true) — confirmado en producción:
+      // mensajes a un contacto real ("Hola Débo...") llegaron con fromMe:true y un
+      // remoteJid @lid que no es paciente, lo que probó que "no es paciente" NO
+      // alcanza como criterio.
       // Baileys 7 (sistema LID): el chat consigo mismo llega con remoteJid "<lid>@lid",
-      // donde ese LID NO es el LID de la propia cuenta (sock.user.lid). Se resolvió
-      // por USYNC al conectar (selfChatLidPorUsuario) y queda cacheado para toda la
-      // sesión. Si todavía no se pudo resolver, NO procesamos nada (fail-safe): es
-      // preferible perder un mensaje de agenda personal a confundir un mensaje a un
-      // contacto real con agenda personal.
-      const selfChatLid = selfChatLidPorUsuario.get(usuarioId);
-      let esChatConsigoMismo = false;
-      if (msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero) {
-        esChatConsigoMismo = true;
-      } else if (msg.key.fromMe && selfChatLid && remoteJid === selfChatLid) {
-        esChatConsigoMismo = true;
-      }
+      // y ese LID NO coincide ni con sock.user.lid ni con el resuelto vía
+      // getLIDForPN (verificado en producción: ninguno matchea el remoteJid real
+      // del "Note to Self"). Sin una forma confiable de identificar el chat propio,
+      // solo aceptamos el caso legacy (remoteJid == propio número @s.whatsapp.net).
+      const esChatConsigoMismo =
+        msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero;
 
       if (esChatConsigoMismo) {
         const numParaBuscar = propioNumero;
