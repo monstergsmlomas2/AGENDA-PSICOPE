@@ -375,7 +375,6 @@ export async function iniciarWhatsApp(usuarioId) {
         await pool.query(`DELETE FROM whatsapp_session WHERE usuario_id = $1`, [usuarioId]);
         sessionsLoadedFromDB.delete(usuarioId); // forzar recarga limpia en el próximo arranque
         reconnectAttemptsMap.set(usuarioId, 0);
-        selfChatLidPorUsuario.delete(usuarioId);
         setTimeout(() => iniciarWhatsApp(usuarioId), 3000);
       } else if (restartRequired) {
         // Normal post-QR scan: WA pide restart para activar la sesión nueva.
@@ -405,30 +404,6 @@ export async function iniciarWhatsApp(usuarioId) {
 
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB(usuarioId);
-
-      // Resolver el LID del chat "Mensajes a mí mismo" (Note to Self). En Baileys 7
-      // ese chat usa un @lid que NO es el LID de la propia cuenta y no tiene mapeo
-      // local — hay que pedírselo a WhatsApp (USYNC) una vez por sesión y cachearlo.
-      // Es la única forma confiable de distinguir "me escribo a mí mismo" de
-      // "le escribo a un contacto cualquiera" (ambos llegan con fromMe:true).
-      if (usuarioId !== SISTEMA_ID) {
-        try {
-          const propioJid = sock?.user?.id || state?.creds?.me?.id;
-          if (propioJid) {
-            const lid = await sock.signalRepository?.lidMapping?.getLIDForPN(propioJid);
-            if (lid) {
-              selfChatLidPorUsuario.set(usuarioId, lid);
-              console.log(`[AgendaPersonal:${usuarioId}] LID del chat propio resuelto: ${lid}`);
-            } else {
-              console.warn(`[AgendaPersonal:${usuarioId}] No se pudo resolver el LID del chat propio — agenda personal deshabilitada hasta la próxima conexión.`);
-              selfChatLidPorUsuario.delete(usuarioId);
-            }
-          }
-        } catch (err) {
-          console.error(`[AgendaPersonal:${usuarioId}] Error resolviendo LID propio: ${err.message}`);
-          selfChatLidPorUsuario.delete(usuarioId);
-        }
-      }
 
       // Baileys envía un presence "unavailable" al abrir la conexión (lo hace
       // internamente porque markOnlineOnConnect=false). Eso es lo correcto: marca
