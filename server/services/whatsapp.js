@@ -402,12 +402,6 @@ export async function iniciarWhatsApp(usuarioId) {
       reconnectAttemptsMap.set(usuarioId, 0); // conexión OK → resetear backoff
       console.log(`[WhatsApp:${usuarioId}] Conectado correctamente.`);
 
-      // Diagnóstico temporal: comparar sock.user.lid / creds.me.lid contra el
-      // remoteJid real del chat "Note to Self" capturado en [DiagFromMe].
-      if (usuarioId !== SISTEMA_ID) {
-        console.log(`[DiagLid:${usuarioId}] sock.user.id:${sock?.user?.id} sock.user.lid:${sock?.user?.lid} creds.me.id:${state?.creds?.me?.id} creds.me.lid:${state?.creds?.me?.lid}`);
-      }
-
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB(usuarioId);
 
@@ -479,19 +473,19 @@ export async function iniciarWhatsApp(usuarioId) {
       // mensajes a un contacto real ("Hola Débo...") llegaron con fromMe:true y un
       // remoteJid @lid que no es paciente, lo que probó que "no es paciente" NO
       // alcanza como criterio.
-      // Baileys 7 (sistema LID): el chat consigo mismo llega con remoteJid "<lid>@lid",
-      // y ese LID NO coincide ni con sock.user.lid ni con el resuelto vía
-      // getLIDForPN (verificado en producción: ninguno matchea el remoteJid real
-      // del "Note to Self"). Sin una forma confiable de identificar el chat propio,
-      // solo aceptamos el caso legacy (remoteJid == propio número @s.whatsapp.net).
-      const esChatConsigoMismo =
-        msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero;
+      // Baileys 7 (sistema LID): el chat consigo mismo llega con remoteJid "<lidUser>@lid"
+      // (sin sufijo de device), y ese user-id coincide con el user-id de
+      // sock.user.lid/creds.me.lid (que SÍ tiene sufijo ":device@lid"). Confirmado en
+      // producción: remoteJid "220550899220647@lid" vs sock.user.lid
+      // "220550899220647:37@lid" — mismo user-id, distinto device suffix.
+      const propioLidUser = (sock?.user?.lid || state?.creds?.me?.lid || "")
+        .split("@")[0]
+        .split(":")[0];
 
-      // Diagnóstico temporal: log de TODO mensaje fromMe para capturar el remoteJid
-      // real del chat "Note to Self" bajo LID y poder definir un criterio confiable.
-      if (msg.key.fromMe) {
-        console.log(`[DiagFromMe:${usuarioId}] type:${type} remoteJid:${remoteJid} propioNumero:${propioNumero} esChatConsigoMismo:${esChatConsigoMismo} texto:"${(textoRecibido || "[audio]").substring(0, 40)}"`);
-      }
+      const esChatConsigoMismo =
+        msg.key.fromMe &&
+        ((remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero) ||
+          (remoteJid.endsWith("@lid") && propioLidUser && remoteId === propioLidUser));
 
       if (esChatConsigoMismo) {
         const numParaBuscar = propioNumero;
