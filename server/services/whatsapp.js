@@ -481,6 +481,12 @@ export async function iniciarWhatsApp(usuarioId) {
       const esChatConsigoMismo =
         msg.key.fromMe && remoteJid.endsWith("@s.whatsapp.net") && remoteId === propioNumero;
 
+      // Diagnóstico temporal: log de TODO mensaje fromMe para capturar el remoteJid
+      // real del chat "Note to Self" bajo LID y poder definir un criterio confiable.
+      if (msg.key.fromMe) {
+        console.log(`[DiagFromMe:${usuarioId}] type:${type} remoteJid:${remoteJid} propioNumero:${propioNumero} esChatConsigoMismo:${esChatConsigoMismo} texto:"${(textoRecibido || "[audio]").substring(0, 40)}"`);
+      }
+
       if (esChatConsigoMismo) {
         const numParaBuscar = propioNumero;
 
