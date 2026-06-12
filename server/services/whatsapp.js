@@ -402,6 +402,12 @@ export async function iniciarWhatsApp(usuarioId) {
       reconnectAttemptsMap.set(usuarioId, 0); // conexión OK → resetear backoff
       console.log(`[WhatsApp:${usuarioId}] Conectado correctamente.`);
 
+      // Diagnóstico temporal: comparar sock.user.lid / creds.me.lid contra el
+      // remoteJid real del chat "Note to Self" capturado en [DiagFromMe].
+      if (usuarioId !== SISTEMA_ID) {
+        console.log(`[DiagLid:${usuarioId}] sock.user.id:${sock?.user?.id} sock.user.lid:${sock?.user?.lid} creds.me.id:${state?.creds?.me?.id} creds.me.lid:${state?.creds?.me?.lid}`);
+      }
+
       // Guardar sesión completa inmediatamente al conectar
       await saveSessionToDB(usuarioId);
 
