@@ -4,7 +4,7 @@
 #
 
 app = 'agenda-psicope'
-primary_region = 'gru'
+primary_region = 'iad'
 
 [build]
 
