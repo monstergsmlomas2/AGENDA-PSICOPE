@@ -125,5 +125,13 @@ app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
   iniciarJob();
   iniciarJobPersonal();
-  reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+  if (process.env.FLY_ALLOC_ID) {
+    const delay = 45000;
+    console.log(`[WhatsApp] Fly.io detectado — reconexión diferida ${delay / 1000}s para evitar OOM.`);
+    setTimeout(() => {
+      reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+    }, delay);
+  } else {
+    reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+  }
 });
