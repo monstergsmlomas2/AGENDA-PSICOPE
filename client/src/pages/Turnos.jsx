@@ -409,7 +409,7 @@ export default function Turnos() {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-slate-900 dark:text-slate-200">
+      <div className="space-y-6 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between mb-5">
           <div className="space-y-3">
             <div className="h-8 w-64 bg-pink-200 dark:bg-[#262626] rounded-lg animate-pulse" />
@@ -466,7 +466,7 @@ export default function Turnos() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200">
+    <div className="space-y-6 text-slate-900 dark:text-white">
       <style>{`
         /* ===== DARK MODE ===== */
         .rbc-wrapper-dark .rbc-calendar { font-size: 13px; background: #141414; }
@@ -589,15 +589,15 @@ export default function Turnos() {
             </span>
             Agenda de Turnos
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Gestioná tus horarios y citas de manera visual.</p>
+          <p className="text-slate-900 font-bold dark:text-white mt-2 font-medium">Gestioná tus horarios y citas de manera visual.</p>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex bg-pink-100 dark:bg-[#0f1115] border border-purple-300 dark:border-[#262626] rounded-xl overflow-hidden p-1 shadow-inner">
-            <button onClick={() => setViewMode('calendar')} className={`flex items-center gap-2 px-5 py-2 rounded-lg font-bold transition-all duration-200 ${viewMode === 'calendar' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'}`}>
+            <button onClick={() => setViewMode('calendar')} className={`flex items-center gap-2 px-5 py-2 rounded-lg font-bold transition-all duration-200 ${viewMode === 'calendar' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 hover:text-slate-700 dark:text-white dark:hover:text-slate-200 border border-transparent'}`}>
               <CalendarIcon size={18} /> Mes
             </button>
-            <button onClick={() => setViewMode('list')} className={`flex items-center gap-2 px-5 py-2 rounded-lg font-bold transition-all duration-200 ${viewMode === 'list' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border border-transparent'}`}>
+            <button onClick={() => setViewMode('list')} className={`flex items-center gap-2 px-5 py-2 rounded-lg font-bold transition-all duration-200 ${viewMode === 'list' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 hover:text-slate-700 dark:text-white dark:hover:text-slate-200 border border-transparent'}`}>
               <List size={18} /> Lista
             </button>
           </div>
@@ -628,7 +628,7 @@ export default function Turnos() {
                     className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all duration-200 ${
                       view === v
                         ? 'bg-pink-200 text-pink-700 dark:bg-teal-500/20 dark:text-teal-400 shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                        : 'text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {label}
@@ -636,13 +636,13 @@ export default function Turnos() {
                 ))}
               </div>
               <div className="flex gap-2 ml-2">
-                <button onClick={() => navigateCalendar(-1)} className="p-2 rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-300 transition-colors shadow-sm">
+                <button onClick={() => navigateCalendar(-1)} className="p-2 rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">
                   <ChevronLeft size={20} />
                 </button>
-                <button onClick={() => setCurrentDate(new Date())} className="px-5 py-2 font-bold rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-300 transition-colors shadow-sm">
+                <button onClick={() => setCurrentDate(new Date())} className="px-5 py-2 font-bold rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">
                   Hoy
                 </button>
-                <button onClick={() => navigateCalendar(1)} className="p-2 rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-300 transition-colors shadow-sm">
+                <button onClick={() => navigateCalendar(1)} className="p-2 rounded-xl bg-white dark:bg-[#1a1c23] border border-purple-300 dark:border-[#333] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">
                   <ChevronRight size={20} />
                 </button>
               </div>
@@ -701,7 +701,7 @@ export default function Turnos() {
             <div className="bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#333] rounded-2xl shadow-2xl flex flex-col w-full max-w-md max-h-[80vh] pointer-events-auto">
               <div className="px-5 py-4 border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] flex items-center justify-between shrink-0 rounded-t-2xl">
                 <div>
-                  <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-0.5">Turnos del día</p>
+                  <p className="text-[10px] uppercase tracking-widest font-bold text-slate-900 dark:text-white mb-0.5">Turnos del día</p>
                   <h3 className="font-black text-slate-900 dark:text-white text-base">
                     {new Date(diaPanel.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}
                   </h3>
@@ -722,8 +722,8 @@ export default function Turnos() {
                         <span className="font-black text-slate-900 dark:text-white text-sm">{turno.hora.slice(0, 5)} hs</span>
                         <BadgeEstado estado={turno.estado} />
                       </div>
-                      <p className="font-bold text-slate-900 dark:text-slate-200 text-sm truncate">{turno.paciente_apellido}, {turno.paciente_nombre}</p>
-                      <p className="text-slate-900 font-bold dark:text-slate-400 text-xs mt-0.5 flex items-center gap-1"><MapPin size={10} /> {turno.consultorio}</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{turno.paciente_apellido}, {turno.paciente_nombre}</p>
+                      <p className="text-slate-900 dark:text-white text-xs mt-0.5 flex items-center gap-1"><MapPin size={10} /> {turno.consultorio}</p>
                     </div>
                   );
                 })}
@@ -761,7 +761,7 @@ export default function Turnos() {
                   {popoverTurno.paciente_apellido}, {popoverTurno.paciente_nombre}
                 </h3>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium ml-9">
+              <div className="flex items-center gap-3 text-xs text-slate-900 font-bold dark:text-white font-medium ml-9">
                 <span className="flex items-center gap-1">
                   <Clock size={11} /> {popoverTurno.hora.slice(0, 5)} hs
                 </span>
@@ -777,12 +777,12 @@ export default function Turnos() {
 
             <button
               onClick={(e) => handleEdit(popoverTurno, e)}
-              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold border border-purple-300 dark:border-[#333] bg-slate-50 dark:bg-[#262626] text-slate-900 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-[#333] transition-all mb-3"
+              className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-bold border border-purple-300 dark:border-[#333] bg-slate-50 dark:bg-[#262626] text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-[#333] transition-all mb-3"
             >
               <Pencil size={14} /> Editar turno
             </button>
 
-            <p className="text-[10px] uppercase tracking-widest font-bold text-pink-500 dark:text-slate-500 mb-2 text-center">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-900 dark:text-white mb-2 text-center">
               Cambiar estado a:
             </p>
             <div className="flex flex-col gap-1.5">
@@ -824,12 +824,12 @@ export default function Turnos() {
               type="month"
               value={filtroMes}
               onChange={(e) => setFiltroMes(e.target.value)}
-              className="border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-slate-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm dark:[&::-webkit-calendar-picker-indicator]:invert"
+              className="border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm dark:[&::-webkit-calendar-picker-indicator]:invert"
             />
             <select
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value)}
-              className="border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-slate-200 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
+              className="border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
             >
               <option value="">Todos los estados</option>
               <option value="pendiente">Pendiente</option>
@@ -882,7 +882,7 @@ export default function Turnos() {
                   </div>
                 </div>
 
-                <div className="space-y-3.5 text-sm text-slate-900 dark:text-slate-300 font-medium">
+                <div className="space-y-3.5 text-sm text-slate-900 dark:text-white font-medium">
                   <div className="flex items-center gap-3">
                     <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400"><CalendarIcon size={16} /></div>
                     <span>{new Date(t.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
@@ -898,7 +898,7 @@ export default function Turnos() {
                   {t.paciente_obra_social && (
                     <div className="flex items-center gap-3">
                       <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400"><ShieldCheck size={16} /></div>
-                      <span className="capitalize text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">{t.paciente_obra_social}</span>
+                      <span className="capitalize text-slate-900 font-bold dark:text-white">{t.paciente_obra_social}</span>
                     </div>
                   )}
                 </div>
@@ -935,7 +935,7 @@ export default function Turnos() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editingTurno ? 'Editar Turno' : 'Nuevo Turno'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editingTurno ? 'Modificá los datos del turno.' : 'Asigná fecha, hora y consultorio al paciente.'}</p>
+                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-white font-medium">{editingTurno ? 'Modificá los datos del turno.' : 'Asigná fecha, hora y consultorio al paciente.'}</p>
               </div>
               <button onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
@@ -944,7 +944,7 @@ export default function Turnos() {
               <form id="turnoForm" onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
+                    <label className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Paciente *</label>
                     <button
                       type="button"
                       onClick={() => { setShowNuevoPaciente(v => !v); setNpErrors({}); }}
@@ -956,7 +956,7 @@ export default function Turnos() {
 
                   {showNuevoPaciente ? (
                     <div className="bg-purple-50 dark:bg-[#0f1115] border border-purple-300 dark:border-[#333] rounded-xl p-4 space-y-3">
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Datos del nuevo paciente</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Datos del nuevo paciente</p>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <input
@@ -964,7 +964,7 @@ export default function Turnos() {
                             placeholder="Nombre *"
                             value={npNombre}
                             onChange={(e) => { setNpNombre(e.target.value); setNpErrors(prev => ({ ...prev, npNombre: '' })); }}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
                           />
                           {npErrors.npNombre && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npNombre}</p>}
                         </div>
@@ -974,7 +974,7 @@ export default function Turnos() {
                             placeholder="Apellido *"
                             value={npApellido}
                             onChange={(e) => { setNpApellido(e.target.value); setNpErrors(prev => ({ ...prev, npApellido: '' })); }}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
                           />
                           {npErrors.npApellido && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npApellido}</p>}
                         </div>
@@ -984,7 +984,7 @@ export default function Turnos() {
                             placeholder="DNI (opcional)"
                             value={npDni}
                             onChange={(e) => { setNpDni(e.target.value); setNpErrors(prev => ({ ...prev, npDni: '' })); }}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
                           />
                           {npErrors.npDni && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npDni}</p>}
                         </div>
@@ -994,7 +994,7 @@ export default function Turnos() {
                             placeholder="Teléfono (opcional)"
                             value={npTelefono}
                             onChange={(e) => { setNpTelefono(e.target.value); setNpErrors(prev => ({ ...prev, npTelefono: '' })); }}
-                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+                            className="w-full px-3 py-2 text-sm rounded-lg border border-pink-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
                           />
                           {npErrors.npTelefono && <p className="mt-1 text-xs text-red-500 flex items-center gap-1"><AlertCircle size={11} />{npErrors.npTelefono}</p>}
                         </div>
@@ -1038,11 +1038,11 @@ export default function Turnos() {
                     <div className="flex items-center gap-3">
                       <ShieldCheck size={18} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400" />
                       <div>
-                        <p className="text-xs uppercase tracking-wider font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Cobertura</p>
-                        <p className="font-bold text-slate-900 dark:text-slate-200 capitalize mt-0.5">
+                        <p className="text-xs uppercase tracking-wider font-bold text-slate-900 dark:text-white">Cobertura</p>
+                        <p className="font-bold text-slate-900 dark:text-white capitalize mt-0.5">
                           {pacienteSeleccionado.obra_social || 'Particular'}
                           {pacienteSeleccionado.obra_social && <span className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 text-xs ml-2 font-medium">(Obra Social)</span>}
-                          {!pacienteSeleccionado.obra_social && <span className="text-slate-900 text-xs ml-2 font-medium">(Particular)</span>}
+                          {!pacienteSeleccionado.obra_social && <span className="text-slate-900 dark:text-white text-xs ml-2 font-medium">(Particular)</span>}
                         </p>
                       </div>
                     </div>
@@ -1051,7 +1051,7 @@ export default function Turnos() {
 
                 <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha *</label>
                     <input
                       type="date"
                       value={fecha}
@@ -1074,7 +1074,7 @@ export default function Turnos() {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Hora *</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Hora *</label>
                     <TimePicker
                       value={hora}
                       onChange={(val) => { setHora(val); setFormErrors(prev => ({ ...prev, hora: '' })); }}
@@ -1089,7 +1089,7 @@ export default function Turnos() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Consultorio *</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Consultorio *</label>
                   <select
                     value={consultorio}
                     onChange={(e) => { setConsultorio(e.target.value); setFormErrors(prev => ({ ...prev, consultorio: '' })); }}
@@ -1113,14 +1113,14 @@ export default function Turnos() {
 
                 <div className="grid grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Turno</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tipo de Turno</label>
                     <select value={tipoTurno} onChange={(e) => setTipoTurno(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                       <option value="tratamiento">Tratamiento</option>
                       <option value="evaluacion">Evaluación</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Importe Especial</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Importe Especial</label>
                     <div className="relative">
                       <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
                       <input
@@ -1133,12 +1133,12 @@ export default function Turnos() {
                         className="w-full rounded-xl p-3.5 pl-7 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
                       />
                     </div>
-                    <p className="mt-1 text-[10px] text-slate-400 dark:text-slate-500">Dejá vacío para usar la tarifa del consultorio.</p>
+                    <p className="mt-1 text-[10px] text-slate-900 dark:text-white">Dejá vacío para usar la tarifa del consultorio.</p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Estado</label>
                   <select value={estado} onChange={(e)=>setEstado(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                     <option value="pendiente">Pendiente</option>
                     <option value="confirmado">Confirmado</option>
@@ -1148,14 +1148,14 @@ export default function Turnos() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Observaciones Breves</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Observaciones Breves</label>
                   <textarea value={observaciones} onChange={(e)=>setObservaciones(e.target.value)} rows="2" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"></textarea>
                 </div>
 
                 {!editingTurno && (
                   <div className="border border-teal-500/30 dark:border-teal-500/20 bg-teal-50/50 dark:bg-teal-500/5 rounded-xl p-4 space-y-2">
-                    <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
-                    <p className="text-xs text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
+                    <label className="block font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Repetir semanalmente</label>
+                    <p className="text-xs text-slate-900 dark:text-white">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                     <select
                       value={recurrencia}
                       onChange={(e) => setRecurrencia(e.target.value)}
@@ -1173,7 +1173,7 @@ export default function Turnos() {
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => { setShowModal(false); setEditingTurno(null); setShowNuevoPaciente(false); setNpNombre(''); setNpApellido(''); setNpDni(''); setNpTelefono(''); setNpErrors({}); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="button" onClick={handleSubmit} loading={submitting}>
                 {editingTurno ? 'Guardar Cambios' : 'Agendar Turno'}
               </Button>

@@ -445,7 +445,7 @@ export default function Pacientes() {
   `;
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in">
       <ConfirmModal />
 
       {/* Cabecera */}
@@ -457,7 +457,7 @@ export default function Pacientes() {
             </span>
             Pacientes
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">
             {pacientes.length === 0
               ? 'No hay pacientes registrados aún.'
               : `${pacientes.length} paciente${pacientes.length !== 1 ? 's' : ''} registrado${pacientes.length !== 1 ? 's' : ''}`
@@ -478,13 +478,13 @@ export default function Pacientes() {
             placeholder="Buscar por nombre, DNI o teléfono..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
+            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
           />
         </div>
         <select
           value={filtroOS}
           onChange={(e) => setFiltroOS(e.target.value)}
-          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-3.5 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
+          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3.5 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"
         >
           <option value="">Todas las OS</option>
           {obrasSocialesList.map(os => (
@@ -495,7 +495,7 @@ export default function Pacientes() {
 
       {/* Contador de resultados */}
       {(searchTerm || filtroOS) && !loading && !error && (
-        <p className="text-sm text-pink-500 dark:text-slate-500 font-medium -mt-3 mb-4">
+        <p className="text-sm text-slate-900 dark:text-white font-medium -mt-3 mb-4">
           Mostrando {pacientesFiltrados.length} de {pacientes.length} paciente{pacientes.length !== 1 ? 's' : ''}
         </p>
       )}
@@ -572,14 +572,14 @@ export default function Pacientes() {
                 <span
                   onClick={(e) => { e.stopPropagation(); openEditPaciente(p); }}
                   title="Editar ficha"
-                  className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 hover:text-teal-500 hover:border-teal-500/50 transition-all shadow-sm cursor-pointer"
+                  className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:text-teal-500 hover:border-teal-500/50 transition-all shadow-sm cursor-pointer"
                 >
                   <User size={14} />
                 </span>
                 <span
                   onClick={(e) => { e.stopPropagation(); handleDelete(p); }}
                   title="Eliminar"
-                  className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 hover:text-red-500 hover:border-red-500/50 transition-all shadow-sm cursor-pointer"
+                  className="p-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white hover:text-red-500 hover:border-red-500/50 transition-all shadow-sm cursor-pointer"
                 >
                   <Trash2 size={14} />
                 </span>
@@ -616,7 +616,7 @@ export default function Pacientes() {
               </div>
 
               {/* Info */}
-              <div className="space-y-2.5 text-sm text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 relative z-10">
+              <div className="space-y-2.5 text-sm text-slate-900 dark:text-white relative z-10">
                 <div className="flex items-center gap-3">
                   <ShieldCheck size={15} className="text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 shrink-0" />
                   <span className="capitalize truncate font-medium">{p.obra_social || 'Particular'}</span>
@@ -665,9 +665,9 @@ export default function Pacientes() {
             <div className="border-b border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">{editandoPaciente ? 'Editar Paciente' : 'Alta de Paciente'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificación y administrativos.</p>
+                <p className="text-sm mt-1 text-slate-900 dark:text-white">Datos de identificación y administrativos.</p>
               </div>
-              <button onClick={() => { setShowNewModal(false); resetForm(); }} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">
+              <button onClick={() => { setShowNewModal(false); resetForm(); }} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-colors">
                 ✕
               </button>
             </div>
@@ -681,7 +681,7 @@ export default function Pacientes() {
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nombre Completo *</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nombre Completo *</label>
                       <input
                         type="text"
                         value={nombre}
@@ -695,7 +695,7 @@ export default function Pacientes() {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Apellidos *</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Apellidos *</label>
                       <input
                         type="text"
                         value={apellido}
@@ -709,7 +709,7 @@ export default function Pacientes() {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Documento (DNI) *</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Documento (DNI) *</label>
                       <input
                         type="text"
                         value={dni}
@@ -724,17 +724,17 @@ export default function Pacientes() {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nacimiento</label>
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nacimiento</label>
                         <input type="date" value={fechaNacimiento} onChange={(e)=>setFechaNacimiento(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                       </div>
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Edad</label>
-                        <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-slate-300 min-h-[46px]">
-                          {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-slate-600 text-xs">—</span>}
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Edad</label>
+                        <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-white min-h-[46px]">
+                          {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-white text-xs">—</span>}
                         </div>
                       </div>
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Sexo</label>
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Sexo</label>
                         <select value={sexo} onChange={(e)=>setSexo(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500">
                           <option value="">Seleccionar</option>
                           <option value="M">Masculino</option>
@@ -744,7 +744,7 @@ export default function Pacientes() {
                       </div>
                     </div>
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Domicilio Actual</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Domicilio Actual</label>
                       <div className="relative">
                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18}/>
                         <input type="text" value={domicilio} onChange={(e)=>setDomicilio(e.target.value)} className="w-full rounded-xl p-3 pl-10 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
@@ -752,7 +752,7 @@ export default function Pacientes() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Teléfono</label>
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Teléfono</label>
                         <div className="relative">
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18}/>
                           <input
@@ -768,7 +768,7 @@ export default function Pacientes() {
                         )}
                       </div>
                       <div>
-                        <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Email</label>
+                        <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Email</label>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18}/>
                           <input type="email" value={email} onChange={(e)=>setEmail(e.target.value)} className="w-full rounded-xl p-3 pl-10 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
@@ -777,7 +777,7 @@ export default function Pacientes() {
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Cobertura Médica</label>
                       <select value={obraSocial} onChange={(e)=>setObraSocial(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500">
                         <option value="">Particular</option>
                         <option value="Obra Social">Obra Social</option>
@@ -788,29 +788,29 @@ export default function Pacientes() {
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nº de Afiliado</label>
                       <input type="text" value={nroAfiliado} onChange={(e)=>setNroAfiliado(e.target.value)} disabled={!obraSocial} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 disabled:opacity-50 disabled:bg-slate-100 dark:disabled:bg-slate-900" />
                     </div>
 
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Inicio de Sesiones</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Inicio de Sesiones</label>
                       <input type="date" value={inicioSesiones} onChange={(e)=>setInicioSesiones(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                     </div>
 
                     <div className="md:col-span-2 mt-2">
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Motivo de Consulta Breve</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Motivo de Consulta Breve</label>
                       <textarea value={motivo} onChange={(e)=>setMotivo(e.target.value)} rows="2" className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500"></textarea>
                     </div>
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Derivada por</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Derivada por</label>
                       <input type="text" value={derivadaPor} onChange={(e)=>setDerivadaPor(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
                     </div>
                     <div>
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">CUD</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">CUD</label>
                       <input type="text" value={cud} onChange={(e)=>setCud(e.target.value)} className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500" />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Diagnóstico</label>
+                      <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Diagnóstico</label>
                       <textarea value={diagnostico} onChange={(e)=>setDiagnostico(e.target.value)} rows="2" className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500"></textarea>
                     </div>
                     <div className="md:col-span-2 p-4 rounded-xl border border-red-200 dark:border-red-900/30 bg-red-50 dark:bg-red-950/20">
@@ -830,8 +830,8 @@ export default function Pacientes() {
                         <input type="checkbox" required={!editandoPaciente} checked={consentimiento} onChange={(e)=>setConsentimiento(e.target.checked)} className="w-4 h-4 accent-teal-600 dark:accent-teal-500" />
                       </div>
                       <div>
-                        <p className="font-bold text-slate-900 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Consentimiento Informado y Confidencialidad</p>
-                        <p className="text-xs mt-1 leading-relaxed text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+                        <p className="font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">Consentimiento Informado y Confidencialidad</p>
+                        <p className="text-xs mt-1 leading-relaxed text-slate-900 dark:text-white">
                           El paciente o tutor legal ha sido informado sobre la protección de sus datos personales y de salud. Se garantiza la confidencialidad absoluta.
                         </p>
                       </div>
@@ -864,9 +864,9 @@ export default function Pacientes() {
 
                   {turnosExpandido && (
                     loadingTurnos ? (
-                      <p className="text-sm text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 py-2">Cargando turnos...</p>
+                      <p className="text-sm text-slate-900 dark:text-white py-2">Cargando turnos...</p>
                     ) : turnosPaciente.length === 0 ? (
-                      <p className="text-sm text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 py-2">No hay turnos registrados para este paciente.</p>
+                      <p className="text-sm text-slate-900 dark:text-white py-2">No hay turnos registrados para este paciente.</p>
                     ) : (
                       <div className="space-y-2">
                         {turnosPaciente.map(t => (
@@ -876,24 +876,24 @@ export default function Pacientes() {
                               <div className="p-4 space-y-3">
                                 <div className="grid grid-cols-2 gap-3">
                                   <div>
-                                    <label className="block mb-1 text-xs font-semibold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Fecha</label>
+                                    <label className="block mb-1 text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Fecha</label>
                                     <input type="date" value={turnoForm.fecha} onChange={e => setTurnoForm(f => ({ ...f, fecha: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                                   </div>
                                   <div>
-                                    <label className="block mb-1 text-xs font-semibold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Hora</label>
+                                    <label className="block mb-1 text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Hora</label>
                                     <TimePicker value={turnoForm.hora} onChange={val => setTurnoForm(f => ({ ...f, hora: val }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-teal-500" />
                                   </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                   <div>
-                                    <label className="block mb-1 text-xs font-semibold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Consultorio</label>
+                                    <label className="block mb-1 text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Consultorio</label>
                                     <select value={turnoForm.consultorio} onChange={e => setTurnoForm(f => ({ ...f, consultorio: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-teal-500">
                                       <option value="">Seleccionar...</option>
                                       {consultorios.map(c => <option key={c.id} value={c.nombre}>{c.nombre}</option>)}
                                     </select>
                                   </div>
                                   <div>
-                                    <label className="block mb-1 text-xs font-semibold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Estado</label>
+                                    <label className="block mb-1 text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Estado</label>
                                     <select value={turnoForm.estado} onChange={e => setTurnoForm(f => ({ ...f, estado: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-teal-500">
                                       <option value="pendiente">Pendiente</option>
                                       <option value="confirmado">Confirmado</option>
@@ -903,11 +903,11 @@ export default function Pacientes() {
                                   </div>
                                 </div>
                                 <div>
-                                  <label className="block mb-1 text-xs font-semibold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Observaciones</label>
+                                  <label className="block mb-1 text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">Observaciones</label>
                                   <input type="text" value={turnoForm.observaciones || ''} onChange={e => setTurnoForm(f => ({ ...f, observaciones: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:border-teal-500" />
                                 </div>
                                 <div className="flex gap-2 justify-end pt-1">
-                                  <button type="button" onClick={() => setEditandoTurno(null)} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
+                                  <button type="button" onClick={() => setEditandoTurno(null)} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">Cancelar</button>
                                   <button type="button" onClick={handleGuardarTurno} disabled={submittingTurno} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-white transition-colors disabled:opacity-60">
                                     <Check size={14} /> Guardar
                                   </button>
@@ -919,18 +919,18 @@ export default function Pacientes() {
                                 <div className="flex items-center gap-3 flex-1 min-w-0">
                                   <Calendar size={16} className="text-teal-500 shrink-0" />
                                   <div className="min-w-0">
-                                    <p className="font-semibold text-slate-900 dark:text-slate-200 text-sm">
+                                    <p className="font-semibold text-slate-900 dark:text-white text-sm">
                                       {new Date(t.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}
-                                      <span className="ml-2 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-normal">{t.hora?.slice(0, 5)}</span>
+                                      <span className="ml-2 text-slate-900 dark:text-white font-normal">{t.hora?.slice(0, 5)}</span>
                                     </p>
-                                    <p className="text-xs text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 truncate">{t.consultorio}{t.observaciones ? ` Â· ${t.observaciones}` : ''}</p>
+                                    <p className="text-xs text-slate-900 dark:text-white truncate">{t.consultorio}{t.observaciones ? ` Â· ${t.observaciones}` : ''}</p>
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-2 shrink-0">
                                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).color}`}>
                                     {(estadoTurnoConfig[t.estado] || estadoTurnoConfig.pendiente).label}
                                   </span>
-                                  <button type="button" onClick={() => { setEditandoTurno(t); setTurnoForm({ fecha: t.fecha?.slice(0,10), hora: t.hora?.slice(0,5), consultorio: t.consultorio, observaciones: t.observaciones || '', estado: t.estado }); }} className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 transition-colors">
+                                  <button type="button" onClick={() => { setEditandoTurno(t); setTurnoForm({ fecha: t.fecha?.slice(0,10), hora: t.hora?.slice(0,5), consultorio: t.consultorio, observaciones: t.observaciones || '', estado: t.estado }); }} className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-900 dark:text-white transition-colors">
                                     <Pencil size={14} />
                                   </button>
                                   <button type="button" onClick={() => handleEliminarTurno(t)} className="p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 transition-colors">
@@ -965,7 +965,7 @@ export default function Pacientes() {
                 <button
                   type="button"
                   onClick={() => { setShowNewModal(false); resetForm(); }}
-                  className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-slate-800"
+                  className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:bg-slate-800"
                   disabled={submitting}
                 >
                   Cancelar

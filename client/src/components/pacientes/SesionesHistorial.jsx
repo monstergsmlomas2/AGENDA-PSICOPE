@@ -13,7 +13,7 @@ export default function SesionesHistorial({ sesiones, loading, onNuevaSesion }) 
           </button>
         </div>
         <div className="text-center py-12 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950">
-          <p className="text-slate-900 dark:text-slate-400 font-medium">No hay sesiones registradas aún.</p>
+          <p className="text-slate-900 dark:text-white font-medium">No hay sesiones registradas aún.</p>
         </div>
       </div>
     );
@@ -41,14 +41,14 @@ export default function SesionesHistorial({ sesiones, loading, onNuevaSesion }) 
             <div className="space-y-3 text-sm">
               {s.actividades_realizadas && (
                 <div>
-                  <span className="font-bold text-slate-900 dark:text-slate-300">Actividades:</span>
-                  <p className="text-slate-900 dark:text-slate-400 mt-1 leading-relaxed">{s.actividades_realizadas}</p>
+                  <span className="font-bold text-slate-900 dark:text-white">Actividades:</span>
+                  <p className="text-slate-900 dark:text-white mt-1 leading-relaxed">{s.actividades_realizadas}</p>
                 </div>
               )}
               {s.observaciones && (
                 <div>
-                  <span className="font-bold text-slate-900 dark:text-slate-300">Observaciones:</span>
-                  <p className="text-slate-900 dark:text-slate-400 mt-1 leading-relaxed">{s.observaciones}</p>
+                  <span className="font-bold text-slate-900 dark:text-white">Observaciones:</span>
+                  <p className="text-slate-900 dark:text-white mt-1 leading-relaxed">{s.observaciones}</p>
                 </div>
               )}
             </div>

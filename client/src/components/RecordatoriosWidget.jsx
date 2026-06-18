@@ -108,7 +108,7 @@ export default function RecordatoriosWidget() {
         {/* Sección: Pacientes sin sesión reciente */}
         {pacientesSinSesion.length > 0 && (
           <div>
-            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
+            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
               <AlertTriangle size={13} className="text-amber-500" />
               Pacientes sin sesión reciente
             </h3>
@@ -124,10 +124,10 @@ export default function RecordatoriosWidget() {
                       <User size={14} />
                     </div>
                     <div className="min-w-0">
-                      <p className="font-bold text-sm text-slate-900 dark:text-slate-200 truncate capitalize">
+                      <p className="font-bold text-sm text-slate-900 dark:text-white truncate capitalize">
                         {p.apellido}, {p.nombre}
                       </p>
-                      <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium">
+                      <p className="text-[10px] text-slate-900 dark:text-white mt-0.5 font-medium">
                         {p.ultima_sesion
                           ? `Ãšlt. sesión: ${formatearFecha(p.ultima_sesion)}`
                           : 'Nunca asistió'}
@@ -159,7 +159,7 @@ export default function RecordatoriosWidget() {
                 </Link>
               ))}
               {pacientesSinSesion.length > 5 && (
-                <p className="text-xs text-center text-pink-500 dark:text-slate-500 font-medium pt-1">
+                <p className="text-xs text-center text-slate-900 dark:text-white font-medium pt-1">
                   + {pacientesSinSesion.length - 5} pacientes más
                 </p>
               )}
@@ -170,7 +170,7 @@ export default function RecordatoriosWidget() {
         {/* Sección: Vencimientos próximos - Informes */}
         {informesPorVencer.length > 0 && (
           <div>
-            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
+            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
               <Clock size={13} className="text-blue-500" />
               Informes por vencer
             </h3>
@@ -188,10 +188,10 @@ export default function RecordatoriosWidget() {
                         <FileText size={14} />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-sm text-slate-900 dark:text-slate-200 truncate capitalize">
+                        <p className="font-bold text-sm text-slate-900 dark:text-white truncate capitalize">
                           {i.paciente_apellido}, {i.paciente_nombre}
                         </p>
-                        <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium capitalize">
+                        <p className="text-[10px] text-slate-900 dark:text-white mt-0.5 font-medium capitalize">
                           {i.tipo} • Vence: {formatearFecha(i.fecha_vencimiento)}
                         </p>
                       </div>
@@ -216,7 +216,7 @@ export default function RecordatoriosWidget() {
         {/* Sección: Vencimientos próximos - Evaluaciones */}
         {evaluacionesPorVencer.length > 0 && (
           <div>
-            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-3 flex items-center gap-2">
+            <h3 className="text-xs uppercase tracking-widest font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
               <ClipboardList size={13} className="text-purple-500" />
               Evaluaciones por vencer
             </h3>
@@ -234,10 +234,10 @@ export default function RecordatoriosWidget() {
                         <ClipboardList size={14} />
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-sm text-slate-900 dark:text-slate-200 truncate capitalize">
+                        <p className="font-bold text-sm text-slate-900 dark:text-white truncate capitalize">
                           {e.paciente_apellido}, {e.paciente_nombre}
                         </p>
-                        <p className="text-[10px] text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-0.5 font-medium">
+                        <p className="text-[10px] text-slate-900 dark:text-white mt-0.5 font-medium">
                           {e.tipo_test} • Vence: {formatearFecha(e.fecha_vencimiento)}
                         </p>
                       </div>

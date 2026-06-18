@@ -109,17 +109,17 @@ function EventoCard({ evento, onEdit, onCompletar, onEliminar }) {
             </div>
 
             {evento.descripcion && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">{evento.descripcion}</p>
+              <p className="text-xs text-slate-900 dark:text-white mt-1 line-clamp-2">{evento.descripcion}</p>
             )}
 
             <div className="flex items-center gap-3 mt-2 flex-wrap">
-              <span className="flex items-center gap-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span className="flex items-center gap-1 text-xs font-semibold text-slate-900 dark:text-white">
                 <Clock size={12} className={cfg.color} />
                 <span className={`font-bold ${cfg.color}`}>{hora} hs</span>
-                {!esHoy && <span className="text-slate-500 dark:text-slate-500 font-normal capitalize"> · {fecha}</span>}
+                {!esHoy && <span className="text-slate-900 dark:text-white font-normal capitalize"> · {fecha}</span>}
               </span>
               {recs.length > 0 && (
-                <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
+                <span className="flex items-center gap-1 text-xs text-slate-900 dark:text-white">
                   <Bell size={10} />
                   {recs.map(m => labelRecordatorio(m)).join(' · ')}
                 </span>
@@ -392,7 +392,7 @@ export default function MiAgenda() {
             </span>
             Mi Agenda Personal
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2 font-medium">
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">
             Tus recordatorios y tareas propias — independiente de los turnos de pacientes.
           </p>
         </div>
@@ -415,7 +415,7 @@ export default function MiAgenda() {
           ].map(s => (
             <div key={s.label} className={`${s.bg} border ${s.border} rounded-2xl px-4 py-3 flex flex-col gap-1`}>
               <span className={`text-2xl font-black ${s.color}`}>{s.value}</span>
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">{s.label}</span>
+              <span className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">{s.label}</span>
             </div>
           ))}
         </div>
@@ -454,7 +454,7 @@ export default function MiAgenda() {
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">
                   {editingEvento ? 'Editar Evento' : 'Nuevo Evento'}
                 </h2>
-                <p className="text-sm mt-1 text-slate-600 dark:text-slate-400 font-medium">
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">
                   {editingEvento ? 'Modificá los datos del evento.' : 'Creá un recordatorio o tarea personal.'}
                 </p>
               </div>
@@ -469,20 +469,20 @@ export default function MiAgenda() {
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Título *</label>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Título *</label>
                   <input type="text" value={titulo} onChange={e => setTitulo(e.target.value)} placeholder="Ej: Reunión escuela San José" className={inputClass} required />
                 </div>
                 <div>
-                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Descripción</label>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Descripción</label>
                   <textarea value={descripcion} onChange={e => setDescripcion(e.target.value)} rows={3} placeholder="Opcional — detalle del evento..." className={`${inputClass} resize-none`} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
+                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha *</label>
                     <input type="date" value={fecha} onChange={e => setFecha(e.target.value)} className={inputClass} required />
                   </div>
                   <div>
-                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Hora *</label>
+                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Hora *</label>
                     <input type="time" value={hora} onChange={e => setHora(e.target.value)} className={inputClass} required />
                   </div>
                 </div>
@@ -490,7 +490,7 @@ export default function MiAgenda() {
                 {/* Recordatorios múltiples */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                    <label className="font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
                       Recordatorios WhatsApp
                     </label>
                     {recordatorios.length < 4 && (
@@ -519,7 +519,7 @@ export default function MiAgenda() {
 
                 {editingEvento && (
                   <div>
-                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
+                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Estado</label>
                     <select value={estado} onChange={e => setEstado(e.target.value)} className={inputClass}>
                       <option value="pendiente">Pendiente</option>
                       <option value="completado">Completado</option>
@@ -544,7 +544,7 @@ export default function MiAgenda() {
                 )}
               </div>
               <div className="flex gap-3">
-                <button type="button" onClick={() => { setShowModal(false); setEditingEvento(null); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white transition-colors disabled:opacity-50">
+                <button type="button" onClick={() => { setShowModal(false); setEditingEvento(null); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white transition-colors disabled:opacity-50">
                   Cancelar
                 </button>
                 <Button type="button" onClick={handleSubmit} loading={submitting}>

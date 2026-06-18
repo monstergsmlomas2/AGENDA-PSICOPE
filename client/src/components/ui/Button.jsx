@@ -4,11 +4,11 @@ const variantStyles = {
   primary:
     'bg-pink-500 hover:bg-pink-400 text-white shadow-lg shadow-pink-500/20 dark:bg-teal-600 dark:hover:bg-teal-500 dark:shadow-teal-500/20',
   secondary:
-    'bg-white dark:bg-[var(--bg-surface)] border border-pink-300 dark:border-[var(--border-default)] text-slate-900 dark:text-slate-200 hover:bg-white dark:hover:bg-[var(--bg-elevated)] hover:border-pink-500 dark:hover:border-teal-500 shadow-sm',
+    'bg-white dark:bg-[var(--bg-surface)] border border-pink-300 dark:border-[var(--border-default)] text-slate-900 dark:text-white hover:bg-white dark:hover:bg-[var(--bg-elevated)] hover:border-pink-500 dark:hover:border-teal-500 shadow-sm',
   danger:
     'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20',
   ghost:
-    'text-slate-900 dark:text-slate-300 hover:bg-pink-100 dark:hover:bg-[var(--bg-elevated)] border border-transparent',
+    'text-slate-900 dark:text-white hover:bg-pink-100 dark:hover:bg-[var(--bg-elevated)] border border-transparent',
 };
 
 const sizeStyles = {

@@ -259,7 +259,7 @@ export default function Pagos() {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-slate-900 dark:text-slate-200">
+      <div className="space-y-6 text-slate-900 dark:text-white">
         {/* Cabecera esqueleto */}
         <div className="flex items-center justify-between mb-5">
           <div className="space-y-3">
@@ -305,7 +305,7 @@ export default function Pagos() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200">
+    <div className="space-y-6 text-slate-900 dark:text-white">
 
       <ConfirmModal />
 
@@ -318,14 +318,14 @@ export default function Pagos() {
             </span>
             Pagos y Facturación
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Gestión de cobros, facturación y resúmenes mensuales.</p>
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">Gestión de cobros, facturación y resúmenes mensuales.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="flex bg-pink-100 dark:bg-[#0f1115] border border-purple-300 dark:border-[#262626] rounded-xl overflow-hidden p-1 shadow-inner">
-            <button onClick={() => setActiveTab('pagos')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'pagos' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'}`}>
+            <button onClick={() => setActiveTab('pagos')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'pagos' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white border border-transparent'}`}>
               <Receipt size={16} /> Pagos
             </button>
-            <button onClick={() => setActiveTab('caja')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'caja' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'}`}>
+            <button onClick={() => setActiveTab('caja')} className={`flex items-center gap-2 px-4 py-2 rounded-lg font-bold transition-all duration-200 text-sm ${activeTab === 'caja' ? 'bg-white dark:bg-[#1a1c23] text-slate-900 dark:text-teal-400 shadow-sm border border-purple-300 dark:border-[#333]' : 'text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white border border-transparent'}`}>
               <ClipboardList size={16} /> Caja
               {turnosSinPago.length > 0 && (
                 <span className="bg-pink-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full leading-none">{turnosSinPago.length}</span>
@@ -349,7 +349,7 @@ export default function Pagos() {
             <Receipt size={22} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Total Facturado</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Total Facturado</p>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">
               ${Number(resumen.total_facturado).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </h3>
@@ -360,7 +360,7 @@ export default function Pagos() {
             <TrendingUp size={22} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Total Cobrado</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Total Cobrado</p>
             <h3 className="text-2xl font-black text-green-600 dark:text-green-400 mt-0.5">
               ${Number(resumen.total_cobrado).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </h3>
@@ -371,7 +371,7 @@ export default function Pagos() {
             <TrendingDown size={22} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Total Pendiente</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Total Pendiente</p>
             <h3 className="text-2xl font-black text-yellow-600 dark:text-yellow-400 mt-0.5">
               ${Number(resumen.total_pendiente).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
             </h3>
@@ -382,7 +382,7 @@ export default function Pagos() {
             <Wallet size={22} />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 uppercase tracking-wider">Cant. Pagos</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Cant. Pagos</p>
             <h3 className="text-2xl font-black text-slate-900 dark:text-white mt-0.5">{resumen.total_pagos}</h3>
           </div>
         </div>
@@ -393,14 +393,14 @@ export default function Pagos() {
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
           <input type="text" placeholder="Buscar por paciente o concepto..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
+            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
           />
         </div>
         <input type="month" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}
-          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium dark:[&::-webkit-calendar-picker-indicator]:invert"
+          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium dark:[&::-webkit-calendar-picker-indicator]:invert"
         />
         <select value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)}
-          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
+          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
           <option value="">Todos los estados</option>
           <option value="pagado">Pagado</option>
           <option value="pendiente">Pendiente</option>
@@ -424,13 +424,13 @@ export default function Pagos() {
           <table className="w-full text-sm">
             <thead className="bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
               <tr>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente</th>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha</th>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Concepto</th>
-                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Monto</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</th>
-                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Acciones</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Paciente</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Concepto</th>
+                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Monto</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tipo</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Estado</th>
+                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pink-100 dark:divide-[#262626]">
@@ -449,10 +449,10 @@ export default function Pagos() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-5 text-slate-900 dark:text-slate-400">
+                  <td className="px-6 py-5 text-slate-900 dark:text-white">
                     {new Date(p.fecha + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}
                   </td>
-                  <td className="px-6 py-5 text-slate-900 dark:text-slate-400 max-w-[200px] truncate">
+                  <td className="px-6 py-5 text-slate-900 dark:text-white max-w-[200px] truncate">
                     {p.concepto || '—'}
                   </td>
                   <td className="px-6 py-5 text-right">
@@ -468,7 +468,7 @@ export default function Pagos() {
                       const cfg = tipoPagoConfig[p.tipo_pago] || { label: p.tipo_pago, icon: Receipt };
                       const IconTipo = cfg.icon;
                       return (
-                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-900 dark:text-slate-400">
+                        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-900 dark:text-white">
                           <IconTipo size={14} /> {cfg.label}
                         </span>
                       );
@@ -516,10 +516,10 @@ export default function Pagos() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-black text-slate-900 dark:text-white">Turnos pendientes de cobro</h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Turnos confirmados o pendientes del mes sin pago registrado.</p>
+              <p className="text-xs text-slate-900 dark:text-white mt-0.5">Turnos confirmados o pendientes del mes sin pago registrado.</p>
             </div>
             <input type="month" value={mesFiltro} onChange={(e) => setMesFiltro(e.target.value)}
-              className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-2.5 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium dark:[&::-webkit-calendar-picker-indicator]:invert"
+              className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-2.5 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium dark:[&::-webkit-calendar-picker-indicator]:invert"
             />
           </div>
 
@@ -572,7 +572,7 @@ export default function Pagos() {
                                 <tr key={t.id} className="hover:bg-slate-50 dark:hover:bg-[#1a1c23] transition-colors">
                                   <td className="px-6 py-3.5">
                                     <p className="font-bold text-slate-900 dark:text-white">{t.paciente_apellido}, {t.paciente_nombre}</p>
-                                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{t.hora.slice(0,5)}hs · {t.consultorio}</p>
+                                    <p className="text-xs text-slate-900 dark:text-white mt-0.5">{t.hora.slice(0,5)}hs · {t.consultorio}</p>
                                   </td>
                                   <td className="px-6 py-3.5">
                                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
@@ -586,7 +586,7 @@ export default function Pagos() {
                                   <td className="px-6 py-3.5 text-right">
                                     {imp != null
                                       ? <span className="font-bold text-slate-900 dark:text-white">${imp.toLocaleString('es-AR')}</span>
-                                      : <span className="text-slate-400 dark:text-slate-500 text-xs italic">Sin tarifa</span>
+                                      : <span className="text-slate-900 dark:text-white text-xs italic">Sin tarifa</span>
                                     }
                                     {t.importe_custom != null && (
                                       <span className="ml-1 text-[10px] text-pink-500 dark:text-pink-400">(especial)</span>
@@ -631,15 +631,15 @@ export default function Pagos() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Pago' : 'Nuevo Pago'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Registrá un cobro o facturación.</p>
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">Registrá un cobro o facturación.</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
               <form id="pagoForm" onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Paciente *</label>
                   <select
                     value={pacienteId}
                     onChange={(e) => { setPacienteId(e.target.value); setFormErrors(prev => ({ ...prev, pacienteId: '' })); }}
@@ -663,11 +663,11 @@ export default function Pagos() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha *</label>
                     <input type="date" value={fecha} onChange={(e)=>setFecha(e.target.value)} required className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert shadow-sm font-medium" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Monto *</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Monto *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -689,13 +689,13 @@ export default function Pagos() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Concepto</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Concepto</label>
                   <input type="text" value={concepto} onChange={(e)=>setConcepto(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: Sesión psicopedagógica, Informe diagnóstico..." />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Pago</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tipo de Pago</label>
                     <select value={tipoPago} onChange={(e)=>setTipoPago(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                       <option value="efectivo">Efectivo</option>
                       <option value="transferencia">Transferencia</option>
@@ -704,7 +704,7 @@ export default function Pagos() {
                     </select>
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Estado</label>
                     <select value={estadoPago} onChange={(e)=>setEstadoPago(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                       <option value="pagado">Pagado</option>
                       <option value="pendiente">Pendiente</option>
@@ -715,13 +715,13 @@ export default function Pagos() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">N° Sesión Facturada</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">N° Sesión Facturada</label>
                     <input type="number" value={nroSesion} onChange={(e)=>setNroSesion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Opcional" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Observaciones</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Observaciones</label>
                   <textarea value={observaciones} onChange={(e)=>setObservaciones(e.target.value)} rows="2" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium"></textarea>
                 </div>
               </form>

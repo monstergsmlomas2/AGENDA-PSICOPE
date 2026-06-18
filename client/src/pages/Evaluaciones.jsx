@@ -140,7 +140,7 @@ export default function Evaluaciones() {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-slate-900 dark:text-slate-200">
+      <div className="space-y-6 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between mb-5">
           <div className="space-y-3">
             <div className="h-8 w-56 bg-pink-200 dark:bg-[#262626] rounded-lg animate-pulse" />
@@ -184,7 +184,7 @@ export default function Evaluaciones() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200">
+    <div className="space-y-6 text-slate-900 dark:text-white">
 
       <ConfirmModal />
 
@@ -197,7 +197,7 @@ export default function Evaluaciones() {
             </span>
             Evaluaciones
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Registro de tests y evaluaciones psicopedagógicas.</p>
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">Registro de tests y evaluaciones psicopedagógicas.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nueva Evaluación
@@ -228,18 +228,18 @@ export default function Evaluaciones() {
         <div className="relative w-full max-w-xs">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
           <input type="text" placeholder="Buscar por paciente..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
+            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 pl-10 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
           />
         </div>
         <select value={filtroPaciente} onChange={(e) => setFiltroPaciente(e.target.value)}
-          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
+          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
           <option value="">Todos los pacientes</option>
           {pacientes.map(p => (
             <option key={p.id} value={p.id}>{p.apellido}, {p.nombre}</option>
           ))}
         </select>
         <select value={filtroTipo} onChange={(e) => setFiltroTipo(e.target.value)}
-          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-300 rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
+          className="border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3 px-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
           <option value="">Todos los tipos</option>
           {tiposTest.map(t => (
             <option key={t.value} value={t.value}>{t.label}</option>
@@ -279,10 +279,10 @@ export default function Evaluaciones() {
                 </div>
               </div>
 
-              <div className="space-y-3 text-sm text-slate-900 dark:text-slate-300 font-medium border-t border-slate-100 dark:border-[#262626] pt-4">
+              <div className="space-y-3 text-sm text-slate-900 dark:text-white font-medium border-t border-slate-100 dark:border-[#262626] pt-4">
                 {ev.fecha_administracion && (
                   <div className="flex items-center gap-3">
-                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 dark:text-white">
                       <Calendar size={14} />
                     </div>
                     <span>{new Date((ev.fecha_administracion || '').split('T')[0] + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}</span>
@@ -290,21 +290,21 @@ export default function Evaluaciones() {
                 )}
                 {ev.puntaje_obtenido && (
                   <div className="flex items-center gap-3">
-                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+                    <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 dark:text-white">
                       <Star size={14} />
                     </div>
                     <span className="font-bold text-slate-900 dark:text-white">{ev.puntaje_obtenido}</span>
                   </div>
                 )}
                 {ev.resultados && (
-                  <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 text-xs leading-relaxed line-clamp-3 mt-1">
+                  <p className="text-slate-900 dark:text-white text-xs leading-relaxed line-clamp-3 mt-1">
                     {ev.resultados}
                   </p>
                 )}
               </div>
 
               <div className="mt-4 pt-4 border-t border-slate-100 dark:border-[#262626] flex justify-between items-center">
-                <button onClick={() => setViewing(ev)} className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <button onClick={() => setViewing(ev)} className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
                   <Eye size={14} /> Ver detalle
                 </button>
                 <button onClick={() => openEdit(ev)} className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors">
@@ -322,15 +322,15 @@ export default function Evaluaciones() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Evaluación' : 'Nueva Evaluación'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">Registrá un test o evaluación administrada.</p>
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">Registrá un test o evaluación administrada.</p>
               </div>
-              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
+              <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 text-sm overflow-y-auto flex-1 custom-scrollbar">
               <form id="evalForm" onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Paciente *</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Paciente *</label>
                   <select value={pacienteId} onChange={(e)=>setPacienteId(e.target.value)} required className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                     <option value="">Seleccionar paciente...</option>
                     {pacientes.map(p => (
@@ -340,36 +340,36 @@ export default function Evaluaciones() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Test *</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tipo de Test *</label>
                   <select value={tipoTest} onChange={(e)=>setTipoTest(e.target.value)} required className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                     {tiposTest.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha de Administración</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha de Administración</label>
                   <input type="date" value={fechaAdmin} onChange={(e)=>setFechaAdmin(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert shadow-sm font-medium" />
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Resultados (descripción cualitativa)</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Resultados (descripción cualitativa)</label>
                   <textarea value={resultados} onChange={(e)=>setResultados(e.target.value)} rows="4" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Describí los resultados obtenidos..."></textarea>
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Puntaje Obtenido</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Puntaje Obtenido</label>
                   <input type="text" value={puntajeObtenido} onChange={(e)=>setPuntajeObtenido(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: CI: 95, Percentil 37" />
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Observaciones</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Observaciones</label>
                   <textarea value={observaciones} onChange={(e)=>setObservaciones(e.target.value)} rows="3" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Notas adicionales..."></textarea>
                 </div>
               </form>
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="evalForm" loading={submitting}>
                 {editing ? 'Guardar Cambios' : 'Crear Evaluación'}
               </Button>
@@ -385,20 +385,20 @@ export default function Evaluaciones() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{getTipoTestLabel(viewing.tipo_test)}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium capitalize">
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium capitalize">
                   {viewing.paciente_nombre} {viewing.paciente_apellido}
                 </p>
               </div>
-              <button onClick={() => setViewing(null)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
+              <button onClick={() => setViewing(null)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-white transition-colors shadow-sm">✕</button>
             </div>
 
             <div className="p-5 space-y-4 text-sm overflow-y-auto flex-1 custom-scrollbar">
               {viewing.fecha_administracion && (
                 <div className="flex items-center gap-3">
-                  <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+                  <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 dark:text-white">
                     <Calendar size={14} />
                   </div>
-                  <span className="font-medium text-slate-900 dark:text-slate-300">
+                  <span className="font-medium text-slate-900 dark:text-white">
                     {new Date((viewing.fecha_administracion || '').split('T')[0] + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
@@ -406,7 +406,7 @@ export default function Evaluaciones() {
 
               {viewing.puntaje_obtenido && (
                 <div className="flex items-center gap-3">
-                  <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">
+                  <div className="bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-900 dark:text-white">
                     <Star size={14} />
                   </div>
                   <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-200 dark:border-blue-500/30">
@@ -417,8 +417,8 @@ export default function Evaluaciones() {
 
               {viewing.resultados && (
                 <div>
-                  <p className="text-xs uppercase tracking-wider font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-2">Resultados</p>
-                  <p className="leading-relaxed whitespace-pre-wrap text-sm text-slate-900 dark:text-slate-400">
+                  <p className="text-xs uppercase tracking-wider font-bold text-slate-900 dark:text-white mb-2">Resultados</p>
+                  <p className="leading-relaxed whitespace-pre-wrap text-sm text-slate-900 dark:text-white">
                     {viewing.resultados}
                   </p>
                 </div>
@@ -426,8 +426,8 @@ export default function Evaluaciones() {
 
               {viewing.observaciones && (
                 <div className="bg-purple-100/50 dark:bg-[#0f1115] border border-purple-300 dark:border-[#262626] rounded-xl p-4">
-                  <p className="text-xs uppercase tracking-wider font-bold text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mb-2">Observaciones</p>
-                  <p className="leading-relaxed whitespace-pre-wrap text-sm text-slate-900 dark:text-slate-400">
+                  <p className="text-xs uppercase tracking-wider font-bold text-slate-900 dark:text-white mb-2">Observaciones</p>
+                  <p className="leading-relaxed whitespace-pre-wrap text-sm text-slate-900 dark:text-white">
                     {viewing.observaciones}
                   </p>
                 </div>
@@ -435,7 +435,7 @@ export default function Evaluaciones() {
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button onClick={() => setViewing(null)} className="px-6 py-3 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white">
+              <button onClick={() => setViewing(null)} className="px-6 py-3 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white">
                 Cerrar
               </button>
               <button onClick={() => { openEdit(viewing); setViewing(null); }} className="inline-flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-teal-500/20 transition-all hover:-translate-y-0.5">

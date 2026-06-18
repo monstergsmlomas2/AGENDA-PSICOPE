@@ -123,7 +123,7 @@ export default function Consultorios() {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-slate-900 dark:text-slate-200">
+      <div className="space-y-6 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between mb-5">
           <div className="space-y-3">
             <div className="h-8 w-56 bg-pink-200 dark:bg-[#262626] rounded-lg animate-pulse" />
@@ -157,7 +157,7 @@ export default function Consultorios() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200">
+    <div className="space-y-6 text-slate-900 dark:text-white">
 
       <ConfirmModal />
 
@@ -170,7 +170,7 @@ export default function Consultorios() {
             </span>
             Sedes y Consultorios
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-400 mt-2 font-medium">Administrá los espacios físicos donde atendés a tus pacientes.</p>
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">Administrá los espacios físicos donde atendés a tus pacientes.</p>
         </div>
         <button onClick={openCreate} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nueva Sede
@@ -208,7 +208,7 @@ export default function Consultorios() {
               </h3>
             </div>
 
-            <div className="space-y-3.5 text-sm text-slate-900 dark:text-slate-300 font-medium">
+            <div className="space-y-3.5 text-sm text-slate-900 dark:text-white font-medium">
               <div className="flex items-start gap-3">
                 <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-slate-900 dark:text-teal-400 mt-0.5"><MapPin size={16} /></div>
                 <span className="leading-relaxed">{c.direccion || 'Sin dirección registrada'}</span>
@@ -220,13 +220,13 @@ export default function Consultorios() {
                   <div className="space-y-0.5">
                     {c.monto_tratamiento != null && (
                       <p className="text-xs">
-                        <span className="text-slate-500 dark:text-slate-500">Tratamiento:</span>{' '}
+                        <span className="text-slate-900 dark:text-white">Tratamiento:</span>{' '}
                         <span className="font-bold text-slate-900 dark:text-white">${Number(c.monto_tratamiento).toLocaleString('es-AR')}</span>
                       </p>
                     )}
                     {c.monto_evaluacion != null && (
                       <p className="text-xs">
-                        <span className="text-slate-500 dark:text-slate-500">Evaluación:</span>{' '}
+                        <span className="text-slate-900 dark:text-white">Evaluación:</span>{' '}
                         <span className="font-bold text-slate-900 dark:text-white">${Number(c.monto_evaluacion).toLocaleString('es-AR')}</span>
                       </p>
                     )}
@@ -246,7 +246,7 @@ export default function Consultorios() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editingId ? 'Editar Sede' : 'Nueva Sede'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-400 font-medium">{editingId ? 'Modificá los datos del consultorio.' : 'Registrá un nuevo lugar de atención.'}</p>
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">{editingId ? 'Modificá los datos del consultorio.' : 'Registrá un nuevo lugar de atención.'}</p>
               </div>
               <button onClick={() => setShowModal(false)} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
@@ -255,7 +255,7 @@ export default function Consultorios() {
               <form id="consultorioForm" onSubmit={handleSubmit} className="space-y-5">
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">Nombre de la Sede / Consultorio *</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Nombre de la Sede / Consultorio *</label>
                   <input
                     type="text"
                     value={form.nombre}
@@ -275,7 +275,7 @@ export default function Consultorios() {
                 </div>
 
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">Dirección</label>
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Dirección</label>
                   <input
                     type="text"
                     value={form.direccion}
@@ -287,12 +287,12 @@ export default function Consultorios() {
 
                 <div className="border border-pink-200 dark:border-pink-500/20 bg-pink-50/50 dark:bg-pink-500/5 rounded-xl p-4 space-y-4">
                   <div>
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider mb-1">Tarifas del Profesional</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-500">Monto que percibís por paciente según tipo de atención. Podés dejarlo vacío y completarlo después.</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">Tarifas del Profesional</p>
+                    <p className="text-xs text-slate-900 dark:text-white">Monto que percibís por paciente según tipo de atención. Podés dejarlo vacío y completarlo después.</p>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">Tratamiento</label>
+                      <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tratamiento</label>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
                         <input
@@ -312,7 +312,7 @@ export default function Consultorios() {
                       )}
                     </div>
                     <div>
-                      <label className="block mb-2 font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider text-xs">Evaluación</label>
+                      <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Evaluación</label>
                       <div className="relative">
                         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
                         <input
@@ -338,7 +338,7 @@ export default function Consultorios() {
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => setShowModal(false)} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => setShowModal(false)} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="consultorioForm" loading={submitting}>
                 {editingId ? 'Guardar Cambios' : 'Guardar Sede'}
               </Button>

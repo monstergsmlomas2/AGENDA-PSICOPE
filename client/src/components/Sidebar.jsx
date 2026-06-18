@@ -59,7 +59,7 @@ function NavItem({ item, onClick }) {
         `group relative flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
           isActive
             ? 'bg-pink-300 text-black shadow-sm shadow-pink-300/30 dark:bg-teal-500/10 dark:text-teal-400 dark:shadow-teal-500/5'
-            : 'text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50'
+            : 'text-slate-900 hover:text-black hover:bg-pink-200 dark:text-white dark:hover:text-white dark:hover:bg-slate-800/50'
         }`
       }
     >
@@ -152,7 +152,7 @@ export default function Sidebar({ isOpen, onClose }) {
             onClick={() =>
               window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
             }
-            className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-800/50 mb-1"
+            className="group flex items-center gap-2 w-full px-3 py-1.5 rounded-lg text-sm font-semibold transition-all duration-200 text-slate-900 hover:text-black hover:bg-pink-200 dark:text-white dark:hover:text-white dark:hover:bg-slate-800/50 mb-1"
           >
             <span className="shrink-0 text-slate-900 group-hover:text-pink-600 dark:text-slate-500 dark:group-hover:text-slate-300">
               <Search size={16} />

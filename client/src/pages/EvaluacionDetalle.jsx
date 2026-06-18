@@ -71,7 +71,7 @@ export default function EvaluacionDetalle() {
 
   if (!evaluacion) {
     return (
-      <div className="text-center py-20 text-slate-900 dark:text-slate-400">
+      <div className="text-center py-20 text-slate-900 dark:text-white">
         <p className="text-lg font-bold">Evaluación no encontrada</p>
         <button onClick={() => navigate(`/pacientes/${id}`)} className="mt-4 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:underline font-medium">Volver al paciente</button>
       </div>
@@ -79,7 +79,7 @@ export default function EvaluacionDetalle() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in">
       <ConfirmModal />
 
       <button onClick={() => navigate(`/pacientes/${id}`)}

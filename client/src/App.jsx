@@ -39,7 +39,7 @@ function ProtectedRoute({ children }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-purple-200 dark:bg-[var(--bg-base)]">
-        <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+        <div className="flex items-center gap-3 text-slate-900 dark:text-white">
           <Loader2 size={24} className="animate-spin" />
           <span className="text-sm font-medium">Cargando…</span>
         </div>
@@ -96,7 +96,7 @@ function ProtectedLayout({ children }) {
   }, []);
 
   return (
-    <div className="flex h-[100dvh] w-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-slate-200">
+    <div className="flex h-[100dvh] w-screen font-sans overflow-hidden transition-colors duration-300 bg-purple-200 dark:bg-[var(--bg-base)] text-slate-900 dark:text-white">
       {/* Sidebar — oculto en móvil, visible en desktop */}
       <div className="hidden md:flex">
         <Sidebar />

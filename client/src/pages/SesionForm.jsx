@@ -138,7 +138,7 @@ export default function SesionForm() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in w-full">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in w-full">
       <button
         onClick={() => navigate(volverPath)}
         className="inline-flex items-center gap-2 text-sm font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors"
@@ -219,7 +219,7 @@ export default function SesionForm() {
           <div>
               <div className="flex items-center gap-2 mb-2">
                 <Sparkles size={14} className="text-pink-500 dark:text-teal-400" />
-                <label className="text-xs font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider">Resumen IA</label>
+                <label className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Resumen IA</label>
                 <button
                   type="button"
                   onClick={handleGenerarResumenIA}
@@ -240,7 +240,7 @@ export default function SesionForm() {
                 )}
               </div>
               {generandoResumen ? (
-                <div className="w-full rounded-xl p-3.5 border border-pink-300 dark:border-teal-500/30 bg-pink-50 dark:bg-teal-500/5 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <div className="w-full rounded-xl p-3.5 border border-pink-300 dark:border-teal-500/30 bg-pink-50 dark:bg-teal-500/5 flex items-center gap-2 text-sm text-slate-900 dark:text-white">
                   <Loader2 size={14} className="animate-spin text-pink-500 dark:text-teal-400" />
                   Generando resumen con IA...
                 </div>

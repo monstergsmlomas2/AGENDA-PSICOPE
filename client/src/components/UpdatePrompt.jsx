@@ -13,7 +13,7 @@ export default function UpdatePrompt() {
 
   return (
     <div className="fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 rounded-xl border border-pink-200 dark:border-[#333] bg-white dark:bg-slate-900 shadow-lg px-4 py-3 animate-fade-in">
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+      <span className="text-sm font-medium text-slate-900 dark:text-white">
         Hay una nueva versión disponible
       </span>
       <button

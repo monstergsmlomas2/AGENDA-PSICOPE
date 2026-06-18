@@ -132,7 +132,7 @@ export default function EvaluacionForm() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in w-full">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in w-full">
       <button
         onClick={() => navigate(volverPath)}
         className="inline-flex items-center gap-2 text-sm font-bold text-slate-900 hover:text-slate-700 dark:text-white transition-colors"

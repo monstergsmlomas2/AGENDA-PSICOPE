@@ -127,9 +127,9 @@ export default function GlobalSearch() {
 
         {/* ─── Shortcut hint ─── */}
         {!query.trim() && (
-          <div className="px-4 py-3 text-xs text-slate-400 text-center">
+          <div className="px-4 py-3 text-xs text-slate-900 dark:text-white text-center">
             Escribí para buscar.{' '}
-            <span className="font-semibold text-slate-500 dark:text-slate-500">
+            <span className="font-semibold text-slate-900 dark:text-white">
               {isMac ? '⌘K' : 'Ctrl+K'} para abrir / cerrar
             </span>
           </div>
@@ -139,7 +139,7 @@ export default function GlobalSearch() {
         {query.trim() && (
           <div className="max-h-80 overflow-y-auto p-2 space-y-1">
             {resultados.length === 0 ? (
-              <div className="text-center py-10 text-sm text-slate-500 dark:text-slate-400 font-medium">
+              <div className="text-center py-10 text-sm text-slate-900 dark:text-white font-medium">
                 Sin resultados para <span className="font-bold">'{query}'</span>
               </div>
             ) : (
@@ -157,7 +157,7 @@ export default function GlobalSearch() {
                     <p className="font-bold text-slate-900 dark:text-white text-sm capitalize truncate">
                       {p.apellido}, {p.nombre}
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                    <p className="text-xs text-slate-900 dark:text-white truncate">
                       {p.dni && <span>DNI: {p.dni}</span>}
                       {p.dni && p.obra_social_nombre && <span> • </span>}
                       {p.obra_social_nombre && <span>{p.obra_social_nombre}</span>}

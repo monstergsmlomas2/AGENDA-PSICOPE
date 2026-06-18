@@ -120,7 +120,7 @@ export default function ObrasSociales() {
 
   if (loading) {
     return (
-      <div className="space-y-6 text-slate-900 dark:text-slate-200">
+      <div className="space-y-6 text-slate-900 dark:text-white">
         <div className="flex items-center justify-between mb-5">
           <div className="space-y-3">
             <div className="h-8 w-56 bg-pink-200 dark:bg-[#262626] rounded-lg animate-pulse" />
@@ -151,7 +151,7 @@ export default function ObrasSociales() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200">
+    <div className="space-y-6 text-slate-900 dark:text-white">
 
       <ConfirmModal />
 
@@ -164,7 +164,7 @@ export default function ObrasSociales() {
             </span>
             Obras Sociales
           </h1>
-          <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 mt-2 font-medium">Administración de coberturas médicas y valores de sesión.</p>
+          <p className="text-slate-900 dark:text-white mt-2 font-medium">Administración de coberturas médicas y valores de sesión.</p>
         </div>
         <button onClick={() => { resetForm(); setShowModal(true); }} className="flex items-center gap-2 bg-teal-600 hover:bg-teal-500 text-white px-6 py-2.5 rounded-xl transition-all font-bold shadow-lg shadow-teal-500/20 hover:-translate-y-0.5">
           <Plus size={20} /> Nueva Obra Social
@@ -176,7 +176,7 @@ export default function ObrasSociales() {
         <div className="relative w-full max-w-md">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={20} />
           <input type="text" placeholder="Buscar por nombre o código..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-200 rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
+            className="w-full border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-xl py-3.5 pl-12 pr-4 text-sm outline-none focus:border-teal-500 dark:focus:border-teal-500 transition-shadow shadow-sm"
           />
         </div>
       </div>
@@ -197,13 +197,13 @@ export default function ObrasSociales() {
           <table className="w-full text-sm">
             <thead className="bg-purple-100/50 dark:bg-[#0f1115] border-b border-purple-300 dark:border-[#333]">
               <tr>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Nombre</th>
-                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Código</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Sesiones Autorizadas</th>
-                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Valor por Sesión</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Renovación</th>
-                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Pacientes</th>
-                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Acciones</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Nombre</th>
+                <th className="text-left px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Código</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Sesiones Autorizadas</th>
+                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Valor por Sesión</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Renovación</th>
+                <th className="text-center px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Pacientes</th>
+                <th className="text-right px-6 py-4 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-pink-100 dark:divide-[#262626]">
@@ -211,7 +211,7 @@ export default function ObrasSociales() {
                 <tr key={os.id} className={`stagger-${Math.min(idx + 1, 12)} animate-fade-in-up hover:bg-slate-50 dark:hover:bg-[#1a1c23] transition-colors`}>
                   <td className="px-6 py-5">
                     <div className="flex items-center gap-3">
-                      <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400">
+                      <div className="bg-teal-50 dark:bg-teal-500/10 p-2 rounded-lg text-teal-600 dark:text-teal-400">
                         <ShieldCheck size={18} />
                       </div>
                       <div>
@@ -221,7 +221,7 @@ export default function ObrasSociales() {
                     </div>
                   </td>
                   <td className="px-6 py-5">
-                    <span className="font-mono text-slate-900 dark:text-slate-400">{os.codigo || '—'}</span>
+                    <span className="font-mono text-slate-900 dark:text-white">{os.codigo || '—'}</span>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 px-3 py-1 rounded-lg font-bold text-xs">
@@ -234,7 +234,7 @@ export default function ObrasSociales() {
                     </span>
                   </td>
                   <td className="px-6 py-5 text-center">
-                    <span className="capitalize text-sm text-slate-900 dark:text-slate-400">{os.periodo_renovacion}</span>
+                    <span className="capitalize text-sm text-slate-900 dark:text-white">{os.periodo_renovacion}</span>
                   </td>
                   <td className="px-6 py-5 text-center">
                     <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg font-bold text-xs ${
@@ -270,7 +270,7 @@ export default function ObrasSociales() {
             <div className="border-b border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0">
               <div>
                 <h2 className="text-2xl font-black text-slate-900 dark:text-white">{editing ? 'Editar Obra Social' : 'Nueva Obra Social'}</h2>
-                <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-medium">{editing ? 'Actualizá los datos de la cobertura.' : 'Registrá una nueva obra social.'}</p>
+                <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">{editing ? 'Actualizá los datos de la cobertura.' : 'Registrá una nueva obra social.'}</p>
               </div>
               <button onClick={() => { setShowModal(false); resetForm(); }} className="p-2.5 rounded-xl border border-purple-300 dark:border-[#333] bg-white dark:bg-[#1a1c23] hover:bg-slate-50 dark:hover:bg-[#262626] text-slate-900 dark:text-slate-400 transition-colors shadow-sm">✕</button>
             </div>
@@ -279,7 +279,7 @@ export default function ObrasSociales() {
               <form id="osForm" onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div className="col-span-2">
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Nombre *</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Nombre *</label>
                     <input
                       type="text"
                       value={nombre}
@@ -298,25 +298,25 @@ export default function ObrasSociales() {
                     )}
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
                       <Hash size={12} className="inline mr-1" /> Código
                     </label>
                     <input type="text" value={codigo} onChange={(e)=>setCodigo(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Ej: OSDE-210" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
                       <Calendar size={12} className="inline mr-1" /> Sesiones Autorizadas
                     </label>
                     <input type="number" value={sesionesAutorizadas} onChange={(e)=>setSesionesAutorizadas(e.target.value)} min="1" className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
                       <DollarSign size={12} className="inline mr-1" /> Valor por Sesión
                     </label>
                     <input type="number" step="0.01" value={valorSesion} onChange={(e)=>setValorSesion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="0.00" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Período de Renovación</label>
+                    <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Período de Renovación</label>
                     <select value={periodoRenovacion} onChange={(e)=>setPeriodoRenovacion(e.target.value)} className="w-full rounded-xl p-3.5 outline-none transition-colors border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium">
                       <option value="mensual">Mensual</option>
                       <option value="trimestral">Trimestral</option>
@@ -325,7 +325,7 @@ export default function ObrasSociales() {
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-2 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">
+                  <label className="block mb-2 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">
                     <FileText size={12} className="inline mr-1" /> Observaciones
                   </label>
                   <textarea value={observaciones} onChange={(e)=>setObservaciones(e.target.value)} rows="3" className="w-full rounded-xl p-3.5 outline-none transition-colors resize-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-teal-500 dark:focus:border-teal-500 shadow-sm font-medium" placeholder="Notas adicionales..."></textarea>
@@ -334,7 +334,7 @@ export default function ObrasSociales() {
             </div>
 
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50">Cancelar</button>
+              <button type="button" onClick={() => { setShowModal(false); resetForm(); }} disabled={submitting} className="px-5 py-2 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white disabled:opacity-50">Cancelar</button>
               <Button type="submit" form="osForm" loading={submitting}>
                 {editing ? 'Guardar Cambios' : 'Crear Obra Social'}
               </Button>

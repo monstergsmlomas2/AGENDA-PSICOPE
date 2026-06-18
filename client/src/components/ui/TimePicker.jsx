@@ -117,7 +117,7 @@ export default function TimePicker({ value, onChange, className, placeholder }) 
             <Drum items={MINUTES} selected={minute} onSelect={setMinute} />
           </div>
           <div className="flex justify-end gap-2 mt-3">
-            <button type="button" onClick={() => setOpen(false)} className="px-4 py-1.5 text-sm text-slate-900 hover:text-slate-700 dark:text-gray-400 dark:hover:text-white transition-colors">Cancelar</button>
+            <button type="button" onClick={() => setOpen(false)} className="px-4 py-1.5 text-sm text-slate-900 hover:text-slate-700 dark:text-white dark:hover:text-white transition-colors">Cancelar</button>
             <button type="button" onClick={handleConfirm} className="px-4 py-1.5 text-sm bg-pink-500 hover:bg-pink-400 dark:bg-teal-500 dark:hover:bg-teal-400 text-white rounded-lg font-semibold transition-colors">Aceptar</button>
           </div>
         </div>,

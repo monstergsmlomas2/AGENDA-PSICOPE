@@ -36,12 +36,12 @@ export default function EmptyState({
         />
       )}
       {title && (
-        <p className="text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400 font-bold text-lg">
+        <p className="text-slate-900 dark:text-white font-bold text-lg">
           {title}
         </p>
       )}
       {description && (
-        <p className="text-pink-500 dark:text-slate-500 text-sm mt-1">
+        <p className="text-slate-900 dark:text-white text-sm mt-1">
           {description}
         </p>
       )}

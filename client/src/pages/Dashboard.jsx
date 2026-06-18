@@ -354,7 +354,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-4 text-slate-900 dark:text-slate-200">
+    <div className="space-y-4 text-slate-900 dark:text-white">
 
       {/* ────────── HEADER ────────── */}
       <HeaderSection />
@@ -495,7 +495,7 @@ export default function Dashboard() {
                       <h3 className="font-bold text-slate-900 dark:text-white capitalize">
                         {turno.paciente_apellido}, {turno.paciente_nombre}
                       </h3>
-                      <div className="flex items-center gap-1 mt-1 text-sm text-slate-900 dark:text-slate-400">
+                      <div className="flex items-center gap-1 mt-1 text-sm text-slate-900 dark:text-white">
                         <MapPin size={14} /> {turno.consultorio}
                       </div>
                     </div>
@@ -527,7 +527,7 @@ export default function Dashboard() {
                       <h3 className="font-bold text-slate-900 dark:text-white capitalize text-sm">
                         {turno.paciente_apellido}, {turno.paciente_nombre}
                       </h3>
-                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-900 dark:text-slate-400">
+                      <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-900 dark:text-white">
                         <span>{turno.hora?.slice(0, 5)} hs</span>
                         <span>•</span>
                         <span className="flex items-center gap-1"><MapPin size={11} /> {turno.consultorio}</span>
@@ -612,7 +612,7 @@ export default function Dashboard() {
                       <p className="font-bold text-slate-900 dark:text-white capitalize text-sm truncate">
                         {p.nombre} {p.apellido}
                       </p>
-                      <p className="text-xs text-slate-900 dark:text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-900 dark:text-white mt-0.5">
                         {dias !== null
                           ? `Última sesión: hace ${dias} ${dias === 1 ? 'día' : 'días'}`
                           : 'Sin sesiones registradas'}
@@ -656,7 +656,7 @@ function HeaderSection() {
         </span>
         Panel de Control
       </h1>
-      <p className="text-slate-900 dark:text-slate-400 mt-2 font-medium capitalize">{hoy}</p>
+      <p className="text-slate-900 dark:text-white mt-2 font-medium capitalize">{hoy}</p>
     </div>
   );
 }
@@ -677,13 +677,13 @@ function KpiCard({ icon, label, value, sub, change, iconClass, gradientTo, hover
       {/* Header: icono chico + label */}
       <div className="relative px-5 pt-5 pb-2 flex items-center gap-2">
         <span className={iconClass}>{icon}</span>
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wider">{label}</span>
       </div>
 
       {/* Valor principal */}
       <div className="relative px-5 pb-5">
         <p className="text-3xl font-bold text-slate-800 dark:text-white">{value}</p>
-        {sub && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{sub}</p>}
+        {sub && <p className="text-xs text-slate-900 dark:text-white mt-1 font-medium">{sub}</p>}
         {change && (
           <div className="flex items-center gap-1.5 mt-2">
             {change.up
@@ -703,10 +703,10 @@ function SummaryBox({ label, value, sub, change, icon, color, bg }) {
     <div className="p-4 rounded-xl bg-purple-100/50 dark:bg-slate-950/50 border border-purple-300 dark:border-slate-800">
       <div className="flex items-center gap-2 mb-2">
         <span className={`${bg} ${color} p-1.5 rounded-lg`}>{icon}</span>
-        <span className="text-xs font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider">{label}</span>
+        <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">{label}</span>
       </div>
       <p className="text-xl font-black text-slate-900 dark:text-white">{value}</p>
-      {sub && <p className="text-[11px] text-slate-900 dark:text-slate-500 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[11px] text-slate-900 dark:text-white mt-0.5">{sub}</p>}
       {change && (
         <div className="flex items-center gap-1 mt-1">
           {change.up ? <TrendingUp size={12} className="text-emerald-500" /> : <TrendingDown size={12} className="text-red-500" />}
@@ -739,7 +739,7 @@ function SectionCard({ title, icon, children, linkTo, linkLabel }) {
 function EmptySection({ message }) {
   return (
     <div className="text-center py-12 bg-purple-100/50 dark:bg-slate-950 rounded-xl border border-dashed border-purple-300 dark:border-slate-800">
-      <p className="text-slate-900 dark:text-slate-400 font-medium">{message}</p>
+      <p className="text-slate-900 dark:text-white font-medium">{message}</p>
     </div>
   );
 }

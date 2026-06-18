@@ -127,9 +127,9 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
             <div className="border-b border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 gap-2">
           <div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Editar Paciente</h2>
-            <p className="text-sm mt-1 text-slate-900 font-bold dark:text-slate-700 dark:text-slate-400">Datos de identificación y administrativos.</p>
+            <p className="text-sm mt-1 text-slate-900 dark:text-white font-medium">Datos de identificación y administrativos.</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-slate-400 transition-colors">✕</button>
+          <button onClick={onClose} className="p-2 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-white transition-colors">✕</button>
         </div>
         <div className="p-5 overflow-y-auto custom-scrollbar flex-1 text-sm">
           <form id="editPacienteForm" onSubmit={handleSubmit} className="space-y-8">
@@ -139,34 +139,34 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nombre Completo</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nombre Completo</label>
                   <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Apellidos</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Apellidos</label>
                   <input type="text" value={apellido} onChange={(e) => setApellido(e.target.value)} required
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Documento (DNI)</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Documento (DNI)</label>
                   <input type="text" value={dni} onChange={(e) => setDni(e.target.value)} required
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nacimiento</label>
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nacimiento</label>
                     <input type="date" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)}
                       className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                   </div>
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Edad</label>
-                    <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-slate-300 min-h-[46px]">
-                      {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-slate-600 text-xs">—</span>}
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Edad</label>
+                    <div className="w-full rounded-xl p-3 border border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-900 text-slate-900 dark:text-white min-h-[46px]">
+                      {calcularEdad(fechaNacimiento) !== null ? `${calcularEdad(fechaNacimiento)} años` : <span className="text-slate-900 dark:text-white text-xs">—</span>}
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Sexo</label>
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Sexo</label>
                     <select value={sexo} onChange={(e) => setSexo(e.target.value)}
                       className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500">
                       <option value="">Seleccionar</option>
@@ -177,7 +177,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Domicilio Actual</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Domicilio Actual</label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
                     <input type="text" value={domicilio} onChange={(e) => setDomicilio(e.target.value)}
@@ -186,7 +186,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Teléfono</label>
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Teléfono</label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
                       <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)}
@@ -194,7 +194,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                     </div>
                   </div>
                   <div>
-                    <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Email</label>
+                    <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Email</label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-500 dark:text-slate-500" size={18} />
                       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
@@ -203,7 +203,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Cobertura Médica</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Cobertura Médica</label>
                   <select value={obraSocial} onChange={(e) => setObraSocial(e.target.value)}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500">
                     <option value="">Particular</option>
@@ -214,32 +214,32 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Nº de Afiliado</label>
                   <input type="text" value={nroAfiliado} onChange={(e) => setNroAfiliado(e.target.value)} disabled={!obraSocial}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 disabled:opacity-50" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Inicio de Tratamiento</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Inicio de Tratamiento</label>
                   <input type="date" value={inicioSesiones} onChange={(e) => setInicioSesiones(e.target.value)}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                 </div>
                 <div className="md:col-span-2 mt-2">
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Motivo de Consulta Breve</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Motivo de Consulta Breve</label>
                   <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} rows="2"
                     className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Derivada por</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Derivada por</label>
                   <input type="text" value={derivadaPor} onChange={(e) => setDerivadaPor(e.target.value)}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div>
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">CUD</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">CUD</label>
                   <input type="text" value={cud} onChange={(e) => setCud(e.target.value)}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Diagnóstico</label>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-white">Diagnóstico</label>
                   <textarea value={diagnostico} onChange={(e) => setDiagnostico(e.target.value)} rows="2"
                     className="w-full rounded-xl p-3 outline-none transition-colors resize-none border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500" />
                 </div>
@@ -254,7 +254,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
         </div>
         <div className="border-t border-purple-300 dark:border-slate-800 bg-purple-100/50 dark:bg-slate-950 px-4 sm:px-6 py-4 flex justify-end gap-3 shrink-0">
           <button type="button" onClick={onClose}
-            className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-pink-200 dark:bg-slate-800"
+            className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:bg-pink-200 dark:bg-slate-800"
             disabled={submitting}>Cancelar</button>
           <Button type="submit" form="editPacienteForm" loading={submitting}>Guardar Cambios</Button>
         </div>
@@ -820,7 +820,7 @@ export default function PacienteDetalle() {
 
     return (
       <div className="mt-4 border-t border-dashed border-purple-200 dark:border-slate-700 pt-4 space-y-3">
-        <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+        <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
           <Paperclip size={13} /> Archivos en Drive — {seccion}
         </p>
 
@@ -852,7 +852,7 @@ export default function PacienteDetalle() {
             }}
           />
           {subiendo ? (
-            <div className="flex items-center justify-center gap-2 text-slate-400">
+            <div className="flex items-center justify-center gap-2 text-slate-900 dark:text-white">
               <Loader2 size={16} className="animate-spin" />
               <span className="text-xs">Subiendo a Drive...</span>
             </div>
@@ -860,7 +860,7 @@ export default function PacienteDetalle() {
             <div className="flex items-center gap-2 justify-center flex-wrap">
               <button
                 onClick={() => fileInputRefs.current[seccion]?.click()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-slate-700 dark:text-slate-300"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-700 rounded-xl hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors text-slate-900 dark:text-white"
               >
                 <Upload size={12} /> Subir archivo
               </button>
@@ -880,15 +880,15 @@ export default function PacienteDetalle() {
             {[1, 2].map(i => <div key={i} className="h-10 bg-purple-100 dark:bg-slate-800 rounded-xl animate-pulse" />)}
           </div>
         ) : archivosSeccion.length === 0 ? (
-          <p className="text-center text-xs text-slate-400 py-2">No hay archivos en esta sección.</p>
+          <p className="text-center text-xs text-slate-900 dark:text-white py-2">No hay archivos en esta sección.</p>
         ) : (
           <div className="space-y-1.5">
             {archivosSeccion.map(archivo => (
               <div key={archivo.id} className="bg-purple-50 dark:bg-slate-950/50 border border-purple-200 dark:border-slate-800 rounded-xl px-3 py-2 flex items-center gap-2">
                 <div className="shrink-0">{getFileIcon(archivo.mimeType)}</div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 truncate">{archivo.name}</p>
-                  <p className="text-xs text-slate-400">{formatFileSize(archivo.size)}{archivo.createdTime ? ` · ${new Date(archivo.createdTime).toLocaleDateString('es-AR')}` : ''}</p>
+                  <p className="text-xs font-semibold text-slate-900 dark:text-white truncate">{archivo.name}</p>
+                  <p className="text-xs text-slate-900 dark:text-white">{formatFileSize(archivo.size)}{archivo.createdTime ? ` · ${new Date(archivo.createdTime).toLocaleDateString('es-AR')}` : ''}</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <a href={archivo.webViewLink} target="_blank" rel="noopener noreferrer"
@@ -933,7 +933,7 @@ export default function PacienteDetalle() {
 
   return (
     <>
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in">
       <ConfirmModal />
 
       {/* Botón volver */}
@@ -964,7 +964,7 @@ export default function PacienteDetalle() {
                 {paciente.entrevista ? 'Activo' : 'Pendiente'}
               </span>
             </div>
-            <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-sm text-slate-900">
+            <div className="flex flex-wrap gap-x-6 gap-y-1 mt-2 text-sm text-slate-900 dark:text-white">
               <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-teal-400" /> {paciente.obra_social || 'Particular'}</span>
               <span className="flex items-center gap-1.5"><User size={14} className="text-teal-400" /> DNI: {paciente.dni}</span>
             </div>
@@ -972,7 +972,7 @@ export default function PacienteDetalle() {
           <div className="shrink-0 flex items-center gap-2">
             <button
               onClick={() => setShowEditPaciente(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-200 dark:bg-slate-800 hover:text-slate-700 dark:text-white transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-200 dark:bg-slate-800 hover:text-slate-700 transition-colors"
             >
               <Edit size={15} /> Editar datos
             </button>
@@ -981,7 +981,7 @@ export default function PacienteDetalle() {
               className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl transition-colors ${
                 tabActivo === 'turnos'
                   ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
-                  : 'border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-200 dark:bg-slate-800 hover:text-slate-700 dark:text-white'
+                  : 'border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-200 dark:bg-slate-800 hover:text-slate-700'
               }`}
             >
               <Calendar size={15} /> Turnos
@@ -1008,8 +1008,8 @@ export default function PacienteDetalle() {
             <div key={i} className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4 flex items-start gap-3">
               <div className="bg-pink-200 dark:bg-slate-800 p-2 rounded-lg text-teal-400 shrink-0"><Icon size={16} /></div>
               <div className="min-w-0">
-                <p className="text-xs font-bold text-slate-900 uppercase tracking-wider">{item.label}</p>
-                <p className="text-sm font-medium text-slate-900 dark:text-slate-200 mt-0.5 truncate">{item.value}</p>
+                <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">{item.label}</p>
+                <p className="text-sm font-medium text-slate-900 dark:text-white mt-0.5 truncate">{item.value}</p>
               </div>
             </div>
           );
@@ -1020,26 +1020,26 @@ export default function PacienteDetalle() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {paciente.motivo && (
           <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4">
-            <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Motivo de Consulta</p>
-            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.motivo}</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">Motivo de Consulta</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{paciente.motivo}</p>
           </div>
         )}
         {paciente.diagnostico && (
           <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4">
-            <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Diagnóstico</p>
-            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.diagnostico}</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">Diagnóstico</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{paciente.diagnostico}</p>
           </div>
         )}
         {paciente.cud && (
           <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4">
-            <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">CUD</p>
-            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.cud}</p>
+            <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">CUD</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{paciente.cud}</p>
           </div>
         )}
         {paciente.contacto_emergencia && (
           <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-4">
             <p className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Contacto de Emergencia</p>
-            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.contacto_emergencia}</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{paciente.contacto_emergencia}</p>
           </div>
         )}
       </div>
@@ -1115,7 +1115,7 @@ export default function PacienteDetalle() {
                     )}
                     <button
                       onClick={() => { setModoSeleccionTurnos(false); setTurnosSeleccionados(new Set()); }}
-                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
                     >
                       <X size={15} /> Cancelar
                     </button>
@@ -1123,7 +1123,7 @@ export default function PacienteDetalle() {
                 ) : (
                   <button
                     onClick={() => { setModoSeleccionTurnos(true); setShowNuevoTurno(false); }}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-xl border border-pink-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-100 dark:hover:bg-slate-800 transition-colors"
                   >
                     <CheckCircle size={15} /> Seleccionar
                   </button>
@@ -1177,7 +1177,7 @@ export default function PacienteDetalle() {
                 <input type="text" value={nuevoTurnoForm.observaciones} onChange={e => setNuevoTurnoForm(f => ({ ...f, observaciones: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-pink-300 dark:border-slate-700 bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-teal-500" placeholder="Opcional..." />
               </div>
               <div className="border border-teal-500/30 bg-teal-500/5 rounded-xl p-3 space-y-1.5">
-                <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
+                <label className="block font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Repetir semanalmente</label>
                 <p className="text-xs text-slate-900">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                 <select
                   value={recurrenciaTurno}
@@ -1192,7 +1192,7 @@ export default function PacienteDetalle() {
                 </select>
               </div>
               <div className="flex gap-2 justify-end pt-1">
-                <button type="button" onClick={() => { setShowNuevoTurno(false); setTurnoFormErrors({}); setRecurrenciaTurno(''); }} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-slate-300 hover:bg-pink-200 dark:bg-slate-800 transition-colors">Cancelar</button>
+                <button type="button" onClick={() => { setShowNuevoTurno(false); setTurnoFormErrors({}); setRecurrenciaTurno(''); }} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-white hover:bg-pink-200 dark:bg-slate-800 transition-colors">Cancelar</button>
                 <button type="button" onClick={handleCrearTurno} disabled={submittingTurno} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-slate-900 dark:text-white transition-colors disabled:opacity-60">
                   <Check size={14} /> Guardar Turno
                 </button>
@@ -1244,7 +1244,7 @@ export default function PacienteDetalle() {
                         <input type="text" value={turnoForm.observaciones || ''} onChange={e => setTurnoForm(f => ({ ...f, observaciones: e.target.value }))} className="w-full rounded-lg p-2.5 text-sm outline-none border border-pink-300 dark:border-slate-700 bg-pink-200 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-teal-500" />
                       </div>
                       <div className="border border-teal-500/30 bg-teal-500/5 rounded-xl p-3 space-y-1.5">
-                        <label className="block font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Repetir semanalmente</label>
+                        <label className="block font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Repetir semanalmente</label>
                         <p className="text-xs text-slate-900">Se creará un turno por semana, el mismo día y horario, durante el período elegido.</p>
                         <select
                           value={recurrenciaTurno}
@@ -1259,7 +1259,7 @@ export default function PacienteDetalle() {
                         </select>
                       </div>
                       <div className="flex gap-2 justify-end pt-1">
-                        <button type="button" onClick={() => { setEditandoTurno(null); setRecurrenciaTurno(''); }} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-slate-300 hover:bg-pink-200 dark:bg-slate-800 transition-colors">Cancelar</button>
+                        <button type="button" onClick={() => { setEditandoTurno(null); setRecurrenciaTurno(''); }} className="px-4 py-1.5 text-sm font-bold rounded-lg text-slate-900 dark:text-white hover:bg-pink-200 dark:bg-slate-800 transition-colors">Cancelar</button>
                         <button type="button" onClick={handleGuardarTurno} disabled={submittingTurno} className="flex items-center gap-1.5 px-4 py-1.5 text-sm font-bold rounded-lg bg-teal-600 hover:bg-teal-700 text-slate-900 dark:text-white transition-colors disabled:opacity-60">
                           <Check size={14} /> Guardar
                         </button>
@@ -1285,7 +1285,7 @@ export default function PacienteDetalle() {
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <Clock size={15} className="text-teal-400 shrink-0" />
                         <div className="min-w-0">
-                          <p className="font-semibold text-slate-900 dark:text-slate-200 text-sm">
+                          <p className="font-semibold text-slate-900 dark:text-white text-sm">
                             {new Date(t.fecha + 'T12:00:00').toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                             <span className="ml-2 text-teal-400 font-bold">{t.hora?.slice(0, 5)}</span>
                           </p>
@@ -1504,7 +1504,7 @@ export default function PacienteDetalle() {
               </h3>
               <div className="flex flex-wrap items-center gap-3">
                 {motivoPaciente && (
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={testsFiltroMotivo}
@@ -1515,7 +1515,7 @@ export default function PacienteDetalle() {
                   </label>
                 )}
                 {edadPaciente !== null && (
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={testsFiltroEdad}
@@ -1545,7 +1545,7 @@ export default function PacienteDetalle() {
             )}
 
             {(!categorias || categorias.length === 0) ? (
-              <div className="text-center py-10 text-slate-400 dark:text-slate-600">
+              <div className="text-center py-10 text-slate-900 dark:text-white">
                 <BookOpen size={36} className="mx-auto mb-2 opacity-40" />
                 <p className="font-medium text-sm">No hay tests que coincidan con los filtros aplicados.</p>
                 <p className="text-xs mt-1">Desactivá algún filtro para ver más opciones.</p>
@@ -1571,13 +1571,13 @@ export default function PacienteDetalle() {
                             <div className="flex items-start justify-between gap-2">
                               <div>
                                 <p className={`font-bold text-sm ${c.title}`}>{test.nombre}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">{test.nombreCompleto}</p>
+                                <p className="text-xs text-slate-900 dark:text-white leading-snug">{test.nombreCompleto}</p>
                               </div>
                               <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${c.badge}`}>
                                 {test.edadMax >= 80 ? `${test.edadMin}a+` : `${test.edadMin}–${test.edadMax}a`}
                               </span>
                             </div>
-                            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">{test.descripcion}</p>
+                            <p className="text-xs text-slate-900 dark:text-white leading-relaxed line-clamp-2">{test.descripcion}</p>
                             <p className={`text-xs font-semibold ${c.title} opacity-60`}>Ver detalle →</p>
                           </button>
                         ))}
@@ -1655,11 +1655,11 @@ export default function PacienteDetalle() {
           ) : viewingInforme ? (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <button onClick={() => { setViewingInforme(null); setVersionesInforme([]); setVersionPreview(null); }} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-slate-400 hover:text-pink-500 transition-colors">
+                <button onClick={() => { setViewingInforme(null); setVersionesInforme([]); setVersionPreview(null); }} className="inline-flex items-center gap-1.5 text-sm font-bold text-slate-900 dark:text-white hover:text-pink-500 transition-colors">
                   <ArrowLeft size={16} /> Volver a la lista
                 </button>
                 <div className="flex gap-2">
-                  <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-slate-300 hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
+                  <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
                     <Printer size={15} /> Imprimir
                   </button>
                   <button onClick={() => { setVersionPreview(null); setVersionesInforme([]); setViewingInforme(null); setEditandoInforme(viewingInforme.id); setInformeTipo(viewingInforme.tipo); setInformeFecha(viewingInforme.fecha); setInformeContenido(typeof viewingInforme.contenido === 'object' ? viewingInforme.contenido : {}); setInformeEstado(viewingInforme.estado); setShowInformeModal(true); }} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors">
@@ -1688,8 +1688,8 @@ export default function PacienteDetalle() {
                   if (!valor) return null;
                   return (
                     <div key={sec.key}>
-                      <p className="text-xs font-bold text-slate-900 dark:text-slate-400 uppercase tracking-wider mb-1">{sec.label}</p>
-                      <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{valor}</p>
+                      <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-1">{sec.label}</p>
+                      <p className="text-sm text-slate-900 dark:text-white leading-relaxed whitespace-pre-wrap">{valor}</p>
                     </div>
                   );
                 })}
@@ -1701,14 +1701,14 @@ export default function PacienteDetalle() {
               ) : versionesInforme.length > 0 && (
                 <div className="border border-purple-200 dark:border-slate-800 rounded-xl overflow-hidden">
                   <div className="px-4 py-2 bg-purple-50 dark:bg-slate-900 border-b border-purple-200 dark:border-slate-800">
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Historial de versiones</p>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Historial de versiones</p>
                   </div>
                   <div className="divide-y divide-purple-100 dark:divide-slate-800">
                     {versionesInforme.map(v => (
                       <div key={v.id} className={`flex items-center justify-between px-4 py-2.5 transition-colors ${versionPreview?.id === v.id ? 'bg-amber-50 dark:bg-amber-500/5' : 'hover:bg-purple-50 dark:hover:bg-slate-900'}`}>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 w-6">v{v.version}</span>
-                          <span className="text-xs text-slate-600 dark:text-slate-400">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white w-6">v{v.version}</span>
+                          <span className="text-xs text-slate-900 dark:text-white">
                             {new Date(v.guardado_en).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}
                             {' '}
                             {new Date(v.guardado_en).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
@@ -1717,7 +1717,7 @@ export default function PacienteDetalle() {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => setVersionPreview(versionPreview?.id === v.id ? null : v)}
-                            className="text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-purple-100 dark:hover:bg-slate-800 transition-colors"
+                            className="text-xs font-bold px-2.5 py-1 rounded-lg border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-purple-100 dark:hover:bg-slate-800 transition-colors"
                           >
                             {versionPreview?.id === v.id ? 'Cerrar' : 'Ver'}
                           </button>
@@ -1786,18 +1786,18 @@ export default function PacienteDetalle() {
             <div className="p-5 overflow-y-auto custom-scrollbar flex-1 text-sm space-y-5">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Tipo de Informe *</label>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Tipo de Informe *</label>
                   <select value={informeTipo} onChange={e => setInformeTipo(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500">
                     {tiposInforme.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Fecha *</label>
+                  <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Fecha *</label>
                   <input type="date" value={informeFecha} onChange={e => setInformeFecha(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                 </div>
               </div>
               <div>
-                <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">Estado</label>
+                <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">Estado</label>
                 <select value={informeEstado} onChange={e => setInformeEstado(e.target.value)} className="w-full rounded-xl p-3 outline-none border border-slate-300 dark:border-[#333] bg-white dark:bg-[#0f1115] text-slate-900 dark:text-white focus:border-pink-500">
                   <option value="borrador">Borrador</option>
                   <option value="finalizado">Finalizado</option>
@@ -1807,7 +1807,7 @@ export default function PacienteDetalle() {
                 <p className="font-bold text-pink-600 dark:text-pink-400 text-sm uppercase tracking-wider">Contenido del informe</p>
                 {(seccionesPorTipo[informeTipo] || []).map(sec => (
                   <div key={sec.key}>
-                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-slate-300 uppercase tracking-wider text-xs">{sec.label}</label>
+                    <label className="block mb-1.5 font-bold text-slate-900 dark:text-white uppercase tracking-wider text-xs">{sec.label}</label>
                     {sec.short ? (
                       <input
                         type="text"
@@ -1830,7 +1830,7 @@ export default function PacienteDetalle() {
               </div>
             </div>
             <div className="border-t border-purple-300 dark:border-[#262626] bg-purple-100/50 dark:bg-[#0f1115] px-6 py-4 flex justify-end gap-3 shrink-0">
-              <button onClick={() => setShowInformeModal(false)} disabled={submittingInforme} className="px-5 py-2 font-bold rounded-xl text-slate-900 hover:bg-slate-200 dark:text-slate-400 dark:hover:text-white disabled:opacity-50 transition-colors">Cancelar</button>
+              <button onClick={() => setShowInformeModal(false)} disabled={submittingInforme} className="px-5 py-2 font-bold rounded-xl text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:text-white disabled:opacity-50 transition-colors">Cancelar</button>
               <button
                 onClick={async () => {
                   setSubmittingInforme(true);
@@ -1873,7 +1873,7 @@ export default function PacienteDetalle() {
             </div>
             <div className="p-5 overflow-y-auto custom-scrollbar flex-1 space-y-4">
               <div>
-                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Fecha *</label>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-white">Fecha *</label>
                 <input
                   type="date"
                   value={turnoRapidoForm.fecha}
@@ -1882,7 +1882,7 @@ export default function PacienteDetalle() {
                 />
               </div>
               <div>
-                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Hora *</label>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-white">Hora *</label>
                 <TimePicker
                   value={turnoRapidoForm.hora}
                   onChange={val => setTurnoRapidoForm(f => ({ ...f, hora: val }))}
@@ -1890,7 +1890,7 @@ export default function PacienteDetalle() {
                 />
               </div>
               <div>
-                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Consultorio *</label>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-white">Consultorio *</label>
                 <select
                   value={turnoRapidoForm.consultorio}
                   onChange={e => setTurnoRapidoForm(f => ({ ...f, consultorio: e.target.value }))}
@@ -1901,7 +1901,7 @@ export default function PacienteDetalle() {
                 </select>
               </div>
               <div>
-                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-slate-300">Notas</label>
+                <label className="block mb-1 text-sm font-semibold text-slate-900 dark:text-white">Notas</label>
                 <textarea
                   value={turnoRapidoForm.notas}
                   onChange={e => setTurnoRapidoForm(f => ({ ...f, notas: e.target.value }))}
@@ -1916,7 +1916,7 @@ export default function PacienteDetalle() {
                 type="button"
                 onClick={() => setShowTurnoRapido(false)}
                 disabled={submittingTurnoRapido}
-                className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-slate-300 dark:hover:bg-pink-200 dark:bg-slate-800"
+                className="px-6 py-2.5 font-bold rounded-xl transition-colors text-slate-900 hover:bg-slate-200 dark:text-white dark:hover:bg-pink-200 dark:bg-slate-800"
               >
                 Cancelar
               </button>

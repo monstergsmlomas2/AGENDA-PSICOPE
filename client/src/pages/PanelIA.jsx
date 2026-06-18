@@ -37,7 +37,7 @@ function ResultadoBox({ texto, onCopy, copiado }) {
   if (!texto) return null;
   return (
     <div className="mt-4 relative">
-      <div className="bg-purple-50 dark:bg-slate-950 border border-pink-200 dark:border-slate-700 rounded-xl p-4 text-sm text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
+      <div className="bg-purple-50 dark:bg-slate-950 border border-pink-200 dark:border-slate-700 rounded-xl p-4 text-sm text-slate-900 dark:text-white whitespace-pre-wrap leading-relaxed max-h-[500px] overflow-y-auto">
         {texto}
       </div>
       <button
@@ -57,7 +57,7 @@ function PacienteSelect({ pacientes, value, onChange, placeholder = 'Seleccioná
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full appearance-none bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 pr-10"
+        className="w-full appearance-none bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 pr-10"
       >
         <option value="">{placeholder}</option>
         {pacientes.map(p => (
@@ -159,8 +159,8 @@ function AsistenteChat({ pacientes }) {
               <Bot size={24} className="text-pink-400 dark:text-teal-400" />
             </div>
             <div>
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Asistente clínico en psicopedagogía</p>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">Asistente clínico en psicopedagogía</p>
+              <p className="text-xs text-slate-900 dark:text-white mt-1">
                 {pacienteSeleccionado
                   ? `Consultá sobre ${pacienteSeleccionado.nombre}. El asistente conoce su historia.`
                   : 'Seleccioná un paciente para dar contexto, o hacé una consulta general.'}
@@ -184,7 +184,7 @@ function AsistenteChat({ pacientes }) {
             <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
               m.role === 'user'
                 ? 'bg-pink-500 dark:bg-teal-600 text-white rounded-tr-sm'
-                : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border border-pink-100 dark:border-slate-700 rounded-tl-sm'
+                : 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white border border-pink-100 dark:border-slate-700 rounded-tl-sm'
             }`}>
               {m.content}
             </div>
@@ -215,7 +215,7 @@ function AsistenteChat({ pacientes }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Escribí tu consulta clínica... (Enter para enviar, Shift+Enter para nueva línea)"
-          className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 resize-none placeholder-slate-400"
+          className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 resize-none placeholder-slate-400"
         />
         <button
           onClick={handleEnviar}
@@ -267,7 +267,7 @@ function ResumenSesion({ pacientes }) {
           placeholder="Nº de sesión (opcional)"
           value={nroSesion}
           onChange={e => setNroSesion(e.target.value)}
-          className="bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+          className="bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
         />
       </div>
       <textarea
@@ -275,7 +275,7 @@ function ResumenSesion({ pacientes }) {
         placeholder="Pegá o escribí las notas crudas de la sesión aquí... Podés escribir en forma libre, puntos, frases cortas, lo que sea."
         value={notas}
         onChange={e => setNotas(e.target.value)}
-        className="w-full bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 resize-none"
+        className="w-full bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 resize-none"
       />
       <button
         onClick={handleGenerar}
@@ -322,13 +322,13 @@ function GenerarInforme({ pacientes }) {
         <select
           value={tipoInforme}
           onChange={e => setTipoInforme(e.target.value)}
-          className="w-full appearance-none bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 pr-10"
+          className="w-full appearance-none bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500 pr-10"
         >
           {TIPOS_INFORME.map(t => <option key={t} value={t}>{t}</option>)}
         </select>
         <ChevronDown size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
       </div>
-      <p className="text-xs text-slate-500 dark:text-slate-400 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
+      <p className="text-xs text-slate-900 dark:text-white bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
         La IA usará las sesiones y evaluaciones registradas del paciente para generar el informe.
       </p>
       <button
@@ -371,7 +371,7 @@ function SugerirObjetivos({ pacientes }) {
   return (
     <div className="space-y-4">
       <PacienteSelect pacientes={pacientes} value={pacienteId} onChange={setPacienteId} />
-      <p className="text-xs text-slate-500 dark:text-slate-400 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
+      <p className="text-xs text-slate-900 dark:text-white bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
         La IA analizará la entrevista de admisión, el diagnóstico y las sesiones recientes para sugerir objetivos.
       </p>
       <button
@@ -412,7 +412,7 @@ function DetectarAbandonos() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500 dark:text-slate-400 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
+      <p className="text-xs text-slate-900 dark:text-white bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
         Analiza todos los pacientes con más de 15 días sin sesión y clasifica el riesgo de abandono con IA.
       </p>
       <button
@@ -423,7 +423,7 @@ function DetectarAbandonos() {
         {loading ? <><Loader2 size={15} className="animate-spin" /> Analizando...</> : <><UserX size={15} /> Analizar Ahora</>}
       </button>
       {analizado && pacientes.length === 0 && (
-        <div className="text-center py-8 text-slate-500 dark:text-slate-400 text-sm">
+        <div className="text-center py-8 text-slate-900 dark:text-white text-sm">
           ¡Excelente! No hay pacientes en riesgo de abandono.
         </div>
       )}
@@ -435,11 +435,11 @@ function DetectarAbandonos() {
                 {p.riesgo}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{p.apellido}, {p.nombre}</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">{p.apellido}, {p.nombre}</p>
+                <p className="text-xs text-slate-900 dark:text-white mt-0.5">
                   {p.ultima_sesion ? `Última sesión hace ${p.dias_desde_ultima_sesion} días` : 'Sin sesiones registradas'}
                 </p>
-                {p.motivo && <p className="text-xs text-slate-500 dark:text-slate-400">{p.motivo}</p>}
+                {p.motivo && <p className="text-xs text-slate-900 dark:text-white">{p.motivo}</p>}
                 {p.recomendacion && <p className="text-xs text-pink-600 dark:text-teal-400 mt-1 font-medium">{p.recomendacion}</p>}
               </div>
             </div>
@@ -478,7 +478,7 @@ function AlertasEstancamiento({ pacientes }) {
   return (
     <div className="space-y-4">
       <PacienteSelect pacientes={pacientes} value={pacienteId} onChange={setPacienteId} />
-      <p className="text-xs text-slate-500 dark:text-slate-400 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
+      <p className="text-xs text-slate-900 dark:text-white bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
         Requiere al menos 3 sesiones registradas para el análisis.
       </p>
       <button
@@ -500,13 +500,13 @@ function AlertasEstancamiento({ pacientes }) {
                 : 'Sin señales de estancamiento'}
             </span>
           </div>
-          <p className="text-sm text-slate-700 dark:text-slate-300">{resultado.mensaje}</p>
+          <p className="text-sm text-slate-900 dark:text-white">{resultado.mensaje}</p>
           {resultado.sugerencias?.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide mb-2">Sugerencias:</p>
+              <p className="text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wide mb-2">Sugerencias:</p>
               <ul className="space-y-1">
                 {resultado.sugerencias.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-slate-700 dark:text-slate-300">
+                  <li key={i} className="flex items-start gap-2 text-sm text-slate-900 dark:text-white">
                     <span className="shrink-0 w-4 h-4 rounded-full bg-pink-100 dark:bg-teal-900/30 text-pink-600 dark:text-teal-400 text-xs flex items-center justify-center font-bold mt-0.5">{i + 1}</span>
                     {s}
                   </li>
@@ -601,7 +601,7 @@ function TranscripcionAudio() {
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-slate-500 dark:text-slate-400 bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
+      <p className="text-xs text-slate-900 dark:text-white bg-purple-50 dark:bg-slate-950 border border-pink-100 dark:border-slate-800 rounded-lg px-3 py-2">
         Usa Groq Whisper (gratis). Soporta MP3, MP4, M4A, WAV, WebM. Máximo 25 MB por archivo.
       </p>
 
@@ -626,7 +626,7 @@ function TranscripcionAudio() {
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={loading || grabando}
-          className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-pink-300 dark:border-slate-700 hover:bg-pink-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
+          className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-pink-300 dark:border-slate-700 hover:bg-pink-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-60"
         >
           <Upload size={15} /> Subir archivo
         </button>
@@ -634,7 +634,7 @@ function TranscripcionAudio() {
       </div>
 
       {loading && (
-        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <div className="flex items-center gap-2 text-sm text-slate-900 dark:text-white">
           <Loader2 size={15} className="animate-spin" /> Transcribiendo audio...
         </div>
       )}
@@ -682,7 +682,7 @@ function BusquedaHistoria({ pacientes }) {
           value={consulta}
           onChange={e => setConsulta(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleBuscar()}
-          className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
+          className="flex-1 bg-white dark:bg-slate-900 border border-pink-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
         />
         <button
           onClick={handleBuscar}
@@ -735,8 +735,8 @@ export default function PanelIA() {
             <Sparkles size={20} className="text-white dark:text-teal-400" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900 dark:text-slate-100">Panel de IA</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Herramientas de inteligencia artificial para tu práctica clínica</p>
+            <h1 className="text-xl font-bold text-slate-900 dark:text-white">Panel de IA</h1>
+            <p className="text-sm text-slate-900 dark:text-white">Herramientas de inteligencia artificial para tu práctica clínica</p>
           </div>
         </div>
 
@@ -753,7 +753,7 @@ export default function PanelIA() {
                   className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all whitespace-nowrap shrink-0 ${
                     activo
                       ? 'bg-pink-100 dark:bg-teal-500/10 text-pink-700 dark:text-teal-400'
-                      : 'text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-200'
+                      : 'text-slate-900 dark:text-white hover:bg-pink-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                   }`}
                 >
                   <Icono size={15} className={activo ? 'text-pink-500 dark:text-teal-400' : 'text-slate-400'} />
@@ -773,8 +773,8 @@ export default function PanelIA() {
                   <herramienta.icon size={18} className="text-pink-500 dark:text-teal-400" />
                 </div>
                 <div>
-                  <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">{herramienta.label}</h2>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{herramienta.desc}</p>
+                  <h2 className="text-base font-bold text-slate-900 dark:text-white">{herramienta.label}</h2>
+                  <p className="text-sm text-slate-900 dark:text-white">{herramienta.desc}</p>
                 </div>
               </>
             )}

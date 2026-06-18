@@ -23,7 +23,7 @@ export default function ErrorState({
         </div>
       </div>
       <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
-      <p className="text-slate-900 dark:text-slate-400 max-w-md mx-auto mb-6 leading-relaxed">
+      <p className="text-slate-900 dark:text-white max-w-md mx-auto mb-6 leading-relaxed">
         {message}
       </p>
       {onRetry && (

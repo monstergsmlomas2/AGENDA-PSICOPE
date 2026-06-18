@@ -71,7 +71,7 @@ export default function ConfirmDialog({
           <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">{title}</h3>
 
           {/* Mensaje */}
-          <p className="text-slate-900 dark:text-slate-400 text-sm leading-relaxed mb-8 max-w-sm">
+          <p className="text-slate-900 dark:text-white text-sm leading-relaxed mb-8 max-w-sm">
             {message}
           </p>
 
@@ -80,7 +80,7 @@ export default function ConfirmDialog({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-5 py-3 font-bold rounded-xl transition-colors text-slate-900 hover:bg-white dark:text-slate-300 dark:hover:bg-slate-800 border border-purple-300 dark:border-[#333]"
+              className="flex-1 px-5 py-3 font-bold rounded-xl transition-colors text-slate-900 hover:bg-white dark:text-white dark:hover:bg-slate-800 border border-purple-300 dark:border-[#333]"
             >
               {cancelLabel}
             </button>

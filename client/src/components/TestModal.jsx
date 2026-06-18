@@ -48,7 +48,7 @@ export default function TestModal({ test, colorKey, onClose }) {
               {!modoCorreccion && <div className={`mt-0.5 w-3 h-3 rounded-full ${c.dot} shrink-0`} />}
               <div>
                 <h2 className={`text-xl font-black ${c.title}`}>{test.nombre}</h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5 leading-snug">
+                <p className="text-sm text-slate-900 dark:text-white mt-0.5 leading-snug">
                   {modoCorreccion ? 'Corrección automática de resultados' : test.nombreCompleto}
                 </p>
               </div>
@@ -83,9 +83,9 @@ export default function TestModal({ test, colorKey, onClose }) {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <BookOpen size={14} className="text-slate-400" />
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Descripción</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">Descripción</span>
             </div>
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{test.descripcion}</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{test.descripcion}</p>
           </div>
 
           {/* Corrección automática disponible */}
@@ -110,7 +110,7 @@ export default function TestModal({ test, colorKey, onClose }) {
           {/* Áreas que evalúa — keywords como chips */}
           {test.keywords && test.keywords.length > 0 && (
             <div>
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-2">Áreas relacionadas</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider block mb-2">Áreas relacionadas</span>
               <div className="flex flex-wrap gap-1.5">
                 {test.keywords.map(kw => (
                   <span key={kw} className={`text-xs px-2.5 py-1 rounded-full font-medium ${c.badge}`}>
@@ -129,7 +129,7 @@ export default function TestModal({ test, colorKey, onClose }) {
               href={test.urlDescarga}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold text-sm transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-semibold text-sm transition-colors"
             >
               <Download size={15} />
               Descargar materiales

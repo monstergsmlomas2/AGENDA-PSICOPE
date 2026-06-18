@@ -35,14 +35,14 @@ function TestCard({ test, colorKey, onOpen }) {
       <div className="flex items-start justify-between gap-2">
         <div>
           <p className={`font-bold text-sm ${c.title}`}>{test.nombre}</p>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">{test.nombreCompleto}</p>
+          <p className="text-xs text-slate-900 dark:text-white leading-snug">{test.nombreCompleto}</p>
         </div>
         <span className={`shrink-0 text-xs font-semibold px-2 py-1 rounded-full ${c.badge} flex items-center gap-1`}>
           <Users size={11} />
           {edadLabel(test.edadMin, test.edadMax)}
         </span>
       </div>
-      <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2">{test.descripcion}</p>
+      <p className="text-xs text-slate-900 dark:text-white leading-relaxed line-clamp-2">{test.descripcion}</p>
       <p className={`text-xs font-semibold ${c.title} opacity-70`}>Ver detalle →</p>
     </button>
   );
@@ -111,7 +111,7 @@ export default function HerramientasEstandarizadas() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Herramientas Estandarizadas</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{totalTests} tests psicopedagógicos en {CATEGORIAS_TESTS.length} categorías</p>
+            <p className="text-sm text-slate-900 dark:text-white">{totalTests} tests psicopedagógicos en {CATEGORIAS_TESTS.length} categorías</p>
           </div>
         </div>
         {/* Buscador */}
@@ -129,7 +129,7 @@ export default function HerramientasEstandarizadas() {
 
       {/* Categorías */}
       {categoriasFiltradas.length === 0 ? (
-        <div className="text-center py-16 text-slate-400 dark:text-slate-600">
+        <div className="text-center py-16 text-slate-900 dark:text-white">
           <BookOpen size={40} className="mx-auto mb-3 opacity-40" />
           <p className="font-medium">No se encontraron tests para "{query}"</p>
         </div>

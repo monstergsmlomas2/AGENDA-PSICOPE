@@ -80,9 +80,9 @@ function ToastItem({ id, variant, title, message, onRemove }) {
       <div className="flex items-start gap-3 p-4">
         <Icon size={20} className={`shrink-0 mt-0.5 ${iconColors[variant]}`} />
         <div className="flex-1 min-w-0">
-          <p className="font-bold text-sm text-slate-900 dark:text-slate-200 truncate">{title}</p>
+          <p className="font-bold text-sm text-slate-900 dark:text-white truncate">{title}</p>
           {message && (
-            <p className="text-xs text-slate-900 dark:text-slate-400 mt-0.5 leading-relaxed">{message}</p>
+            <p className="text-xs text-slate-900 dark:text-white mt-0.5 leading-relaxed">{message}</p>
           )}
         </div>
         <button

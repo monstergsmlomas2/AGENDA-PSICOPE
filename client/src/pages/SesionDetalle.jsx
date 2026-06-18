@@ -66,7 +66,7 @@ export default function SesionDetalle() {
 
   if (!sesion) {
     return (
-      <div className="text-center py-20 text-slate-900 dark:text-slate-400">
+      <div className="text-center py-20 text-slate-900 dark:text-white">
         <p className="text-lg font-bold">Sesión no encontrada</p>
         <button onClick={() => navigate(`/pacientes/${id}`)} className="mt-4 text-slate-900 font-bold dark:text-slate-600 dark:text-teal-400 hover:underline font-medium">
           Volver al paciente
@@ -76,7 +76,7 @@ export default function SesionDetalle() {
   }
 
   return (
-    <div className="space-y-6 text-slate-900 dark:text-slate-200 animate-fade-in w-full">
+    <div className="space-y-6 text-slate-900 dark:text-white animate-fade-in w-full">
       <ConfirmModal />
 
       <button
@@ -123,7 +123,7 @@ export default function SesionDetalle() {
           {sesion.actividades_realizadas ? (
             <div>
               <p className="text-xs uppercase tracking-wider font-bold text-slate-900 mb-3">Actividades Realizadas</p>
-              <p className="leading-relaxed text-slate-900 dark:text-slate-300 whitespace-pre-wrap">{sesion.actividades_realizadas}</p>
+              <p className="leading-relaxed text-slate-900 dark:text-white whitespace-pre-wrap">{sesion.actividades_realizadas}</p>
             </div>
           ) : (
             <p className="text-slate-900 italic">Sin actividades registradas.</p>
@@ -132,7 +132,7 @@ export default function SesionDetalle() {
           {sesion.observaciones && (
             <div className="border border-purple-300 dark:bg-slate-950 dark:border-slate-800 rounded-xl p-5">
               <p className="text-xs uppercase tracking-wider font-bold text-slate-900 mb-3">Observaciones / Evolución</p>
-              <p className="leading-relaxed text-slate-900 dark:text-slate-300 whitespace-pre-wrap">{sesion.observaciones}</p>
+              <p className="leading-relaxed text-slate-900 dark:text-white whitespace-pre-wrap">{sesion.observaciones}</p>
             </div>
           )}
         </div>

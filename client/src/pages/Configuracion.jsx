@@ -32,7 +32,7 @@ function SwitchToggle({ valor, onChange, label, descripcion }) {
     <div className="flex items-center justify-between gap-4">
       <div>
         <p className="text-sm font-semibold text-slate-900 dark:text-white">{label}</p>
-        {descripcion && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{descripcion}</p>}
+        {descripcion && <p className="text-xs text-slate-900 dark:text-white mt-0.5">{descripcion}</p>}
       </div>
       <button
         onClick={() => onChange(!valor)}
@@ -75,7 +75,7 @@ function SectionHeader({ icon: Icon, iconBg, iconColor, title, subtitle, action 
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-900 dark:text-white">{title}</h2>
-          {subtitle && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>}
+          {subtitle && <p className="text-xs text-slate-900 dark:text-white mt-0.5">{subtitle}</p>}
         </div>
       </div>
       {action}
@@ -86,7 +86,7 @@ function SectionHeader({ icon: Icon, iconBg, iconColor, title, subtitle, action 
 function Field({ label, value, onChange, placeholder, hint, type = 'text' }) {
   return (
     <div className="space-y-1.5">
-      <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">{label}</label>
+      <label className="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wide">{label}</label>
       <input
         type={type}
         value={value}
@@ -231,7 +231,7 @@ function TabPerfil({ toast }) {
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
                   {darkMode ? 'Modo Oscuro' : 'Modo Claro'}
                 </p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-900 dark:text-white mt-0.5">
                   {darkMode ? 'Fondo oscuro, ideal para poca luz' : 'Paleta rosa/lila, ideal para el día'}
                 </p>
               </div>
@@ -324,7 +324,7 @@ function TabRecordatorios({ toast }) {
               <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${notificacionesPacientes ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
             </button>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Recordatorio automático el día anterior al turno</p>
+          <p className="text-xs text-slate-900 dark:text-white">Recordatorio automático el día anterior al turno</p>
         </div>
 
         <div className={`p-4 rounded-2xl border-2 transition-colors ${notificacionesProfesional ? 'bg-blue-50 dark:bg-blue-500/5 border-blue-200 dark:border-blue-500/30' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700'}`}>
@@ -340,7 +340,7 @@ function TabRecordatorios({ toast }) {
               <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${notificacionesProfesional ? 'translate-x-[18px]' : 'translate-x-[2px]'}`} />
             </button>
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400">Resumen diario con todos los turnos del día siguiente</p>
+          <p className="text-xs text-slate-900 dark:text-white">Resumen diario con todos los turnos del día siguiente</p>
         </div>
       </div>
 
@@ -360,7 +360,7 @@ function TabRecordatorios({ toast }) {
               onChange={(val) => setHoraEnvio(val)}
               className="bg-purple-50 dark:bg-slate-800 border border-purple-200 dark:border-slate-600 text-slate-900 dark:text-white rounded-xl px-4 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-pink-400 dark:focus:ring-teal-500"
             />
-            <p className="text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-900 dark:text-white">
               Aplica a pacientes y al resumen profesional. Hora actual: <strong className="text-slate-900 dark:text-white">{horaEnvio} hs</strong>
             </p>
           </div>
@@ -780,7 +780,7 @@ function TabIntegraciones({ toast, confirm }) {
               {waQR ? (
                 <div className="flex flex-col sm:flex-row items-center gap-5">
                   <img src={waQR} alt="QR WhatsApp" className="w-48 h-48 rounded-2xl border-2 border-purple-200 dark:border-slate-700 shadow-sm" />
-                  <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
+                  <div className="space-y-3 text-sm text-slate-900 dark:text-white">
                     <p className="font-semibold text-slate-900 dark:text-white">Cómo vincular tu teléfono:</p>
                     <ol className="space-y-2 text-sm">
                       <li className="flex items-start gap-2"><span className="shrink-0 w-5 h-5 rounded-full bg-pink-100 dark:bg-teal-500/10 text-pink-600 dark:text-teal-400 text-xs font-bold flex items-center justify-center">1</span>Abrí WhatsApp en tu celular</li>
@@ -805,7 +805,7 @@ function TabIntegraciones({ toast, confirm }) {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">Sin conexión a WhatsApp</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conectá para activar el envío automático de recordatorios</p>
+                  <p className="text-xs text-slate-900 dark:text-white mt-0.5">Conectá para activar el envío automático de recordatorios</p>
                 </div>
               </div>
               <button
@@ -929,7 +929,7 @@ function TabIntegraciones({ toast, confirm }) {
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-slate-900 dark:text-white">Drive no conectado</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Conectá tu cuenta para adjuntar y acceder a archivos de pacientes</p>
+                    <p className="text-xs text-slate-900 dark:text-white mt-0.5">Conectá tu cuenta para adjuntar y acceder a archivos de pacientes</p>
                   </div>
                 </div>
                 <button
@@ -1031,7 +1031,7 @@ function TabIntegraciones({ toast, confirm }) {
               {/* Selector de calendario */}
               {calendarSyncEnabled && (
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide">
+                  <label className="block text-xs font-semibold text-slate-900 dark:text-white uppercase tracking-wide">
                     Calendario de destino
                   </label>
                   {calendarios.length > 0 ? (
@@ -1072,7 +1072,7 @@ function TabIntegraciones({ toast, confirm }) {
               {/* Info */}
               <div className="flex items-start gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
                 <AlertCircle size={13} className="text-slate-400 shrink-0 mt-0.5" />
-                <p className="text-xs text-slate-500 dark:text-slate-400">
+                <p className="text-xs text-slate-900 dark:text-white">
                   "Exportar turnos futuros" sincroniza todos los turnos pendientes y confirmados desde hoy que aún no tienen evento en Calendar. Los cambios futuros se sincronizan en tiempo real.
                 </p>
               </div>
@@ -1221,7 +1221,7 @@ export default function Configuracion() {
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-900 dark:text-white">Configuración</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Preferencias del sistema</p>
+          <p className="text-sm text-slate-900 dark:text-white">Preferencias del sistema</p>
         </div>
       </div>
 
@@ -1234,7 +1234,7 @@ export default function Configuracion() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold transition-all duration-150 ${
               tabActiva === id
                 ? 'bg-white dark:bg-slate-800 text-pink-600 dark:text-teal-400 shadow-sm'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-slate-800/50'
+                : 'text-slate-900 dark:text-white hover:text-slate-900 dark:hover:text-white hover:bg-white/60 dark:hover:bg-slate-800/50'
             }`}
           >
             <Icon size={14} />

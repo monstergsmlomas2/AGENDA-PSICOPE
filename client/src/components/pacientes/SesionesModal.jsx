@@ -57,7 +57,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
             <h2 className="text-2xl font-bold text-teal-600 dark:text-teal-400 flex items-center gap-3">
               <ClipboardList size={26} /> Sesiones
             </h2>
-            <p className="text-slate-900 dark:text-slate-400 text-sm mt-1">
+            <p className="text-slate-900 dark:text-white text-sm mt-1">
               Paciente: <span className="capitalize font-semibold">{paciente.nombre} {paciente.apellido}</span>
               <span className="ml-3 text-xs text-slate-900">({sesiones.length} sesión{sesiones.length !== 1 ? 'es' : ''})</span>
             </p>
@@ -71,7 +71,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
                 <Plus size={16} /> Nueva Sesión
               </button>
             )}
-            <button onClick={onClose} className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-slate-400 transition-colors shadow-sm">
+            <button onClick={onClose} className="p-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-white transition-colors shadow-sm">
               <X size={18} />
             </button>
           </div>
@@ -87,13 +87,13 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
                   <Calendar size={18} className="text-teal-600 dark:text-teal-400" />
                   Registrar nueva sesión
                 </h3>
-                <button onClick={resetForm} className="text-xs text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-medium transition-colors">
+                <button onClick={resetForm} className="text-xs text-slate-900 hover:text-slate-700 dark:text-white dark:hover:text-white font-medium transition-colors">
                   Cancelar
                 </button>
               </div>
               <form id="sesionForm" onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-slate-400 text-xs uppercase tracking-wider">Fecha de la Sesión</label>
+                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Fecha de la Sesión</label>
                   <input
                     type="date"
                     value={fechaSesion}
@@ -103,7 +103,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
                   />
                 </div>
                 <div>
-                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-slate-400 text-xs uppercase tracking-wider">Actividades Realizadas</label>
+                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Actividades Realizadas</label>
                   <textarea
                     value={actividades}
                     onChange={(e) => setActividades(e.target.value)}
@@ -114,7 +114,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
                   ></textarea>
                 </div>
                 <div>
-                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-slate-400 text-xs uppercase tracking-wider">Observaciones / Evolución</label>
+                  <label className="block mb-1.5 font-semibold text-slate-900 dark:text-white text-xs uppercase tracking-wider">Observaciones / Evolución</label>
                   <textarea
                     value={observaciones}
                     onChange={(e) => setObservaciones(e.target.value)}
@@ -157,7 +157,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
             ) : sesiones.length === 0 ? (
               <div className="text-center py-10 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
                 <ClipboardList size={32} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
-                <p className="text-slate-900 dark:text-slate-400 font-medium">No hay sesiones registradas aún.</p>
+                <p className="text-slate-900 dark:text-white font-medium">No hay sesiones registradas aún.</p>
                 {!showForm && (
                   <button
                     onClick={() => setShowForm(true)}
@@ -182,14 +182,14 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
                     <div className="space-y-2 text-sm">
                       {s.actividades_realizadas && (
                         <div>
-                          <span className="font-bold text-slate-900 dark:text-slate-300">Actividades:</span>
-                          <p className="text-slate-900 dark:text-slate-400 mt-0.5 leading-relaxed">{s.actividades_realizadas}</p>
+                          <span className="font-bold text-slate-900 dark:text-white">Actividades:</span>
+                          <p className="text-slate-900 dark:text-white mt-0.5 leading-relaxed">{s.actividades_realizadas}</p>
                         </div>
                       )}
                       {s.observaciones && (
                         <div>
-                          <span className="font-bold text-slate-900 dark:text-slate-300">Observaciones:</span>
-                          <p className="text-slate-900 dark:text-slate-400 mt-0.5 leading-relaxed">{s.observaciones}</p>
+                          <span className="font-bold text-slate-900 dark:text-white">Observaciones:</span>
+                          <p className="text-slate-900 dark:text-white mt-0.5 leading-relaxed">{s.observaciones}</p>
                         </div>
                       )}
                     </div>
@@ -203,7 +203,7 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
 
         {/* Footer */}
         <div className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 px-8 py-4 flex justify-end shrink-0">
-          <button onClick={onClose} className="px-6 py-2.5 text-slate-900 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white font-bold transition-colors rounded-xl">
+          <button onClick={onClose} className="px-6 py-2.5 text-slate-900 hover:text-slate-700 dark:text-white dark:hover:text-white font-bold transition-colors rounded-xl">
             Cerrar
           </button>
         </div>

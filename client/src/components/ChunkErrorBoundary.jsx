@@ -37,7 +37,7 @@ export default class ChunkErrorBoundary extends Component {
     if (this.state.hasError) {
       return (
         <div className="flex items-center justify-center h-full min-h-[300px]">
-          <div className="flex items-center gap-3 text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-3 text-slate-900 dark:text-white">
             <Loader2 size={24} className="animate-spin" />
             <span className="text-sm font-medium">Actualizando…</span>
           </div>

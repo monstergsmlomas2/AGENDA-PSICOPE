@@ -58,7 +58,7 @@ function ModalOpinionClinica({ datos, onClose }) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">Opinión clínica</p>
             {datos.pacienteNombre && (
-              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{datos.pacienteNombre}</p>
+              <p className="text-xs text-slate-900 dark:text-white truncate">{datos.pacienteNombre}</p>
             )}
           </div>
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-pink-50 dark:hover:bg-slate-800 text-slate-400 transition-colors">
@@ -66,14 +66,14 @@ function ModalOpinionClinica({ datos, onClose }) {
           </button>
         </div>
         <div className="px-5 py-4 max-h-[60vh] overflow-y-auto">
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-3 italic">"{datos.consulta}"</p>
+          <p className="text-xs text-slate-900 dark:text-white mb-3 italic">"{datos.consulta}"</p>
           {cargando ? (
-            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+            <div className="flex items-center gap-2 text-slate-900 dark:text-white">
               <Loader2 size={16} className="animate-spin" />
               <span className="text-sm">Analizando historia clínica…</span>
             </div>
           ) : (
-            <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">{respuesta}</p>
+            <p className="text-sm text-slate-900 dark:text-white whitespace-pre-wrap leading-relaxed">{respuesta}</p>
           )}
         </div>
         <div className="px-5 py-3 border-t border-pink-100 dark:border-slate-700 flex justify-end">
@@ -113,25 +113,25 @@ function ModalConfirmacion({ datos, onConfirmar, onCancelar }) {
             <p className="text-sm font-semibold text-slate-900 dark:text-white">Asistente entendió:</p>
           </div>
           <div className="bg-pink-50 dark:bg-slate-800 rounded-xl p-3 mb-4">
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Lo que dijiste:</p>
-            <p className="text-sm text-slate-700 dark:text-slate-300 italic">"{transcripcion}"</p>
+            <p className="text-xs text-slate-900 dark:text-white mb-1">Lo que dijiste:</p>
+            <p className="text-sm text-slate-900 dark:text-white italic">"{transcripcion}"</p>
           </div>
           {intencion === 'no_entendido' ? (
-            <p className="text-sm text-slate-500 dark:text-slate-400 text-center py-2">No pude entender la acción. ¿Podés repetirlo?</p>
+            <p className="text-sm text-slate-900 dark:text-white text-center py-2">No pude entender la acción. ¿Podés repetirlo?</p>
           ) : intencion === 'respuesta_directa' ? (
-            <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{p.respuesta}</p>
+            <p className="text-sm text-slate-900 dark:text-white leading-relaxed">{p.respuesta}</p>
           ) : (
             <div className="bg-purple-50 dark:bg-teal-500/5 rounded-xl p-3">
-              <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Acción:</p>
-              <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{descripcion}</p>
+              <p className="text-xs text-slate-900 dark:text-white mb-1">Acción:</p>
+              <p className="text-sm font-medium text-slate-900 dark:text-white">{descripcion}</p>
               {intencion === 'recordatorio_whatsapp' && p.mensaje && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 italic">"{p.mensaje}"</p>
+                <p className="text-xs text-slate-900 dark:text-white mt-1 italic">"{p.mensaje}"</p>
               )}
             </div>
           )}
         </div>
         <div className="flex gap-2 px-5 py-4">
-          <button onClick={onCancelar} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
+          <button onClick={onCancelar} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
             Cancelar
           </button>
           {intencion !== 'no_entendido' && intencion !== 'respuesta_directa' && (
@@ -187,12 +187,12 @@ function ModalTexto({ onEnviar, onClose }) {
             onKeyDown={onKeyDown}
             rows={3}
             placeholder="Ej: Recordame llamar a la mamá de Juan mañana a las 10"
-            className="w-full resize-none rounded-xl border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500"
+            className="w-full resize-none rounded-xl border border-pink-300 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2.5 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 dark:focus:ring-teal-500"
           />
-          <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Ctrl + Enter para enviar</p>
+          <p className="text-[11px] text-slate-900 dark:text-white mt-1.5">Ctrl + Enter para enviar</p>
         </div>
         <div className="flex gap-2 px-5 py-4 border-t border-pink-100 dark:border-slate-700">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl text-sm font-medium border border-pink-200 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-pink-50 dark:hover:bg-slate-800 transition-colors">
             Cancelar
           </button>
           <button
@@ -643,7 +643,7 @@ export default function AsistenteVoz({ onTranscripcionSesion }) {
             <div className="absolute w-64 h-64 rounded-full bg-blue-400/5 dark:bg-purple-400/5 animate-ping" style={{ animationDuration: '2.5s' }} />
             <img src="/icon-192x192.png" alt="Psicope" className="w-24 h-24 rounded-2xl shadow-2xl shadow-pink-500/30 dark:shadow-teal-400/30 animate-pulse" style={{ animationDuration: '2s' }} />
             <div className="absolute -bottom-10 whitespace-nowrap">
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
+              <span className="text-sm font-medium text-slate-900 dark:text-white">
                 {estado === 'grabando' ? 'Escuchando…' : 'Procesando…'}
               </span>
             </div>

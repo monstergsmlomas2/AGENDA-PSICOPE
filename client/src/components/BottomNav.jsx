@@ -28,7 +28,7 @@ export default function BottomNav() {
             `flex flex-col items-center justify-center shrink-0 w-16 gap-0.5 transition-colors duration-200 ${
               isActive
                 ? 'text-pink-600 dark:text-teal-400'
-                : 'text-slate-900 dark:text-slate-300'
+                : 'text-slate-900 dark:text-white'
             }`
           }
         >
