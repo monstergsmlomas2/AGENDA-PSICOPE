@@ -64,6 +64,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
   const [diagnostico, setDiagnostico] = useState("");
   const [cud, setCud] = useState("");
   const [contactoEmergencia, setContactoEmergencia] = useState("");
+  const [inicioSesiones, setInicioSesiones] = useState("");
   const [obrasSocialesList, setObrasSocialesList] = useState([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -86,6 +87,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
       setDiagnostico(paciente.diagnostico || "");
       setCud(paciente.cud || "");
       setContactoEmergencia(paciente.contacto_emergencia || "");
+      setInicioSesiones(paciente.inicio_sesiones ? paciente.inicio_sesiones.split('T')[0] : "");
     }
   }, [show, paciente]);
 
@@ -105,6 +107,7 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
         fecha_nacimiento: fechaNacimiento, sexo, domicilio, email,
         obra_social: obraSocial, nro_afiliado: nroAfiliado,
         contacto_emergencia: contactoEmergencia,
+        inicio_sesiones: inicioSesiones || null,
       });
       toast.success('Paciente actualizado', 'Los datos se guardaron correctamente.');
       onClose();
@@ -214,6 +217,11 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
                   <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Nº de Afiliado</label>
                   <input type="text" value={nroAfiliado} onChange={(e) => setNroAfiliado(e.target.value)} disabled={!obraSocial}
                     className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 disabled:opacity-50" />
+                </div>
+                <div>
+                  <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Inicio de Tratamiento</label>
+                  <input type="date" value={inicioSesiones} onChange={(e) => setInicioSesiones(e.target.value)}
+                    className="w-full rounded-xl p-3 outline-none transition-colors border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:border-teal-500 dark:[&::-webkit-calendar-picker-indicator]:invert" />
                 </div>
                 <div className="md:col-span-2 mt-2">
                   <label className="block mb-2 font-semibold text-slate-900 dark:text-slate-400">Motivo de Consulta Breve</label>
@@ -991,6 +999,9 @@ export default function PacienteDetalle() {
           { icon: Calendar, label: 'Fecha de Nacimiento', value: paciente.fecha_nacimiento ? `${new Date(paciente.fecha_nacimiento.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}${calcularEdad(paciente.fecha_nacimiento) !== null ? ` (${calcularEdad(paciente.fecha_nacimiento)} años)` : ''}` : '—' },
           { icon: User, label: 'Sexo', value: paciente.sexo === 'M' ? 'Masculino' : paciente.sexo === 'F' ? 'Femenino' : paciente.sexo === 'X' ? 'Otro' : '—' },
           { icon: ShieldCheck, label: 'Nº de Afiliado', value: paciente.nro_afiliado || '—' },
+          { icon: CalendarPlus, label: 'Inicio de Tratamiento', value: paciente.inicio_sesiones ? new Date(paciente.inicio_sesiones.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—' },
+          { icon: BookOpen, label: 'Escuela', value: paciente.entrevista?.escuela || '—' },
+          { icon: ClipboardList, label: 'Año Escolar', value: paciente.entrevista?.cursa || '—' },
         ].map((item, i) => {
           const Icon = item.icon;
           return (
