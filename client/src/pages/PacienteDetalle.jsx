@@ -1024,6 +1024,18 @@ export default function PacienteDetalle() {
             <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.motivo}</p>
           </div>
         )}
+        {paciente.diagnostico && (
+          <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4">
+            <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Diagnóstico</p>
+            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.diagnostico}</p>
+          </div>
+        )}
+        {paciente.cud && (
+          <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-xl p-4">
+            <p className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">CUD</p>
+            <p className="text-sm text-slate-900 dark:text-slate-300 leading-relaxed">{paciente.cud}</p>
+          </div>
+        )}
         {paciente.contacto_emergencia && (
           <div className="bg-red-950/20 border border-red-900/30 rounded-xl p-4">
             <p className="text-xs font-bold text-red-400 uppercase tracking-wider mb-1">Contacto de Emergencia</p>
