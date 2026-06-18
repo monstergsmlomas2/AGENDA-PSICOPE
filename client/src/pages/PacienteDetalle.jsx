@@ -998,7 +998,7 @@ export default function PacienteDetalle() {
           { icon: MapPin, label: 'Domicilio', value: paciente.domicilio || '—' },
           { icon: Calendar, label: 'Fecha de Nacimiento', value: paciente.fecha_nacimiento ? `${new Date(paciente.fecha_nacimiento.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' })}${calcularEdad(paciente.fecha_nacimiento) !== null ? ` (${calcularEdad(paciente.fecha_nacimiento)} años)` : ''}` : '—' },
           { icon: User, label: 'Sexo', value: paciente.sexo === 'M' ? 'Masculino' : paciente.sexo === 'F' ? 'Femenino' : paciente.sexo === 'X' ? 'Otro' : '—' },
-          { icon: ShieldCheck, label: 'Nº de Afiliado', value: paciente.nro_afiliado || '—' },
+          { icon: ShieldCheck, label: 'Obra Social', value: paciente.obra_social || 'Particular' },
           { icon: CalendarPlus, label: 'Inicio de Tratamiento', value: paciente.inicio_sesiones ? new Date(paciente.inicio_sesiones.slice(0, 10) + 'T12:00:00Z').toLocaleDateString('es-AR', { day: '2-digit', month: 'long', year: 'numeric' }) : '—' },
           { icon: BookOpen, label: 'Escuela', value: paciente.entrevista?.escuela || '—' },
           { icon: ClipboardList, label: 'Año Escolar', value: paciente.entrevista?.cursa || '—' },

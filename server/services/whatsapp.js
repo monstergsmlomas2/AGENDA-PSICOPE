@@ -31,7 +31,6 @@ const intentionalDisconnects = new Map(); // usuarioId -> boolean (no reconectar
 const mensajesProcesadosPorUsuario = new Map(); // usuarioId -> Set<msgId> (anti-duplicado/anti-loop)
 const sessionsLoadedFromDB = new Set(); // usuarioId — sesión ya cargada de DB una vez (evita re-sync)
 const reconnectAttemptsMap = new Map(); // usuarioId -> contador backoff exponencial
-const savingSessionFlags = new Map(); // usuarioId -> boolean (anti-concurrencia al guardar)
 
 let WA_VERSION_CACHE = null; // versión de protocolo Baileys — global al proceso, no depende del usuario
 const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
@@ -163,45 +162,6 @@ async function loadSessionFromDB(usuarioId) {
   }
 }
 
-async function saveSessionToDB(usuarioId) {
-  // Evitar guardados concurrentes: el DELETE de uno podría pisar archivos
-  // que otro acaba de escribir (creds.update se dispara en ráfaga).
-  if (savingSessionFlags.get(usuarioId)) return;
-  savingSessionFlags.set(usuarioId, true);
-  const authPath = getAuthPath(usuarioId);
-  try {
-    if (!fs.existsSync(authPath)) return;
-    const files = fs.readdirSync(authPath).filter((f) => f.endsWith(".json"));
-
-    for (const filename of files) {
-      const content = fs.readFileSync(path.join(authPath, filename), "utf-8");
-      await pool.query(
-        `
-        INSERT INTO whatsapp_session (usuario_id, filename, file_data) VALUES ($1, $2, $3)
-        ON CONFLICT (usuario_id, filename) DO UPDATE SET file_data = $3, updated_at = NOW()
-      `,
-        [usuarioId, filename, content]
-      );
-    }
-
-    // Sincronizar borrados: eliminar de la DB las pre-keys/archivos que Baileys
-    // ya consumió y borró del disco. Sin esto, la DB acumula claves obsoletas que
-    // corrompen la sesión tras cada reinicio (Bad MAC / Invalid PreKey ID).
-    if (files.length > 0) {
-      await pool.query(
-        `DELETE FROM whatsapp_session WHERE usuario_id = $1 AND filename <> ALL($2::text[])`,
-        [usuarioId, files]
-      );
-    }
-
-    console.log(`[WhatsApp:${usuarioId}] Sesión guardada en DB (${files.length} archivos, huérfanos limpiados).`);
-  } catch (err) {
-    console.error(`[WhatsApp:${usuarioId}] Error guardando sesión:`, err.message);
-  } finally {
-    savingSessionFlags.set(usuarioId, false);
-  }
-}
-
 function resetAuthFolder(usuarioId) {
   const authPath = getAuthPath(usuarioId);
   try {
@@ -330,10 +290,13 @@ export async function iniciarWhatsApp(usuarioId) {
 
   sockets.set(usuarioId, sock);
 
-  // Guardar TODOS los archivos de auth en DB al actualizarse las credenciales
+  // El volumen persistente de Fly.io (agenda_data) ya sobrevive a los deploys,
+  // así que ya no hace falta copiar los ~2390 archivos de sesión a Supabase en
+  // cada actualización de credenciales — ese loop secuencial saturaba el pool
+  // de conexiones y el CPU compartido, y volvía lenta toda la app (timeouts en
+  // analytics/turnos/drive). saveCreds() solo escribe en disco, que ya persiste.
   sock.ev.on("creds.update", async () => {
     await saveCreds();
-    await saveSessionToDB(usuarioId);
   });
 
   sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
@@ -401,9 +364,6 @@ export async function iniciarWhatsApp(usuarioId) {
       qrCodes.set(usuarioId, null);
       reconnectAttemptsMap.set(usuarioId, 0); // conexión OK → resetear backoff
       console.log(`[WhatsApp:${usuarioId}] Conectado correctamente.`);
-
-      // Guardar sesión completa inmediatamente al conectar
-      await saveSessionToDB(usuarioId);
 
       // Baileys envía un presence "unavailable" al abrir la conexión (lo hace
       // internamente porque markOnlineOnConnect=false). Eso es lo correcto: marca
