@@ -16,7 +16,7 @@ const camposComunes = {
   motivo: z.string().trim().max(2000).nullable().optional(),
   derivada_por: z.string().trim().max(200).nullable().optional(),
   diagnostico: z.string().trim().max(2000).nullable().optional(),
-  cud: z.boolean().nullable().optional(),
+  cud: z.string().trim().max(100).nullable().optional(),
   contacto_emergencia: z.string().trim().max(200).nullable().optional(),
   inicio_sesiones: fechaISO.nullable().optional(),
 };
