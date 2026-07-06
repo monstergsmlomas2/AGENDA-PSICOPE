@@ -31,9 +31,12 @@ const intentionalDisconnects = new Map(); // usuarioId -> boolean (no reconectar
 const mensajesProcesadosPorUsuario = new Map(); // usuarioId -> Set<msgId> (anti-duplicado/anti-loop)
 const sessionsLoadedFromDB = new Set(); // usuarioId — sesión ya cargada de DB una vez (evita re-sync)
 const reconnectAttemptsMap = new Map(); // usuarioId -> contador backoff exponencial
+const awaitingQrScan = new Set(); // usuarios esperando escaneo QR manual — no reconectar automáticamente
+const blockReconnectUntil = new Map(); // usuarioId -> timestamp — cooldown post-440
 
 let WA_VERSION_CACHE = null; // versión de protocolo Baileys — global al proceso, no depende del usuario
 const MAX_RECONNECT_DELAY_MS = 60000; // tope del backoff (1 min)
+const MAX_RECONNECT_ATTEMPTS = 8; // después de 8 fallos, parar y esperar reconexión manual
 
 // ── Número central del sistema (Agenda Psicope) ───────────────────────────────
 // Sesión de WhatsApp ESPECIAL, propiedad de los desarrolladores, NO de un usuario.
@@ -180,6 +183,13 @@ export async function iniciarWhatsApp(usuarioId) {
     return;
   }
 
+  // Cooldown post-440 (connectionReplaced)
+  const blockedUntil = blockReconnectUntil.get(usuarioId) || 0;
+  if (Date.now() < blockedUntil) {
+    console.log(`[WhatsApp:${usuarioId}] Cooldown 440 activo — ignorando reconexión.`);
+    return;
+  }
+
   // Evitar múltiples reconexiones simultáneas para este usuario
   if (reconnectingFlags.get(usuarioId)) {
     console.log(`[WhatsApp:${usuarioId}] Ya hay una reconexión en curso, ignorando.`);
@@ -254,12 +264,18 @@ export async function iniciarWhatsApp(usuarioId) {
 
   const connectingTimer = setTimeout(() => {
     if (getStatus(usuarioId) === "CONNECTING") {
-      console.log(`[WhatsApp:${usuarioId}] Timeout esperando QR — reintentando...`);
+      console.log(`[WhatsApp:${usuarioId}] Timeout CONNECTING — marcando disconnected (no reintenta).`);
       statuses.set(usuarioId, "DISCONNECTED");
       qrCodes.set(usuarioId, null);
-      iniciarWhatsApp(usuarioId);
+      connectingTimers.delete(usuarioId);
+      const oldSock2 = sockets.get(usuarioId);
+      if (oldSock2) {
+        try { oldSock2.ev.removeAllListeners(); } catch (_) {}
+        try { oldSock2.end(undefined); } catch (_) {}
+        sockets.delete(usuarioId);
+      }
     }
-  }, 60000);
+  }, 90000);
   connectingTimers.set(usuarioId, connectingTimer);
 
   const sock = makeWASocket({
@@ -302,9 +318,26 @@ export async function iniciarWhatsApp(usuarioId) {
   sock.ev.on("connection.update", async ({ connection, lastDisconnect, qr }) => {
     if (qr) {
       try {
+        const credsPath = path.join(getAuthPath(usuarioId), "creds.json");
+        let hasValidCreds = false;
+        try {
+          if (fs.existsSync(credsPath)) {
+            const c = fs.readFileSync(credsPath, "utf-8");
+            const p = JSON.parse(c);
+            hasValidCreds = c.length > 50 && p?.noiseKey && p?.signedIdentityKey;
+          }
+        } catch (_) {}
+
+        if (!hasValidCreds) {
+          awaitingQrScan.add(usuarioId);
+          console.log(`[WhatsApp:${usuarioId}] QR generado (sin creds previas, requiere escaneo manual).`);
+        } else {
+          console.log(`[WhatsApp:${usuarioId}] QR transitorio — creds válidas en disco, NO se borran.`);
+        }
+
+        reconnectAttemptsMap.set(usuarioId, 0);
         qrCodes.set(usuarioId, await QRCode.toDataURL(qr));
         statuses.set(usuarioId, "QR_READY");
-        console.log(`[WhatsApp:${usuarioId}] QR generado — escaneá desde Configuración.`);
       } catch {
         statuses.set(usuarioId, "ERROR");
       }
@@ -336,20 +369,38 @@ export async function iniciarWhatsApp(usuarioId) {
         console.log(`[WhatsApp:${usuarioId}] Sesión cerrada — limpiando credenciales.`);
         resetAuthFolder(usuarioId);
         await pool.query(`DELETE FROM whatsapp_session WHERE usuario_id = $1`, [usuarioId]);
-        sessionsLoadedFromDB.delete(usuarioId); // forzar recarga limpia en el próximo arranque
+        sessionsLoadedFromDB.delete(usuarioId);
         reconnectAttemptsMap.set(usuarioId, 0);
+        awaitingQrScan.delete(usuarioId);
         setTimeout(() => iniciarWhatsApp(usuarioId), 3000);
       } else if (restartRequired) {
-        // Normal post-QR scan: WA pide restart para activar la sesión nueva.
-        // No cuenta como fallo: reconexión inmediata sin penalizar el backoff.
         console.log(`[WhatsApp:${usuarioId}] Restart post-QR — reconectando en 2s.`);
+        awaitingQrScan.delete(usuarioId);
+        reconnectAttemptsMap.set(usuarioId, 0);
         setTimeout(() => iniciarWhatsApp(usuarioId), 2000);
+      } else if (code === DisconnectReason.connectionReplaced) {
+        const cooldown = 120000;
+        console.log(`[WhatsApp:${usuarioId}] Sesión reemplazada (440). Cooldown ${cooldown / 1000}s — NO reintento automático.`);
+        blockReconnectUntil.set(usuarioId, Date.now() + cooldown);
+        reconnectAttemptsMap.set(usuarioId, 0);
       } else {
-        // Fallos de red (timedOut, connectionLost, etc.): backoff exponencial.
-        // Reconectar en ráfaga multiplica los handshakes y, con ellos, los avisos
-        // de sincronización en el móvil. Espaciamos cada reintento.
-        const delay = nextReconnectDelay(usuarioId);
-        console.log(`[WhatsApp:${usuarioId}] Desconexión por red — reintento ${reconnectAttemptsMap.get(usuarioId)} en ${delay / 1000}s.`);
+        // Si está esperando escaneo QR manual, no reconectar automáticamente
+        if (awaitingQrScan.has(usuarioId)) {
+          console.log(`[WhatsApp:${usuarioId}] Esperando escaneo QR manual — no reconecta automáticamente.`);
+          reconnectAttemptsMap.set(usuarioId, 0);
+          return;
+        }
+
+        const attempt = (reconnectAttemptsMap.get(usuarioId) || 0) + 1;
+        reconnectAttemptsMap.set(usuarioId, attempt);
+
+        if (attempt > MAX_RECONNECT_ATTEMPTS) {
+          console.log(`[WhatsApp:${usuarioId}] ${MAX_RECONNECT_ATTEMPTS} intentos fallidos — deteniendo reconexión automática. Reconectar manualmente desde Configuración.`);
+          return;
+        }
+
+        const delay = Math.min(15000 * Math.pow(2, attempt - 1), MAX_RECONNECT_DELAY_MS);
+        console.log(`[WhatsApp:${usuarioId}] Desconexión por red — reintento ${attempt}/${MAX_RECONNECT_ATTEMPTS} en ${delay / 1000}s.`);
         setTimeout(() => iniciarWhatsApp(usuarioId), delay);
       }
     }
@@ -362,7 +413,9 @@ export async function iniciarWhatsApp(usuarioId) {
       }
       statuses.set(usuarioId, "CONNECTED");
       qrCodes.set(usuarioId, null);
-      reconnectAttemptsMap.set(usuarioId, 0); // conexión OK → resetear backoff
+      reconnectAttemptsMap.set(usuarioId, 0);
+      awaitingQrScan.delete(usuarioId);
+      blockReconnectUntil.delete(usuarioId);
       console.log(`[WhatsApp:${usuarioId}] Conectado correctamente.`);
 
       // Baileys envía un presence "unavailable" al abrir la conexión (lo hace
@@ -543,7 +596,10 @@ export async function cerrarSesionWhatsApp(usuarioId) {
   }
   statuses.set(usuarioId, "DISCONNECTED");
   qrCodes.set(usuarioId, null);
-  sessionsLoadedFromDB.delete(usuarioId); // próxima conexión recarga limpio desde cero (nuevo QR)
+  sessionsLoadedFromDB.delete(usuarioId);
+  awaitingQrScan.delete(usuarioId);
+  blockReconnectUntil.delete(usuarioId);
+  reconnectAttemptsMap.set(usuarioId, 0);
   // intentionalDisconnect se resetea en el handler de connection.update, no aquí,
   // porque el evento loggedOut llega de forma asíncrona después de que esta función termina
   console.log(`[WhatsApp:${usuarioId}] Sesión cerrada.`);
