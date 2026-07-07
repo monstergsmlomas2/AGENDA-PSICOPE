@@ -38,6 +38,7 @@ async function llamarDeepSeekConMensajes(messages, opciones = {}) {
   if (!apiKey) throw new Error('DEEPSEEK_API_KEY no configurada en .env');
 
   const response = await fetch(DEEPSEEK_API_URL, {
+    signal: AbortSignal.timeout(opciones.timeoutMs ?? 30000),
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -69,6 +70,7 @@ async function llamarDeepSeek(systemPrompt, userPrompt, opciones = {}) {
   if (!apiKey) throw new Error('DEEPSEEK_API_KEY no configurada en .env');
 
   const response = await fetch(DEEPSEEK_API_URL, {
+    signal: AbortSignal.timeout(opciones.timeoutMs ?? 30000),
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
