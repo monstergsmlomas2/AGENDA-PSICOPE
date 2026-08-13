@@ -11,7 +11,6 @@ export function generarReciboPDF(pago, config) {
   const pageWidth = doc.internal.pageSize.getWidth();
   const marginLeft = 20;
   const marginRight = 20;
-  const contentWidth = pageWidth - marginLeft - marginRight;
   let y = 20;
 
   // ─── Funciones auxiliares ───

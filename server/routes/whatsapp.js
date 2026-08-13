@@ -10,6 +10,16 @@ import { ejecutarJob } from "../jobs/recordatorios.js";
 
 const router = Router();
 
+router.use((req, res, next) => {
+  if (process.env.WHATSAPP_PAUSADO === "true") {
+    if (req.path === "/status") {
+      return res.json({ estado: "PAUSADO", mensaje: "WhatsApp está pausado para ahorrar recursos." });
+    }
+    return res.status(503).json({ error: "WhatsApp está pausado. Quitá WHATSAPP_PAUSADO para reactivar." });
+  }
+  next();
+});
+
 // GET /whatsapp/status — estado de conexión (de la sesión del usuario autenticado)
 router.get("/status", (req, res) => {
   res.json(getEstadoWhatsApp(req.userId));

@@ -131,8 +131,22 @@ ${notasCrudas}`;
 // ─────────────────────────────────────────────
 // 2. GENERAR INFORME PSICOPEDAGÓGICO
 // ─────────────────────────────────────────────
-export async function generarInforme({ paciente, sesiones, evaluaciones, tipoInforme }) {
-  const system = `Sos un psicopedagogo experto redactando informes clínicos formales.
+export async function generarInforme({ paciente, sesiones, evaluaciones, tipoInforme, secciones }) {
+  // Cuando el cliente manda las secciones del tipo de informe, se pide la
+  // respuesta como JSON con esas claves exactas. Así el informe generado entra
+  // directo en el formulario de la ficha del paciente, sin repartir texto a mano.
+  const modoEstructurado = Array.isArray(secciones) && secciones.length > 0;
+
+  const system = modoEstructurado
+    ? `Sos un psicopedagogo experto redactando informes clínicos formales.
+Respondé SIEMPRE en español rioplatense, con lenguaje técnico pero accesible.
+El informe debe ser profesional, objetivo y basado ÚNICAMENTE en la información provista.
+No inventes datos que no estén en la información dada: si para una sección no hay
+información suficiente, dejá esa sección como cadena vacía.
+Devolvé ÚNICAMENTE un objeto JSON estricto, sin markdown y sin texto adicional,
+con EXACTAMENTE estas claves:
+${secciones.map(s => `- "${s.key}": ${s.label}`).join('\n')}`
+    : `Sos un psicopedagogo experto redactando informes clínicos formales.
 Respondé SIEMPRE en español rioplatense, con lenguaje técnico pero accesible.
 El informe debe ser profesional, objetivo y basado en la información provista.
 Usá estructura con párrafos claros. No inventes datos que no estén en la información dada.`;
@@ -165,9 +179,28 @@ ${sesionesTexto}
 EVALUACIONES REALIZADAS:
 ${evaluacionesTexto}
 
-Redactá un informe psicopedagógico completo basado en esta información. Incluí: introducción, motivo de consulta, metodología de trabajo, evolución clínica observada, conclusiones y recomendaciones.`;
+${modoEstructurado
+  ? 'Completá cada sección del informe con la información disponible. Devolvé solo el JSON.'
+  : 'Redactá un informe psicopedagógico completo basado en esta información. Incluí: introducción, motivo de consulta, metodología de trabajo, evolución clínica observada, conclusiones y recomendaciones.'}`;
 
-  return llamarDeepSeek(system, user, { temperature: 0.3, maxTokens: 2000 });
+  const respuesta = await llamarDeepSeek(system, user, { temperature: 0.3, maxTokens: 2000 });
+
+  if (!modoEstructurado) return { texto: respuesta, secciones: null };
+
+  // Si el modelo no devuelve JSON válido, se entrega la prosa tal cual y el
+  // cliente la vuelca en la primera sección para que el profesional la reparta.
+  try {
+    const limpio = respuesta.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const parsed = JSON.parse(limpio);
+    const contenido = {};
+    for (const s of secciones) {
+      if (typeof parsed[s.key] === 'string') contenido[s.key] = parsed[s.key].trim();
+    }
+    return { texto: respuesta, secciones: contenido };
+  } catch {
+    console.warn('[IA] generar-informe: el modelo no devolvió JSON válido, se usa la prosa cruda');
+    return { texto: respuesta, secciones: null };
+  }
 }
 
 // ─────────────────────────────────────────────

@@ -37,23 +37,30 @@ async function apiFetch(endpoint, options = {}) {
  */
 async function handleResponse(res) {
   if (!res.ok) {
-    // Intentar obtener detalle del error del servidor
+    // Intentar obtener detalle del error del servidor. Se lee el body UNA sola vez
+    // como texto y luego se intenta parsear como JSON (el body no se puede releer).
     let errorMsg = `HTTP ${res.status}`;
     try {
-      const errorBody = await res.json();
-      if (errorBody.error) errorMsg = errorBody.error;
-      if (errorBody.code === 'TOKEN_EXPIRED') {
-        // Token expirado — redirigir a login
-        localStorage.removeItem('psicope_token');
-        window.location.href = '/login';
-        throw new Error('Sesión expirada. Ingresá de nuevo');
+      const text = await res.text();
+      if (text) {
+        errorMsg = text;
+        try {
+          const errorBody = JSON.parse(text);
+          if (errorBody.error) errorMsg = errorBody.error;
+          if (errorBody.code === 'TOKEN_EXPIRED') {
+            // Token expirado — redirigir a login
+            localStorage.removeItem('psicope_token');
+            window.location.href = '/login';
+            throw new Error('Sesión expirada. Ingresá de nuevo');
+          }
+        } catch (e) {
+          if (e.message === 'Sesión expirada. Ingresá de nuevo') throw e;
+          // No era JSON — se usa el texto crudo
+        }
       }
     } catch (e) {
       if (e.message === 'Sesión expirada. Ingresá de nuevo') throw e;
-      try {
-        const text = await res.text();
-        if (text) errorMsg = text;
-      } catch { /* ignorar */ }
+      /* body ilegible — se usa el HTTP status */
     }
     throw new Error(errorMsg);
   }

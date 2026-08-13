@@ -99,6 +99,10 @@ router.post("/", validateBody(crearTurnoSchema), async (req, res) => {
   const tipoTurnoFinal = tipo_turno || 'tratamiento';
 
   try {
+    const dueño = await pool.query("SELECT id FROM pacientes WHERE id = $1 AND usuario_id = $2", [paciente_id, req.userId]);
+    if (dueño.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     const result = await pool.query(
       `WITH nuevo_turno AS (
          INSERT INTO turnos (paciente_id, fecha, hora, consultorio, observaciones, estado, tipo_cobertura, tipo_turno, importe_custom, usuario_id)
@@ -217,6 +221,10 @@ router.put("/:id", validateBody(actualizarTurnoSchema), async (req, res) => {
 // 6. ENVIAR RECORDATORIO WHATSAPP
 router.post("/:id/recordatorio", async (req, res) => {
   const { id } = req.params;
+
+  if (process.env.WHATSAPP_PAUSADO === "true") {
+    return res.status(503).json({ error: "WhatsApp está pausado. Quitá WHATSAPP_PAUSADO para reactivar." });
+  }
 
   try {
     const result = await pool.query(`

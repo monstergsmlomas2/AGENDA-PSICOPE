@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Calendar as CalendarIcon, List, Plus, Clock, MapPin, Trash2, ChevronLeft, ChevronRight, User, ShieldCheck, Check, X, AlertTriangle, Bell, AlertCircle, Pencil, MessageCircle } from 'lucide-react';
 import { getTurnos, crearTurno, eliminarTurno, actualizarEstadoTurno, actualizarTurno, enviarRecordatorio } from '../services/turnosService';
 import { getPacientes, crearPaciente } from '../services/pacientesService';
@@ -34,7 +34,6 @@ const estadoConfig = {
 
 export default function Turnos() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [turnos, setTurnos] = useState([]);
   const [pacientes, setPacientes] = useState([]);
   const [consultorios, setConsultorios] = useState([]);
@@ -57,7 +56,8 @@ export default function Turnos() {
 
   // Estados del Popover
   const [popoverTurno, setPopoverTurno] = useState(null);
-  const [popoverPos, setPopoverPos] = useState({ x: 0, y: 0 });
+  // Solo se usa el setter: la posición la maneja el CSS del popover
+  const [, setPopoverPos] = useState({ x: 0, y: 0 });
 
   // Panel lateral de turnos del día
   const [diaPanel, setDiaPanel] = useState(null); // { fecha, turnos }
@@ -322,13 +322,6 @@ export default function Turnos() {
       newDate.setDate(newDate.getDate() + direction);
     }
     setCurrentDate(newDate);
-  };
-
-  const handleDayClick = (day) => {
-    const mes = String(currentDate.getMonth() + 1).padStart(2, '0');
-    const dia = String(day).padStart(2, '0');
-    setFecha(`${currentDate.getFullYear()}-${mes}-${dia}`);
-    setShowModal(true);
   };
 
   const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -850,7 +843,6 @@ export default function Turnos() {
             </div>
           )}
           {turnosFiltrados.map((t, idx) => {
-            const estConfig = estadoConfig[t.estado] || estadoConfig.pendiente;
             return (
               <div key={t.id} className={`stagger-${Math.min(idx + 1, 12)} animate-fade-in-up bg-white dark:bg-[#141414] border border-purple-300 dark:border-[#262626] rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-pink-500/50 dark:hover:border-teal-500/50 shadow-sm group relative ${
                 t.estado === 'inasistencia' ? 'opacity-60' : ''

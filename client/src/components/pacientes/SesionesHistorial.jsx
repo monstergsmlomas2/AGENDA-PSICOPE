@@ -1,6 +1,6 @@
 ﻿import { ClipboardList } from 'lucide-react';
 
-export default function SesionesHistorial({ sesiones, loading, onNuevaSesion }) {
+export default function SesionesHistorial({ sesiones, onNuevaSesion }) {
   if (sesiones.length === 0) {
     return (
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl shadow-sm">

@@ -60,12 +60,14 @@ export default function TimePicker({ value, onChange, className, placeholder }) 
   const [hour, setHour] = useState(currentHour);
   const [minute, setMinute] = useState(currentMinute);
 
-  useEffect(() => {
-    const parts = (value || '00:00').substring(0, 5).split(':');
-    setHour(parts[0].padStart(2, '0'));
-    const rawMin = parseInt(parts[1] || '0');
-    setMinute(String(Math.round(rawMin / 5) * 5 % 60).padStart(2, '0'));
-  }, [value]);
+  // Re-sincronizar cuando la prop `value` cambia desde afuera (patrón
+  // "derived state from props" recomendado por React, sin useEffect).
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setHour(currentHour);
+    setMinute(currentMinute);
+  }
 
   useEffect(() => {
     const handleClick = (e) => {

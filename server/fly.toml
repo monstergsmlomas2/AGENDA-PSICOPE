@@ -11,6 +11,10 @@ primary_region = 'iad'
 [env]
   NODE_ENV = 'production'
   PORT = '3000'
+  # WhatsApp apagado: no arranca Baileys ni los cron jobs de recordatorios, y
+  # las rutas /whatsapp responden 503. Para reactivarlo, poner 'false' (o borrar
+  # esta línea) y volver a desplegar.
+  WHATSAPP_PAUSADO = 'true'
 
 [http_service]
   internal_port = 3000

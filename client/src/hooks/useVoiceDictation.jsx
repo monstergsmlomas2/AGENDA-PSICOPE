@@ -128,7 +128,6 @@ export function useVoiceDictation(onTranscripcion) {
   }
 
   function VoiceButton({ className = '' }) {
-    const idle = estado === 'idle';
     const grabando = estado === 'grabando';
     const procesando = estado === 'procesando';
 

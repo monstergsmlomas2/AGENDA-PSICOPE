@@ -79,6 +79,10 @@ router.post("/", async (req, res) => {
   }
 
   try {
+    const dueño = await pool.query("SELECT id FROM pacientes WHERE id = $1 AND usuario_id = $2", [paciente_id, req.userId]);
+    if (dueño.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     const result = await pool.query(
       `INSERT INTO informes (paciente_id, tipo, fecha, contenido, estado, fecha_vencimiento, usuario_id)
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,

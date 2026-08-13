@@ -22,7 +22,7 @@ import {
 } from '../services/configuracionService';
 import TimePicker from '../components/ui/TimePicker';
 import Skeleton from '../components/ui/Skeleton';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../context/useAuth.js';
 import supabase from '../services/authService.js';
 
 // ─── Primitivos UI ──────────────────────────────────────────────────────────
@@ -634,7 +634,7 @@ function TabIntegraciones({ toast, confirm }) {
         const qrData = await qrRes.json();
         setWaEstado(statusData.estado || 'DISCONNECTED');
         setWaQR(qrData.qr || null);
-      } catch {}
+      } catch { /* polling: ignorar errores transitorios */ }
     }, 3000);
     return () => clearInterval(interval);
   }, [waEstado]);

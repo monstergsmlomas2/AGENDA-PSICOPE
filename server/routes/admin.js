@@ -1,4 +1,5 @@
 import express from "express";
+import crypto from "crypto";
 import {
   iniciarWhatsApp,
   cerrarSesionWhatsApp,
@@ -24,8 +25,12 @@ function requireAdminSecret(req, res, next) {
   if (!secret) {
     return res.status(503).json({ error: "ADMIN_SECRET no configurado en el servidor." });
   }
-  const provided = req.headers["x-admin-secret"] || req.query.secret;
-  if (provided !== secret) {
+  // Se acepta ?secret= solo para abrir el QR desde el navegador. Comparación en
+  // tiempo constante para no filtrar el secreto por timing.
+  const provided = String(req.headers["x-admin-secret"] || req.query.secret || "");
+  const a = crypto.createHash("sha256").update(provided).digest();
+  const b = crypto.createHash("sha256").update(secret).digest();
+  if (!crypto.timingSafeEqual(a, b)) {
     return res.status(401).json({ error: "No autorizado." });
   }
   next();

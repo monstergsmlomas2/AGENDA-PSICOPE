@@ -13,8 +13,6 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
   const [actividades, setActividades] = useState("");
   const [observaciones, setObservaciones] = useState("");
 
-  if (!paciente) return null;
-
   const cargarSesiones = async () => {
     setLoading(true);
     const data = await getSesiones(paciente.id);
@@ -23,8 +21,11 @@ export default function SesionesModal({ paciente, onClose, onSave }) {
   };
 
   useEffect(() => {
-    cargarSesiones();
-  }, [paciente.id]);
+    if (paciente?.id) cargarSesiones();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paciente?.id]);
+
+  if (!paciente) return null;
 
   const resetForm = () => {
     setFechaSesion(new Date().toISOString().split('T')[0]);

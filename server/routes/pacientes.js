@@ -103,6 +103,10 @@ router.delete("/:id", async (req, res) => {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    // pagos e informes tienen FK ON DELETE RESTRICT: hay que borrarlos antes que el paciente.
+    // El ownership se verifica vía el JOIN con pacientes (pagos/informes viejos pueden no tener usuario_id).
+    await client.query("DELETE FROM pagos pg USING pacientes p WHERE pg.paciente_id = p.id AND p.id = $1 AND p.usuario_id = $2", [id, req.userId]);
+    await client.query("DELETE FROM informes i USING pacientes p WHERE i.paciente_id = p.id AND p.id = $1 AND p.usuario_id = $2", [id, req.userId]);
     await client.query("DELETE FROM turnos WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
     await client.query("DELETE FROM sesiones WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
     await client.query("DELETE FROM evaluaciones WHERE paciente_id = $1 AND usuario_id = $2", [id, req.userId]);
@@ -116,7 +120,7 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     await client.query("ROLLBACK");
     console.error("Error al eliminar paciente:", error.message);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: "Error al eliminar paciente" });
   } finally {
     client.release();
   }
@@ -182,6 +186,10 @@ router.post("/:id/sesiones", async (req, res) => {
   const { id } = req.params;
   const { fecha, observaciones, actividades_realizadas, resumen_ia } = req.body;
   try {
+    const dueño = await pool.query("SELECT id FROM pacientes WHERE id = $1 AND usuario_id = $2", [id, req.userId]);
+    if (dueño.rows.length === 0) {
+      return res.status(404).json({ error: "Paciente no encontrado" });
+    }
     const result = await pool.query(
       "INSERT INTO sesiones (paciente_id, fecha, observaciones, actividades_realizadas, resumen_ia, usuario_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
       [id, fecha, observaciones, actividades_realizadas, resumen_ia || null, req.userId]
@@ -241,6 +249,10 @@ router.delete("/:id/sesiones/:sesionId", async (req, res) => {
 // 12. ENVIAR RECORDATORIO DE SEGUIMIENTO A PACIENTE SIN SESIÓN RECIENTE
 router.post("/:id/recordatorio-seguimiento", async (req, res) => {
   const { id } = req.params;
+
+  if (process.env.WHATSAPP_PAUSADO === "true") {
+    return res.status(503).json({ error: "WhatsApp está pausado. Quitá WHATSAPP_PAUSADO para reactivar." });
+  }
 
   try {
     const result = await pool.query(

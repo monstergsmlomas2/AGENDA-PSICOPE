@@ -123,15 +123,20 @@ pool.on("error", (err) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en puerto ${PORT}`);
-  iniciarJob();
-  iniciarJobPersonal();
-  if (process.env.FLY_ALLOC_ID) {
-    const delay = 45000;
-    console.log(`[WhatsApp] Fly.io detectado — reconexión diferida ${delay / 1000}s para evitar OOM.`);
-    setTimeout(() => {
-      reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
-    }, delay);
+
+  if (process.env.WHATSAPP_PAUSADO === "true") {
+    console.log("[WhatsApp] ⏸️  PAUSADO — Baileys, recordatorios y cron jobs desactivados para ahorrar recursos.");
   } else {
-    reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+    iniciarJob();
+    iniciarJobPersonal();
+    if (process.env.FLY_ALLOC_ID) {
+      const delay = 45000;
+      console.log(`[WhatsApp] Fly.io detectado — reconexión diferida ${delay / 1000}s para evitar OOM.`);
+      setTimeout(() => {
+        reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+      }, delay);
+    } else {
+      reconectarSesionesGuardadas().catch(err => console.error("[WhatsApp] Error al reconectar sesiones:", err));
+    }
   }
 });

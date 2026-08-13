@@ -158,7 +158,7 @@ function EventoCard({ evento, onEdit, onCompletar, onEliminar }) {
   );
 }
 
-function GrupoEventos({ titulo, icono: Icono, color, eventos, onEdit, onCompletar, onEliminar, defaultExpanded = true }) {
+function GrupoEventos({ titulo, color, eventos, onEdit, onCompletar, onEliminar, defaultExpanded = true }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   if (eventos.length === 0) return null;
 

@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Calendar, Building, ShieldCheck,
   DollarSign, Brain, Settings, LogOut, X, Search, BookOpen, Sparkles, CalendarDays, UserCircle,
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../context/useAuth.js';
 import { useEffect, useState } from 'react';
 import { apiGet } from '../services/api.js';
 

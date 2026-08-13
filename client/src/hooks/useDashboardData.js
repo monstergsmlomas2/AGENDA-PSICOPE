@@ -169,7 +169,7 @@ export function useDashboardData() {
         resumenMes: newResumen,
       };
       _cacheTs = Date.now();
-    } catch (err) {
+    } catch {
       setError('No se pudieron cargar los datos del dashboard.');
     } finally {
       setLoading(false);

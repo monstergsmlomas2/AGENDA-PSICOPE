@@ -1,34 +1,26 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as authLogin, logout as authLogout, getToken, isAuthenticated, getUserFromToken } from '../services/authService.js';
+import { useState, useCallback } from 'react';
+import { login as authLogin, logout as authLogout, getToken, getUserFromToken } from '../services/authService.js';
+import { AuthContext } from './useAuth.js';
 
-const AuthContext = createContext(null);
+// Lee y valida el token de forma síncrona (expiración incluida) para
+// inicializar el estado sin necesidad de un useEffect al montar.
+function leerUsuarioInicial() {
+  const token = getToken();
+  if (!token) return null;
+  const tokenData = getUserFromToken();
+  if (!tokenData) return null;
+  if (tokenData.exp && Date.now() >= tokenData.exp * 1000) {
+    // Token expirado
+    localStorage.removeItem('psicope_token');
+    return null;
+  }
+  return { id: tokenData.sub, email: tokenData.email };
+}
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
-    const tokenData = getUserFromToken();
-    return tokenData ? { id: tokenData.sub, email: tokenData.email } : null;
-  });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Verificar si hay un token válido al montar
-    const token = getToken();
-    if (token) {
-      const tokenData = getUserFromToken();
-      if (tokenData) {
-        // Verificar expiración
-        const exp = tokenData.exp * 1000; // convertir a ms
-        if (Date.now() >= exp) {
-          // Token expirado
-          localStorage.removeItem('psicope_token');
-          setUser(null);
-        } else {
-          setUser({ id: tokenData.sub, email: tokenData.email });
-        }
-      }
-    }
-    setLoading(false);
-  }, []);
+  const [user, setUser] = useState(leerUsuarioInicial);
+  // La validación es síncrona, así que nunca hay estado de carga real.
+  const loading = false;
 
   const login = useCallback(async (email, password) => {
     const result = await authLogin(email, password);
@@ -57,12 +49,3 @@ export function AuthProvider({ children }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth debe usarse dentro de un AuthProvider');
-  }
-  return context;
-}
-
-export default AuthContext;

@@ -1,17 +1,6 @@
-﻿import { useState, useEffect, useCallback, createContext, useContext } from 'react';
+﻿import { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, AlertTriangle, XCircle, Info, X } from 'lucide-react';
-
-/* ─────────────────────────────────────────────
-   CONTEXT Y HOOK (useToast exportado desde aquí)
-   ───────────────────────────────────────────── */
-
-const ToastContext = createContext(null);
-
-export function useToast() {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast debe usarse dentro de <ToastProvider>');
-  return ctx;
-}
+import { ToastContext } from './toastContext';
 
 /* ─────────────────────────────────────────────
    ICONOS POR VARIANTE

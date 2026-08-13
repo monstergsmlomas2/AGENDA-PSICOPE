@@ -23,12 +23,9 @@ export default function GlobalSearch() {
     }
   }, [open, cargado]);
 
-  // Resetear índice y query al abrir
+  // Foco en el input después de que se renderice el modal
   useEffect(() => {
     if (open) {
-      setQuery('');
-      setSelectedIndex(0);
-      // Foco en el input después de que se renderice
       setTimeout(() => inputRef.current?.focus(), 50);
     }
   }, [open]);
@@ -38,7 +35,14 @@ export default function GlobalSearch() {
     const handler = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        if (open) {
+          setOpen(false);
+        } else {
+          // Resetear índice y query al abrir
+          setQuery('');
+          setSelectedIndex(0);
+          setOpen(true);
+        }
       }
       if (e.key === 'Escape' && open) {
         setOpen(false);
@@ -87,10 +91,6 @@ export default function GlobalSearch() {
     }
   };
 
-  // Mantener selectedIndex en rango cuando cambian los resultados
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [query]);
 
   if (!open) return null;
 
@@ -113,7 +113,7 @@ export default function GlobalSearch() {
             type="text"
             placeholder="Buscar paciente por nombre, DNI o teléfono…"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { setQuery(e.target.value); setSelectedIndex(0); }}
             onKeyDown={handleKeyDown}
             className="w-full py-3 text-base bg-transparent outline-none text-slate-900 dark:text-white placeholder:text-slate-400"
           />

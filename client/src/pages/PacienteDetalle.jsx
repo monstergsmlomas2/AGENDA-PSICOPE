@@ -3,16 +3,19 @@ import { useParams, useNavigate } from 'react-router-dom';
 import TimePicker from '../components/ui/TimePicker';
 import { getPacienteById, actualizarPaciente, getSesiones } from '../services/pacientesService';
 import { getEvaluaciones, eliminarEvaluacion } from '../services/evaluacionesService';
-import { getInformes, getInforme, crearInforme, actualizarInforme, eliminarInforme, getVersionesInforme, restaurarVersionInforme } from '../services/informesService';
+import { getInformes, crearInforme, actualizarInforme, eliminarInforme, getVersionesInforme, restaurarVersionInforme } from '../services/informesService';
 import { getObrasSociales } from '../services/obrasSocialesService';
 import { getTurnos, crearTurno, actualizarTurno, eliminarTurno } from '../services/turnosService';
 import { getConsultorios } from '../services/consultoriosService';
 import {
   ArrowLeft, FileText, ClipboardList, ClipboardCheck, User, Phone, Mail, MapPin,
   Calendar, ShieldCheck, Trash2, Edit, Eye, Plus, Star, Check, X, Clock, CalendarPlus,
-  Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle, BookOpen
+  Paperclip, Upload, ExternalLink, File, Image, Loader2, CheckCircle, Printer, AlertTriangle, BookOpen, Sparkles
 } from 'lucide-react';
-import { getDriveStatus, getDriveAuthUrl, disconnectDrive, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
+import AsistenteChat from '../components/ia/AsistenteChat';
+import { tiposInforme, seccionesPorTipo } from '../data/seccionesInforme';
+import { getConfiguracion } from '../services/configuracionService';
+import { getDriveStatus, getDriveAuthUrl, getDriveToken, getArchivos, subirArchivo, eliminarArchivo } from '../services/driveService';
 import { getTestsFiltrados } from '../data/testsEstandarizados';
 import TestModal from '../components/TestModal';
 import { useToast, Button } from '../components/ui';
@@ -262,65 +265,8 @@ const EditarPacienteModal = memo(function EditarPacienteModal({ show, onClose, p
     </div>
   );
 });
-const tiposInforme = [
-  { value: 'diagnostico', label: 'Informe Diagnóstico Psicopedagógico' },
-  { value: 'evolucion', label: 'Informe de Evolución (periódico)' },
-  { value: 'escolar', label: 'Informe Escolar (para docentes/directivos)' },
-  { value: 'obra_social', label: 'Informe para Obra Social' },
-  { value: 'derivacion', label: 'Derivación a otro profesional' },
-  { value: 'asistencia', label: 'Certificado de Asistencia' },
-];
-
-const seccionesPorTipo = {
-  diagnostico: [
-    { key: 'motivo_consulta', label: 'Motivo de Consulta' },
-    { key: 'tecnicas_administradas', label: 'Técnicas Administradas' },
-    { key: 'resultados_obtenidos', label: 'Resultados Obtenidos' },
-    { key: 'diagnostico_presuntivo', label: 'Diagnóstico Presuntivo' },
-    { key: 'orientaciones', label: 'Orientaciones y Sugerencias' },
-  ],
-  evolucion: [
-    { key: 'periodo', label: 'Período' },
-    { key: 'objetivos_trabajados', label: 'Objetivos Trabajados' },
-    { key: 'logros_alcanzados', label: 'Logros Alcanzados' },
-    { key: 'aspectos_continuar', label: 'Aspectos a Continuar Trabajando' },
-    { key: 'conclusiones', label: 'Conclusiones' },
-  ],
-  escolar: [
-    { key: 'escuela', label: 'Escuela', short: true },
-    { key: 'direccion_escuela', label: 'Dirección', short: true },
-    { key: 'anio', label: 'Año', short: true },
-    { key: 'turno', label: 'Turno', short: true },
-    { key: 'telefono_escuela', label: 'Teléfono', short: true },
-    { key: 'logico_matematico', label: '1. Lógico-Matemático (descripción de dificultades, logros alcanzados, etc.)' },
-    { key: 'lengua_oral_escrita', label: '2. Lengua Oral y Escrita (descripción de dificultades en la lectoescritura y expresión oral, logros alcanzados, etc.)' },
-    { key: 'ciencias_naturales_sociales', label: '3. Ciencias Naturales y Ciencias Sociales (descripción de dificultades, logros alcanzados, etc.)' },
-    { key: 'educacion_fisica', label: '4. Educación Física (descripción de dificultades, logros alcanzados, etc.)' },
-    { key: 'artistica', label: '5. Artística (descripción de dificultades, logros alcanzados, etc.)' },
-    { key: 'idioma_otra', label: '6. Idioma / Otra' },
-    { key: 'estrategias_docente', label: '7. Estrategias Implementadas por la Docente ante las Dificultades de Aprendizaje' },
-    { key: 'relacion_pares_docentes', label: '8. Relación con sus Pares y Docentes' },
-    { key: 'participacion_familiar', label: '9. Participación Familiar en la Escuela' },
-    { key: 'intervencion_eoe', label: '10. Intervención del E.O.E.' },
-    { key: 'otras_consideraciones', label: '11. Otras Consideraciones' },
-  ],
-  obra_social: [
-    { key: 'diagnostico', label: 'Diagnóstico / CIE' },
-    { key: 'justificacion', label: 'Justificación de Sesiones' },
-    { key: 'frecuencia', label: 'Frecuencia y Duración' },
-    { key: 'objetivos_terapeuticos', label: 'Objetivos Terapéuticos' },
-  ],
-  derivacion: [
-    { key: 'motivo_derivacion', label: 'Motivo de Derivación' },
-    { key: 'profesional_sugerido', label: 'Profesional Sugerido' },
-    { key: 'antecedentes', label: 'Antecedentes Relevantes' },
-  ],
-  asistencia: [
-    { key: 'periodo_asistencia', label: 'Período de Asistencia' },
-    { key: 'frecuencia_asistencia', label: 'Frecuencia' },
-    { key: 'observaciones_asistencia', label: 'Observaciones' },
-  ],
-};
+// tiposInforme y seccionesPorTipo viven en data/seccionesInforme.js porque el
+// Panel de IA los necesita para generar informes con estas mismas secciones.
 
 export default function PacienteDetalle() {
   const { id } = useParams();
@@ -437,6 +383,23 @@ export default function PacienteDetalle() {
       // silent
     } finally {
       setLoadingEvaluaciones(false);
+    }
+  };
+
+  const handleEliminarEvaluacion = async (ev) => {
+    const ok = await confirm({
+      title: 'Eliminar evaluación',
+      message: `¿Eliminás la evaluación "${ev.tipo_test}"? Esta acción no se puede deshacer.`,
+      confirmLabel: 'Eliminar',
+      variant: 'danger',
+    });
+    if (!ok) return;
+    const resultado = await eliminarEvaluacion(ev.id);
+    if (resultado) {
+      setEvaluaciones(prev => prev.filter(e => e.id !== ev.id));
+      toast.success('Evaluación eliminada', '');
+    } else {
+      toast.error('Error', 'No se pudo eliminar la evaluación.');
     }
   };
 
@@ -681,6 +644,27 @@ export default function PacienteDetalle() {
   };
 
   // Abre el panel "Archivos" legacy
+  // Abre el informe en una ventana limpia. Antes usaba window.print(), que
+  // imprimía la app entera con menús y botones.
+  const handleImprimirInforme = async () => {
+    const inf = versionPreview || viewingInforme;
+    if (!inf) return;
+    try {
+      const [{ imprimirInforme }, config] = await Promise.all([
+        import('../utils/generarInformePDF'),
+        getConfiguracion(),
+      ]);
+      imprimirInforme({
+        tipo: inf.tipo,
+        paciente,
+        contenido: typeof inf.contenido === 'object' ? inf.contenido : {},
+        config: config || {},
+      });
+    } catch (e) {
+      toast.error('No se pudo imprimir', e.message || 'Intentá de nuevo.');
+    }
+  };
+
   const handleAbrirAdjuntos = async () => {
     const next = !showAdjuntos;
     setShowAdjuntos(next);
@@ -719,8 +703,6 @@ export default function PacienteDetalle() {
       setSubiendoPorSeccion(prev => ({ ...prev, [seccion]: false }));
     }
   };
-
-  const handleSubirArchivo = (file) => handleSeleccionarArchivoSeccion('Archivos', file);
 
   const handleEliminarArchivoSeccion = async (seccion, archivo) => {
     const ok = await confirm({
@@ -1090,7 +1072,33 @@ export default function PacienteDetalle() {
           <span className="relative text-lg font-black text-indigo-600 dark:text-indigo-400">Tests</span>
         </button>
 
+        <button onClick={() => setTabActivo(tabActivo === 'ia' ? null : 'ia')}
+          className={`group relative overflow-hidden rounded-2xl border-2 shadow-sm hover:shadow-lg transition-all duration-200 flex items-center justify-center text-center py-6 ${tabActivo === 'ia' ? 'border-fuchsia-500 bg-gradient-to-br from-fuchsia-50 to-fuchsia-200/60 dark:from-fuchsia-500/20 dark:to-fuchsia-500/20' : 'border-fuchsia-400 dark:border-fuchsia-500/70 bg-gradient-to-br from-white via-white to-fuchsia-100/60 dark:from-[#141414] dark:via-[#141414] dark:to-fuchsia-500/10 hover:border-fuchsia-500'}`}>
+          <div className="absolute right-0 bottom-0 p-1 text-fuchsia-500 opacity-10 group-hover:opacity-20 transition-opacity duration-200"><Sparkles size={72} /></div>
+          <span className="relative text-lg font-black text-fuchsia-600 dark:text-fuchsia-400">Consultas IA</span>
+        </button>
+
       </div>
+
+      {/* ─────────────────────────────────────────── */}
+      {/* PANEL DE CONSULTAS IA */}
+      {/* ─────────────────────────────────────────── */}
+      {tabActivo === 'ia' && paciente && (
+        <div className="bg-white dark:bg-slate-900 border border-purple-300 dark:border-slate-800 rounded-2xl p-6 shadow-lg">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+              <Sparkles size={22} className="text-fuchsia-500" /> Consultas IA
+            </h3>
+            <button
+              onClick={() => navigate('/ia')}
+              className="text-xs font-semibold text-fuchsia-600 dark:text-fuchsia-400 hover:underline"
+            >
+              Abrir Panel de IA
+            </button>
+          </div>
+          <AsistenteChat pacienteFijo={paciente} />
+        </div>
+      )}
 
       {/* â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {/* PANEL DE TURNOS */}
@@ -1659,7 +1667,7 @@ export default function PacienteDetalle() {
                   <ArrowLeft size={16} /> Volver a la lista
                 </button>
                 <div className="flex gap-2">
-                  <button onClick={() => window.print()} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
+                  <button onClick={handleImprimirInforme} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl border border-purple-300 dark:border-slate-700 text-slate-900 dark:text-white hover:bg-purple-50 dark:hover:bg-slate-800 transition-colors">
                     <Printer size={15} /> Imprimir
                   </button>
                   <button onClick={() => { setVersionPreview(null); setVersionesInforme([]); setViewingInforme(null); setEditandoInforme(viewingInforme.id); setInformeTipo(viewingInforme.tipo); setInformeFecha(viewingInforme.fecha); setInformeContenido(typeof viewingInforme.contenido === 'object' ? viewingInforme.contenido : {}); setInformeEstado(viewingInforme.estado); setShowInformeModal(true); }} className="inline-flex items-center gap-1.5 text-sm font-bold px-3 py-1.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white transition-colors">

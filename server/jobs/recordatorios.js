@@ -249,11 +249,13 @@ async function verificarYEjecutarPorHora() {
   const usuariosConectados = getUsuariosConectados();
   if (usuariosConectados.length === 0) return;
 
-  const horaActual = new Date().toLocaleString("es-AR", {
+  // en-GB garantiza el formato "HH:MM" (es-AR puede variar según la versión de ICU)
+  const horaActual = new Intl.DateTimeFormat("en-GB", {
     timeZone: "America/Argentina/Buenos_Aires",
     hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
-  }).padStart(2, "0");
+  }).format(new Date());
 
   for (const usuarioId of usuariosConectados) {
     try {
@@ -262,7 +264,7 @@ async function verificarYEjecutarPorHora() {
         [usuarioId]
       );
       const horaEnvio = configResult.rows[0]?.hora_envio || "17:00";
-      const horaConfigurada = horaEnvio.substring(0, 2);
+      const horaConfigurada = horaEnvio.substring(0, 5);
 
       if (horaConfigurada !== horaActual) continue;
 
@@ -278,8 +280,11 @@ let cronTask = null;
 
 export function iniciarJob() {
   if (cronTask) cronTask.stop();
-  cronTask = cron.schedule("0 * * * *", verificarYEjecutarPorHora, {
+  // Corre cada minuto para respetar los minutos de hora_envio (ej: "17:30").
+  // El costo es bajo: solo consulta config de usuarios con WhatsApp conectado,
+  // y los envíos a pacientes dedupican por día vía la tabla notificaciones.
+  cronTask = cron.schedule("* * * * *", verificarYEjecutarPorHora, {
     timezone: "America/Argentina/Buenos_Aires",
   });
-  console.log("[Recordatorios] Job programado: corre cada hora y evalúa la preferencia horaria de cada usuario conectado.");
+  console.log("[Recordatorios] Job programado: corre cada minuto y evalúa la hora_envio (HH:MM) de cada usuario conectado.");
 }

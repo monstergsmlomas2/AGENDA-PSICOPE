@@ -141,7 +141,7 @@ export default function EntrevistaPage() {
     setShowFolderPicker(true);
   };
 
-  const handleFolderSelected = async (folderId) => {
+  const handleFolderSelected = async () => {
     setShowFolderPicker(false);
     setUploadingDrive(true);
     try {

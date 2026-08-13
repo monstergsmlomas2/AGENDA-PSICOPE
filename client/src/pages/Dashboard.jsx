@@ -57,7 +57,6 @@ function BarChartSVG({ data, dataKey, color = '#14b8a6', labelKey, height = 220 
     );
   }
   const maxVal = Math.max(...data.map(d => Number(d[dataKey]) || 0), 1);
-  const barW = 100 / data.length;
 
   return (
     <div className="relative" style={{ height }}>
@@ -155,7 +154,7 @@ function AreaChartSVG({ data, keys, colors, labelKey, formatter, height = 260 })
           />
         ))}
         {/* Áreas */}
-        {keys.map((k, i) => (
+        {keys.map((k) => (
           <path key={k} d={areaD(k)} fill={`url(#grad-${k})`} />
         ))}
         {/* Líneas */}
@@ -231,25 +230,29 @@ function DonutChartSVG({ data, nameKey, valueKey, height = 220 }) {
     </div>
   );
   const cx = 90, cy = 90, R = 70, r = 44;
-  let angle = -Math.PI / 2;
 
-  const slices = data.map((d, i) => {
-    const val = Number(d[valueKey]) || 0;
-    const sweep = (val / total) * 2 * Math.PI;
-    const x1 = cx + R * Math.cos(angle), y1 = cy + R * Math.sin(angle);
-    angle += sweep;
-    const x2 = cx + R * Math.cos(angle), y2 = cy + R * Math.sin(angle);
-    const x3 = cx + r * Math.cos(angle), y3 = cy + r * Math.sin(angle);
-    const xa = cx + r * Math.cos(angle - sweep), ya = cy + r * Math.sin(angle - sweep);
-    const large = sweep > Math.PI ? 1 : 0;
-    return {
-      d: `M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${xa},${ya} Z`,
-      color: COLORS[i % COLORS.length],
-      name: d[nameKey],
-      val,
-      pct: Math.round((val / total) * 100),
-    };
-  });
+  const slices = [];
+  {
+    let angle = -Math.PI / 2;
+    for (let i = 0; i < data.length; i++) {
+      const d = data[i];
+      const val = Number(d[valueKey]) || 0;
+      const sweep = (val / total) * 2 * Math.PI;
+      const x1 = cx + R * Math.cos(angle), y1 = cy + R * Math.sin(angle);
+      angle += sweep;
+      const x2 = cx + R * Math.cos(angle), y2 = cy + R * Math.sin(angle);
+      const x3 = cx + r * Math.cos(angle), y3 = cy + r * Math.sin(angle);
+      const xa = cx + r * Math.cos(angle - sweep), ya = cy + r * Math.sin(angle - sweep);
+      const large = sweep > Math.PI ? 1 : 0;
+      slices.push({
+        d: `M${x1},${y1} A${R},${R} 0 ${large} 1 ${x2},${y2} L${x3},${y3} A${r},${r} 0 ${large} 0 ${xa},${ya} Z`,
+        color: COLORS[i % COLORS.length],
+        name: d[nameKey],
+        val,
+        pct: Math.round((val / total) * 100),
+      });
+    }
+  }
 
   return (
     <div style={{ height }} className="flex gap-4 items-center">
@@ -311,7 +314,7 @@ export default function Dashboard() {
 
   const formatMonth = (mesStr) => {
     if (!mesStr) return '';
-    const [y, m] = mesStr.split('-');
+    const [, m] = mesStr.split('-');
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     return `${meses[parseInt(m, 10) - 1]}`;
   };

@@ -5,13 +5,13 @@ import { abrirVentanaImpresion, generarHtmlEntrevista } from '../../utils/entrev
 import FolderPickerDialog from '../ui/FolderPickerDialog';
 
 export default function EntrevistaModal({ paciente, onClose, onSave }) {
-  if (!paciente) return null;
-
   const entrevista = paciente?.entrevista;
   const [uploadingDrive, setUploadingDrive] = useState(false);
   const [driveMsg, setDriveMsg] = useState(null);
   const [showFolderPicker, setShowFolderPicker] = useState(false);
   const [tieneCud, setTieneCud] = useState(!!entrevista?.apoyo_cud);
+
+  if (!paciente) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -79,7 +79,7 @@ export default function EntrevistaModal({ paciente, onClose, onSave }) {
     setShowFolderPicker(true);
   };
 
-  const handleFolderSelected = async (folderId) => {
+  const handleFolderSelected = async () => {
     setShowFolderPicker(false);
     setUploadingDrive(true);
     try {

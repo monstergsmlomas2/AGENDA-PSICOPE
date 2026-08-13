@@ -19,4 +19,4 @@
  *   };
  * }
  */
-export { useToast } from '../components/ui/Toast';
+export { useToast } from '../components/ui/toastContext';

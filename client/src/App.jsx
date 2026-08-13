@@ -7,7 +7,8 @@ import Register from './pages/Register';
 import Landing from './pages/Landing';
 import AuthCallback from './pages/AuthCallback';
 import { ToastProvider, useToast } from './components/ui';
-import { AuthProvider, useAuth } from './context/AuthContext.jsx';
+import { AuthProvider } from './context/AuthContext.jsx';
+import { useAuth } from './context/useAuth.js';
 import { Loader2 } from 'lucide-react';
 import GlobalSearch from './components/GlobalSearch';
 import InstallPrompt from './components/InstallPrompt'
@@ -56,23 +57,11 @@ function ProtectedRoute({ children }) {
 
 // ─── Layout protegido con Sidebar ───
 function ProtectedLayout({ children }) {
-  const [darkMode, setDarkMode] = useState(() => {
+  // Solo inicializa el tema desde localStorage; el toggle vive en Configuración.
+  const [darkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
     return saved === null ? false : saved === 'true';
   });
-
-  const toggleDarkMode = () => {
-    setDarkMode(prev => {
-      const next = !prev;
-      localStorage.setItem('darkMode', String(next));
-      if (next) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
-      return next;
-    });
-  };
 
   const toast = useToast();
 
